@@ -1,0 +1,41 @@
+version: 1.1
+comment: >-
+  How DAs move through the platform: quotes received, time from appointment to PDA, from sailing to FDA, to approval
+  and to analyst sign-off, and cancellations. Use for operational questions about the DA process.
+source: {catalog}.{gold_schema}.da_workflow
+dimensions:
+  - name: Port
+    expr: port_name
+  - name: Region
+    expr: region
+  - name: Buyer
+    expr: buyer_name
+  - name: Agent
+    expr: agent_name
+  - name: Call month
+    expr: call_month
+  - name: Appointment state
+    expr: appointment_state
+  - name: Evaluation state
+    expr: evaluation_state
+    synonyms: [FDA status]
+  - name: Cancellation reason
+    expr: cancellation_reason
+measures:
+  - name: Port calls
+    expr: COUNT(1)
+  - name: Cancelled appointments
+    expr: COUNT(1) FILTER (WHERE appointment_state = 'CANCELLED')
+  - name: Average quotes per call
+    expr: AVG(quotes_received)
+  - name: Hours appointment to PDA
+    expr: AVG(hours_appointment_to_pda)
+  - name: Hours sailing to FDA
+    expr: AVG(hours_sailing_to_fda)
+    synonyms: [FDA lead time]
+  - name: Hours FDA to approval
+    expr: AVG(fda_approval_hours)
+    synonyms: [approval time]
+  - name: Hours to verify
+    expr: AVG(hours_to_verify)
+    synonyms: [sign-off time, verification time]

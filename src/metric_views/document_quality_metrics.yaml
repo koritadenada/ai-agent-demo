@@ -1,0 +1,32 @@
+version: 1.1
+comment: >-
+  Quality of the document pipeline: parsing, classification, page mapping and extraction confidence. Use to monitor
+  the AI steps.
+source: {catalog}.{gold_schema}.document_quality
+dimensions:
+  - name: Document type
+    expr: doc_type
+    comment: Type assigned by ai_classify (pda_quote, final_da_pack, statement_of_facts)
+  - name: Platform link
+    expr: platform_link
+    comment: How the platform links the file (statement of facts or PDA/FDA attachment)
+  - name: Landed month
+    expr: landed_month
+measures:
+  - name: Documents processed
+    expr: COUNT(1)
+  - name: Pages processed
+    expr: SUM(page_count)
+  - name: Parse error rate
+    expr: SUM(pages_with_errors) / NULLIF(SUM(page_count), 0)
+    format:
+      type: percentage
+  - name: Classification agreement
+    expr: AVG(CASE WHEN type_matches_link THEN 1.0 ELSE 0.0 END)
+    comment: Share of documents whose classified type agrees with how the platform linked them
+    format:
+      type: percentage
+  - name: Mean mapping confidence
+    expr: AVG(mean_map_confidence)
+  - name: Mean extraction confidence
+    expr: AVG(mean_extract_confidence)

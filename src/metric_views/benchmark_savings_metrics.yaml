@@ -1,0 +1,50 @@
+version: 1.1
+comment: >-
+  Final lines compared with the historical median for the same port, expense category, vessel type and size band (EUR).
+  Use to find overpriced expenses and the potential savings to negotiate.
+source: {catalog}.{gold_schema}.expense_reconciliation
+filter: benchmark_median_eur IS NOT NULL
+dimensions:
+  - name: Expense category
+    expr: expense_category
+    synonyms: [expense, cost item]
+  - name: Port
+    expr: port_name
+  - name: Region
+    expr: region
+  - name: Vessel type
+    expr: vessel_type
+  - name: Size band
+    expr: size_band
+    synonyms: [GT band, vessel size]
+  - name: Agent
+    expr: agent_name
+    synonyms: [port agent, agency]
+  - name: Call month
+    expr: call_month
+measures:
+  - name: Final amount EUR
+    expr: SUM(final_amount_eur)
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Benchmark amount EUR
+    expr: SUM(benchmark_median_eur)
+    comment: Sum of the benchmark medians of the same lines
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Lines above benchmark
+    expr: COUNT(1) FILTER (WHERE potential_saving_eur > 0)
+  - name: Potential savings EUR
+    expr: SUM(potential_saving_eur)
+    comment: Amount above the benchmark median, summed over lines charged above it
+    synonyms: [savings, negotiation potential, overspend]
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Gap to benchmark pct
+    expr: MEASURE(`Final amount EUR`) / NULLIF(MEASURE(`Benchmark amount EUR`), 0) - 1
+    synonyms: [premium over benchmark, above median]
+    format:
+      type: percentage

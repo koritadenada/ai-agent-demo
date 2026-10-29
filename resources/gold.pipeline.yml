@@ -1,0 +1,19 @@
+resources:
+  pipelines:
+    gold_pipeline:
+      name: portcall-gold
+      catalog: ${var.catalog}
+      schema: ${resources.schemas.gold.name}
+      serverless: true
+      continuous: false
+      channel: CURRENT
+      root_path: ../src/pipelines/gold
+      libraries:
+        - glob:
+            include: ../src/pipelines/gold/transformations/**
+      configuration:
+        catalog: ${var.catalog}
+        silver_schema: ${resources.schemas.silver.name}
+        gold_schema: ${resources.schemas.gold.name}
+        match_tolerance_pct: ${var.match_tolerance_pct}
+        dispute_threshold_pct: ${var.dispute_threshold_pct}

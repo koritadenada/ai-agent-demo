@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<meta name="robots" content="noindex, nofollow" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
@@ -24,11 +25,11 @@
   .hdr { position:absolute; z-index:10; left:40px; right:40px; top:26px; height:44px; display:flex; align-items:center; justify-content:space-between; }
   .brand { display:flex; align-items:center; gap:12px; }
   .brand svg { width:28px; height:31px; }
-  .brand .t { font-size:19px; font-weight:700; letter-spacing:-.01em; }
-  .pills { display:flex; gap:8px; }
-  .pill { display:flex; align-items:center; gap:8px; padding:7px 13px 7px 8px; border-radius:999px; border:1px solid var(--line);
-    font-size:13px; font-weight:500; color:var(--muted); background:#fff; transition:all .4s; }
-  .pill b { width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+  .brand .t { font-size:16px; font-weight:700; letter-spacing:-.01em; }
+  .pills { display:flex; gap:5px; }
+  .pill { display:flex; align-items:center; gap:6px; padding:6px 10px 6px 6px; border-radius:999px; border:1px solid var(--line);
+    font-size:12px; font-weight:500; color:var(--muted); background:#fff; transition:all .4s; }
+  .pill b { min-width:20px; height:20px; padding:0 3px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
     background:var(--wash); color:var(--muted); font-size:12px; transition:all .4s; }
   .pill { cursor:pointer; user-select:none; }
   .pill:hover { border-color:var(--line2); color:var(--navy); }
@@ -224,6 +225,31 @@
   .wire.dep.on { opacity:1; }
   .golink { cursor:pointer; }
   .golink:hover { box-shadow:0 6px 22px rgba(27,49,57,.18); }
+
+  /* schema tab: table cards */
+  .tb { position:absolute; background:#fff; border:1px solid var(--line); border-top:3px solid var(--navy); border-radius:9px;
+    padding:7px 10px; box-shadow:0 2px 8px rgba(27,49,57,.07); height:64px; }
+  .tb .tn { font-family:ui-monospace,Menlo,monospace; font-weight:700; font-size:11px; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tb .tk { font-size:11px; color:var(--muted); margin-top:4px; line-height:1.3; }
+  .tb.scd2 { border-top-color:var(--lava); } .tb.hot { border-top-color:var(--lava); background:#FFF6F4; }
+  .tb.link { border-style:dashed; border-top-style:solid; border-top-color:var(--line2); }
+  .tb.lk { height:64px; border-top-color:#9FB2BA; background:var(--wash); }
+  .lane.assumed { border-color:#C9B98F; background:rgba(250,244,230,.45); }
+  .lane.assumed .ll { color:#8A6D1F; border-color:#C9B98F; }
+  /* genie tab: measures and dimensions */
+  .legend { margin-left:auto; font-size:11px; font-weight:500; color:var(--muted); display:flex; align-items:center; gap:6px; }
+  .chip-m, .chip-d { font-style:normal; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:999px; white-space:nowrap; }
+  .chip-m { background:#FFE3DE; color:#C42A16; } .chip-d { background:#E5EEF1; color:var(--navy); }
+  .mvg { position:relative; border:1px solid var(--line); border-radius:10px; padding:16px 10px 4px; margin-top:12px; }
+  .mvg .gl { position:absolute; top:-9px; left:10px; background:#fff; padding:0 6px; font-size:10.5px; font-weight:700; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--navy); }
+  .mvr { display:flex; align-items:center; gap:6px; height:36px; border-bottom:1px dashed var(--line); }
+  .mvr:last-child { border-bottom:none; }
+  .mvr b { font-family:ui-monospace,Menlo,monospace; font-size:11.5px; width:228px; flex:0 0 228px; color:var(--navy); }
+  /* glossary */
+  .gt { position:absolute; background:#fff; border:1px solid var(--line); border-left:3px solid var(--lava); border-radius:8px;
+    padding:6px 10px; height:44px; display:flex; flex-direction:column; justify-content:center; }
+  .gt b { font-size:12.5px; } .gt span { font-size:11.5px; color:var(--muted); margin-top:2px; }
   .ans { font-size:13px; line-height:1.45; color:var(--navy); background:var(--wash); border-radius:8px; padding:10px 12px; margin-bottom:8px; }
   .ans b { color:var(--lava); }
 </style>
@@ -235,12 +261,15 @@
     <div class="brand">{{BACK}}{{I_DATABRICKS}}<div class="t">Port-call data for AI agents</div></div>
     <div class="pills">
       <div class="pill" data-p="0"><b>&#8635;</b>Overview</div>
-      <div class="pill" data-p="1"><b>1</b>Platform data</div>
-      <div class="pill" data-p="2"><b>2</b>Documents</div>
-      <div class="pill" data-p="3"><b>2b</b>Doc graph</div>
-      <div class="pill" data-p="4"><b>3</b>Gold</div>
-      <div class="pill" data-p="5"><b>4</b>Genie</div>
-      <div class="pill" data-p="6"><b>5</b>One line</div>
+      <div class="pill" data-p="1"><b>1</b>Platform</div>
+      <div class="pill sub" data-p="2" data-name="Schema" title="Source schema"><b>1b</b>Schema</div>
+      <div class="pill" data-p="3"><b>2</b>Documents</div>
+      <div class="pill sub" data-p="4" data-name="Doc graph" title="Document pipeline graph"><b>2b</b>Graph</div>
+      <div class="pill" data-p="5"><b>3</b>Gold</div>
+      <div class="pill sub" data-p="6" data-name="Gold example" title="Gold worked example"><b>3b</b>Example</div>
+      <div class="pill" data-p="7"><b>4</b>Genie</div>
+      <div class="pill" data-p="8"><b>5</b>One line</div>
+      <div class="pill" data-p="9"><b>?</b>Glossary</div>
     </div>
   </div>
 
@@ -257,23 +286,23 @@
       <div class="num">1</div><div class="bt">Platform data</div><div class="bd">Postgres changes via DMS to S3, then Auto Loader and AUTO CDC into silver</div>
       <div class="icons">{{I_DB}}{{I_AUTOLOADER}}</div>
     </div>
-    <div class="blk sm rev" data-t="900" data-go="2" style="left:40px;top:354px">
+    <div class="blk sm rev" data-t="900" data-go="3" style="left:40px;top:354px">
       <div class="num">2</div><div class="bt">Documents</div><div class="bd">PDFs from a second S3 bucket, parsed, classified and extracted with AI Functions</div>
       <div class="icons">{{I_DOC}}{{I_PIPELINES}}</div>
     </div>
-    <div class="blk rev" data-t="2000" data-go="4" style="left:460px">
-      <div class="num">3</div><div class="bt">Joined gold layer</div><div class="bd">Both sources meet on the disbursement account: quote vs final vs invoice, bank checks, benchmarks</div>
+    <div class="blk rev" data-t="2000" data-go="5" style="left:460px">
+      <div class="num">3</div><div class="bt">Joined gold layer</div><div class="bd">Both sources meet on the expense line: quote vs final vs invoice, bank checks, analyst verdicts</div>
       <div class="icons">{{I_DELTA}}{{I_DBSQL}}{{I_UC}}</div>
       <div class="run"><div class="lbl">What runs</div>
-        <div><span>Join keys</span><b>DA, attachment, expense</b></div>
+        <div><span>Join keys</span><b>expense line, file, category</b></div>
         <div><span>Business rules</span><b>plain SQL</b></div>
         <div><span>Refresh</span><b>one Job, after both pipelines</b></div></div>
     </div>
-    <div class="blk rev" data-t="3100" data-go="5" style="left:880px">
+    <div class="blk rev" data-t="3100" data-go="7" style="left:880px">
       <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later a supervisor agent, query</div>
       <div class="icons">{{I_METRIC}}{{I_GENIE}}{{I_AGENT}}</div>
       <div class="run"><div class="lbl">What runs</div>
-        <div><span>Metric views</span><b>6</b></div>
+        <div><span>Metric views</span><b>7</b></div>
         <div><span>Genie agents</span><b>3</b></div>
         <div><span>Supervisor agent</span><b class="always">next phase</b></div></div>
     </div>
@@ -287,51 +316,94 @@
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="p1" class="wire" pathLength="1" d="M 222 300 L 222 336" data-t="600"/>
       <path id="p2" class="wire" pathLength="1" d="M 222 438 L 222 474" data-t="1500"/>
-      <path id="p3" class="wire hot" pathLength="1" d="M 400 532 L 468 532" data-t="2700"/>
-      <path id="p4" class="wire" pathLength="1" d="M 700 532 L 738 532" data-t="4100"/>
-      <path id="p5" class="wire" pathLength="1" d="M 970 532 L 1008 532" data-t="4600"/>
+      <path id="p3" class="wire hot" pathLength="1" d="M 400 532 L 458 532" data-t="2700"/>
+      <path id="p4" class="wire" pathLength="1" d="M 680 532 L 708 532" data-t="4100"/>
+      <path id="p5" class="wire" pathLength="1" d="M 930 532 L 958 532" data-t="4600"/>
       <circle class="pulse" r="5" data-t="3000"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#p3"/></animateMotion></circle><circle class="pulse" r="5" data-t="4400"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#p4"/></animateMotion></circle>
     </svg>
     <div class="node ext rev" data-t="300" style="left:44px;top:200px;width:356px;height:100px">
-      <div class="ico">{{I_DB}}</div><div><div class="name">RDS PostgreSQL</div><div class="desc">Port calls, DAs, expenses, tariffs, users</div></div></div>
+      <div class="ico">{{I_DB}}</div><div><div class="name">Aurora PostgreSQL</div><div class="desc">Request cases, port calls, appointments, PDAs, FDAs, verifications</div></div></div>
     <div class="node ext rev" data-t="800" style="left:44px;top:338px;width:356px;height:100px">
       <span class="badge">already running</span>
       <div class="ico">{{I_SYNC}}</div><div><div class="name">AWS DMS</div><div class="desc">Full load plus ongoing CDC, written as Parquet</div></div></div>
     <div class="node ext rev" data-t="1700" style="left:44px;top:476px;width:356px;height:112px">
-      <div class="ico">{{I_S3}}</div><div><div class="name">Platform bucket</div><div class="desc"><code>schema/table/</code> files, every row tagged <b style="color:var(--lava)">Op = I, U or D</b></div></div></div>
-    <div class="node db rev" data-t="2900" style="left:470px;top:476px;width:230px;height:112px">
+      <div class="ico">{{I_S3}}</div><div><div class="name">DMS bucket</div><div class="desc"><code>schema/table/</code> files, every row starts with <b style="color:var(--lava)">Op</b> and <b style="color:var(--lava)">_dms_commit_ts</b></div></div></div>
+    <div class="node db rev" data-t="2900" style="left:460px;top:476px;width:220px;height:112px">
       <span class="badge">Auto Loader</span>
-      <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">Bronze</div><div class="desc">Every change appended, with file and commit time</div></div></div>
-    <div class="node db rev" data-t="4300" style="left:740px;top:476px;width:230px;height:112px">
+      <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">Bronze</div><div class="desc">Change log: one row per change, plus source file and load time</div></div></div>
+    <div class="node db rev" data-t="4300" style="left:710px;top:476px;width:220px;height:112px">
       <span class="badge">AUTO CDC</span>
-      <div class="ico">{{I_STREAMING_TABLE}}</div><div><div class="name">Silver</div><div class="desc">Changes applied in commit order, SCD 1 or 2</div></div></div>
-    <div class="zc rev" data-t="4800" style="left:1010px;top:200px;width:226px;height:388px;border-top-color:var(--navy)">
-      <div class="zh">{{I_DELTA}}Silver tables</div><div class="zs">A clean mirror of Postgres</div>
-      <div class="kv"><span>port_calls</span><b>SCD 1</b></div>
-      <div class="kv mk" data-t="4900"><span>appointments</span><b>SCD 2</b></div>
-      <div class="kv"><span>disb_accounts</span><b>SCD 2</b></div>
-      <div class="kv"><span>da_expenses</span><b>SCD 1</b></div>
-      <div class="kv"><span>tariffs</span><b>SCD 2</b></div>
-      <div class="kv"><span>categories</span><b>SCD 1</b></div>
-      <div class="kv"><span>vessels, ports</span><b>SCD 1</b></div>
-      <div class="kv"><span>companies, agents</span><b>SCD 1</b></div>
-      <div class="kv"><span>da_attachments</span><b>SCD 1</b></div>
-      <div class="kv"><span>payments</span><b>SCD 1</b></div>
-      <div class="kv"><span>user_events</span><b>append</b></div>
+      <div class="ico">{{I_STREAMING_TABLE}}</div><div><div class="name">Silver</div><div class="desc">Ordered by version, then commit time; SCD 1 or 2</div></div></div>
+    <div class="zc rev" data-t="4800" style="left:960px;top:200px;width:276px;height:388px;border-top-color:var(--navy)">
+      <div class="zh">{{I_DELTA}}Silver tables</div><div class="zs">Current state of every DMS table</div>
+      <div class="kv"><span>request_case, quotes</span><b>SCD 1</b></div>
+      <div class="kv"><span>port_call</span><b>SCD 1</b></div>
+      <div class="kv mk" data-t="4900"><span>appointment</span><b>SCD 2</b></div>
+      <div class="kv"><span>proforma (PDA)</span><b>SCD 2</b></div>
+      <div class="kv"><span>proforma_expense</span><b>SCD 1</b></div>
+      <div class="kv"><span>evaluation (FDA)</span><b>SCD 2</b></div>
+      <div class="kv"><span>expense_evaluation</span><b>SCD 1</b></div>
+      <div class="kv"><span>verifications</span><b>SCD 1</b></div>
+      <div class="kv"><span>attachment links</span><b>pairs</b></div>
+      <div class="kv"><span>lookups</span><b>SCD 1, 2</b></div>
+      <div class="kv"><span>+ 49 child tables</span><b>same</b></div>
     </div>
-    <div class="zc rev" data-t="6100" style="left:470px;top:200px;width:500px;height:250px;border-top-color:var(--lava)">
-      <div class="zh">{{I_STREAMING_TABLE}}One change: an appointment is cancelled</div><div class="zs">appointments, kept as SCD type 2</div>
-      <div class="kv mk" data-t="6600"><span>DMS file, Op = U</span><b>appointment 88213 &middot; type = cancelled</b></div>
-      <div class="kv mk2" data-t="7000"><span>version 1</span><b>in process &middot; 14 Oct to 21 Oct</b></div>
-      <div class="kv mk" data-t="7400"><span>version 2, current</span><b>cancelled &middot; from 21 Oct</b></div>
-      <div class="kv" style="margin-top:10px"><span>Op = D</span><b>closes the row, history kept</b></div>
-      <div class="kv"><span>late or replayed files</span><b>ordered by commit time</b></div>
+    <div class="zc rev" data-t="6100" style="left:460px;top:200px;width:470px;height:250px;border-top-color:var(--lava)">
+      <div class="zh">{{I_STREAMING_TABLE}}One change: an appointment is cancelled</div><div class="zs">appointment, kept as SCD type 2 on state</div>
+      <div class="kv mk" data-t="6600"><span>DMS file, Op = U</span><b>88213 &middot; CANCELLED &middot; version 4</b></div>
+      <div class="kv mk2" data-t="7000"><span>history row</span><b>IN_PROCESS &middot; from the full load</b></div>
+      <div class="kv mk" data-t="7400"><span>current row</span><b>CANCELLED &middot; from the CDC batch</b></div>
+      <div class="kv" style="margin-top:10px"><span>Op = D</span><b>deletes the row, or the link pair</b></div>
+      <div class="kv"><span>_dms_commit_ts</span><b>a string: cast before ordering</b></div>
     </div>
     <div class="nocall rev" data-t="8300" style="left:850px;top:112px;border-color:var(--navy);color:var(--navy)">{{I_SERVERLESS}}Serverless Job: hourly today, continuous later</div>
   </section>
 
+  <!-- ============ PART 1b: SOURCE SCHEMA ============ -->
+  <section class="scene" data-scene="2" data-dur="12000">
+    <div class="stitle rev" data-t="0"><div class="k">Part 1 &middot; the source schema</div><div class="h">The DA tables, from request to final bill</div></div>
+    <div class="nocall rev" data-t="300" style="left:760px;top:112px;border-color:var(--navy);color:var(--navy)">{{I_DELTA}}Every bronze table: Op, _dms_commit_ts ... _source_file</div>
+    <div class="lane rev" data-t="1000" style="left:28px;top:186px;width:200px;height:412px"><span class="ll">Request and quotes</span></div>
+    <div class="lane rev" data-t="2600" style="left:238px;top:186px;width:222px;height:412px"><span class="ll">Port call</span></div>
+    <div class="lane rev" data-t="4400" style="left:470px;top:186px;width:230px;height:412px"><span class="ll">PDA: proforma</span></div>
+    <div class="lane rev" data-t="6200" style="left:710px;top:186px;width:250px;height:412px"><span class="ll">FDA: evaluation</span></div>
+    <div class="lane assumed rev" data-t="9200" style="left:970px;top:186px;width:282px;height:412px"><span class="ll">Lookups, assumed</span></div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="s1" class="wire" pathLength="1" d="M 218 232 C 232 232, 232 312, 246 312" data-t="2900"/>
+      <path id="s2" class="wire" pathLength="1" d="M 450 392 C 464 392, 464 232, 478 232" data-t="4600"/>
+      <path id="s3" class="wire" pathLength="1" d="M 690 232 L 718 232" data-t="6400"/>
+      <path id="s4" class="wire hot" pathLength="1" d="M 690 312 L 718 312" data-t="7200"/>
+    </svg>
+    <div class="tb rev" data-t="1200" style="left:38px;top:200px;width:180px"><div class="tn">request_case</div><div class="tk">buyer, vessel, port, date_in</div></div>
+    <div class="tb rev" data-t="1400" style="left:38px;top:280px;width:180px"><div class="tn">request_for_quotation</div><div class="tk">request_case_id, supplier_id</div></div>
+    <div class="tb rev" data-t="1600" style="left:38px;top:360px;width:180px"><div class="tn">quotation</div><div class="tk">rfq id, quoter_id, state</div></div>
+    <div class="tb rev" data-t="1800" style="left:38px;top:440px;width:180px"><div class="tn">quotation_expense</div><div class="tk">quotation_id, category, amount</div></div>
+    <div class="tb rev" data-t="2800" style="left:248px;top:200px;width:202px"><div class="tn">port_call</div><div class="tk">buyer, vessel, port, dates in/out</div></div>
+    <div class="tb link rev" data-t="3000" style="left:248px;top:280px;width:202px"><div class="tn">port_call_request_case</div><div class="tk">port_call_id + request_case_id</div></div>
+    <div class="tb scd2 rev" data-t="3200" style="left:248px;top:360px;width:202px"><div class="tn">appointment</div><div class="tk">port_call_id, state, eta_date</div></div>
+    <div class="tb rev" data-t="3400" style="left:248px;top:440px;width:202px"><div class="tn">appointment_recipient</div><div class="tk">supplier_id, AGENT or VENDOR</div></div>
+    <div class="tb rev" data-t="3600" style="left:248px;top:520px;width:202px"><div class="tn">appointment_agent_recipient</div><div class="tk">same id, agent_type</div></div>
+    <div class="tb scd2 rev" data-t="4800" style="left:480px;top:200px;width:210px"><div class="tn">proforma</div><div class="tk">appointment_id, quotation_id, rate_eur</div></div>
+    <div class="tb hot rev" data-t="5000" style="left:480px;top:280px;width:210px"><div class="tn">proforma_expense</div><div class="tk">proforma_id, full_amount, category</div></div>
+    <div class="tb link rev" data-t="5200" style="left:480px;top:360px;width:210px"><div class="tn">proforma_attachments</div><div class="tk">file_item_id + proforma_id</div></div>
+    <div class="tb link rev" data-t="5400" style="left:480px;top:440px;width:210px"><div class="tn">proforma_statement_of_facts</div><div class="tk">file_item_id + proforma_id</div></div>
+    <div class="tb scd2 rev" data-t="6600" style="left:720px;top:200px;width:230px"><div class="tn">evaluation</div><div class="tk">proforma_id, approval_date, bank_account_id</div></div>
+    <div class="tb hot rev" data-t="7000" style="left:720px;top:280px;width:230px"><div class="tn">expense_evaluation</div><div class="tk">proforma_expense_id, price_amount</div></div>
+    <div class="tb link rev" data-t="7800" style="left:720px;top:360px;width:230px"><div class="tn">expense_evaluation_attachments</div><div class="tk">file_item_id + expense_evaluation_id</div></div>
+    <div class="tb rev" data-t="8000" style="left:720px;top:440px;width:230px"><div class="tn">expense_evaluation_verification</div><div class="tk">discrepancy_type, amount</div></div>
+    <div class="tb rev" data-t="8200" style="left:720px;top:520px;width:230px"><div class="tn">evaluation_verification</div><div class="tk">sign_off_role, verification_date</div></div>
+    <div class="tb lk rev" data-t="9400" style="left:980px;top:200px;width:132px"><div class="tn">vessel</div><div class="tk">type, GT</div></div>
+    <div class="tb lk rev" data-t="9400" style="left:1118px;top:200px;width:124px"><div class="tn">port</div><div class="tk">unlocode, region</div></div>
+    <div class="tb lk rev" data-t="9500" style="left:980px;top:280px;width:132px"><div class="tn">buyer</div><div class="tk">name, type</div></div>
+    <div class="tb lk rev" data-t="9500" style="left:1118px;top:280px;width:124px"><div class="tn">supplier</div><div class="tk">agents, vendors</div></div>
+    <div class="tb lk rev" data-t="9600" style="left:980px;top:360px;width:132px"><div class="tn">expense_category</div><div class="tk">name, section</div></div>
+    <div class="tb lk rev" data-t="9600" style="left:1118px;top:360px;width:124px"><div class="tn">bank_account</div><div class="tk">iban, swift</div></div>
+    <div class="tb lk rev" data-t="9700" style="left:980px;top:440px;width:262px"><div class="tn">file_item</div><div class="tk">id, s3_key: proforma/&lt;proforma_id&gt;/&lt;id&gt;.pdf</div></div>
+    <div class="formula rev" data-t="9900" style="position:absolute;left:980px;top:520px;width:262px;font-size:11.5px">Referenced by the DA tables, columns not confirmed yet: mocked</div>
+  </section>
+
   <!-- ============ PART 2: DOCUMENTS ============ -->
-  <section class="scene" data-scene="2" data-dur="10500">
+  <section class="scene" data-scene="3" data-dur="10500">
     <div class="stitle rev" data-t="0"><div class="k">Part 2</div><div class="h">Documents: from PDF to facts</div></div>
     <div class="zone aws rev" data-t="0" style="left:24px;top:176px;width:280px;height:432px"><span class="zl">Your AWS</span></div>
     <div class="zone dbx rev" data-t="0" style="left:324px;top:176px;width:932px;height:432px"><span class="zl">Databricks &middot; Lakeflow Spark Declarative Pipeline</span></div>
@@ -342,15 +414,15 @@
       <circle class="pulse" r="5" data-t="1600"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#q1"/></animateMotion></circle>
     </svg>
     <div class="node ext rev" data-t="300" style="left:40px;top:300px;width:248px;height:130px">
-      <div class="ico">{{I_S3}}</div><div><div class="name">Documents bucket</div><div class="desc"><code>proforma/<b style="color:var(--lava)">da_id</b>/<br><b style="color:var(--lava)">attachment_id</b>.pdf</code></div></div></div>
+      <div class="ico">{{I_S3}}</div><div><div class="name">Documents bucket</div><div class="desc"><code>proforma/<b style="color:var(--lava)">proforma_id</b>/<br><b style="color:var(--lava)">file_item_id</b>.pdf</code></div></div></div>
     <div class="node db rev" data-t="1500" style="left:344px;top:300px;width:210px;height:130px">
       <span class="badge">Auto Loader</span>
-      <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">Bronze</div><div class="desc">Binary file plus the join keys from the path</div></div></div>
+      <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">Bronze</div><div class="desc">Binary file plus proforma_id and file_item_id from the key</div></div></div>
     <div class="nocall rev" data-t="8900" style="left:344px;top:452px;width:210px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Errors kept per page: one bad page never fails the file</div>
-    <div class="ep rev golink" data-t="2700" data-go="3" style="left:590px;top:192px;width:380px;height:402px">
+    <div class="ep rev golink" data-t="2700" data-go="4" style="left:590px;top:192px;width:380px;height:402px">
       <div class="bar">{{I_SERVERLESS_W}}Document pipeline<span class="tag">Open the graph &#8599;</span></div>
       <div class="step rev" data-t="3000"><div class="n">1</div><div class="tx">ai_parse_document<span>Text per page, page numbers kept</span></div><div class="si">{{I_DOC}}</div></div>
-      <div class="step rev" data-t="4300"><div class="n">2</div><div class="tx">ai_classify the document<span>PDA quote, invoice, port bill, SOF</span></div><div class="si">{{I_MODEL}}</div></div>
+      <div class="step rev" data-t="4300"><div class="n">2</div><div class="tx">ai_classify the document<span>PDA quote, final DA pack or SOF</span></div><div class="si">{{I_MODEL}}</div></div>
       <div class="step rev" data-t="4900"><div class="n">3</div><div class="tx">ai_query, JSON schema<span>Page to expense, with confidence</span></div><div class="si">{{I_MODEL}}</div></div>
       <div class="step rev" data-t="5900"><div class="n">4</div><div class="tx">ai_extract<span>Lines, totals, bank details, confidence</span></div><div class="si">{{I_MODEL}}</div></div>
       <div class="step rev" data-t="7100"><div class="n">5</div><div class="tx">ai_query<span>Statement of facts to event timeline</span></div><div class="si">{{I_MODEL}}</div></div>
@@ -368,7 +440,7 @@
   </section>
 
   <!-- ============ PART 2b: DOCUMENT PIPELINE GRAPH ============ -->
-  <section class="scene" data-scene="3" data-dur="12000">
+  <section class="scene" data-scene="4" data-dur="12000">
     <div class="stitle rev" data-t="0"><div class="k">Part 2 &middot; inside the document pipeline</div><div class="h">What runs in parallel, what needs Postgres</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; documents pipeline, every box is a table</span></div>
     <div class="lane rev" data-t="5000" style="left:586px;top:186px;width:212px;height:416px"><span class="ll">parallel, by document type</span></div>
@@ -400,7 +472,7 @@
       <div class="ico">{{I_STREAMING_TABLE}}</div><div><div class="name">document_pages</div><div class="desc">One row per page</div></div></div>
     <div class="node sm hero rev" data-t="3600" style="left:210px;top:192px;width:174px;height:96px">
       <span class="badge on">from Part 1</span>
-      <div class="ico">{{I_DB}}</div><div><div class="name">expense_categories</div><div class="desc">Silver, from Postgres</div></div></div>
+      <div class="ico">{{I_DB}}</div><div><div class="name">expense_category</div><div class="desc">Silver, from Postgres</div></div></div>
     <div class="node sm db rev" data-t="5600" style="left:598px;top:196px;width:188px;height:100px">
       <span class="badge">per page</span>
       <div class="ico">{{I_MODEL}}</div><div><div class="name">page_expense_map</div><div class="desc">Final packs: ai_query, page to expense</div></div></div>
@@ -418,13 +490,13 @@
       <div class="ico">{{I_MODEL}}</div><div><div class="name">doc_line_items</div><div class="desc">Invoice pages: ai_extract amount; plus quote lines</div></div></div>
     <div class="node hero rev" data-t="9600" style="left:1056px;top:300px;width:184px;height:190px">
       <span class="badge on">needs Postgres</span>
-      <div class="ico">{{I_DBSQL}}</div><div><div class="name">Gold joins</div><div class="desc">With the DA expenses, DAs, agents and port calls from Postgres (Part 3)</div></div></div>
+      <div class="ico">{{I_DBSQL}}</div><div><div class="name">Gold joins</div><div class="desc">With quoted and final lines, analyst checks and bank accounts (Part 3)</div></div></div>
     <div class="nocall rev" data-t="10200" style="left:1056px;top:508px;width:184px;white-space:normal;line-height:1.3;border-color:var(--navy);color:var(--navy)">{{I_JOBS}}Job order: platform data, documents, then gold</div>
   </section>
 
   <!-- ============ PART 3: GOLD ============ -->
-  <section class="scene" data-scene="4" data-dur="9500">
-    <div class="stitle rev" data-t="0"><div class="k">Part 3</div><div class="h">Gold: both sources meet on the disbursement account</div></div>
+  <section class="scene" data-scene="5" data-dur="9500">
+    <div class="stitle rev" data-t="0"><div class="k">Part 3</div><div class="h">Gold: both sources meet on the expense line</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; one Job, after both pipelines</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="g1" class="wire" pathLength="1" d="M 304 270 C 334 270, 330 362, 358 362" data-t="3100"/>
@@ -438,78 +510,124 @@
     </svg>
     <div class="node db rev" data-t="700" style="left:54px;top:210px;width:250px;height:120px">
       <span class="badge">platform</span>
-      <div class="ico">{{I_STREAMING_TABLE}}</div><div><div class="name">Silver platform</div><div class="desc">Quotes and finals per expense, tariffs, port calls</div></div></div>
+      <div class="ico">{{I_STREAMING_TABLE}}</div><div><div class="name">Silver platform</div><div class="desc">Quoted and final lines, analyst checks, bank accounts</div></div></div>
     <div class="node db rev" data-t="1900" style="left:54px;top:446px;width:250px;height:120px">
       <span class="badge on">documents</span>
-      <div class="ico">{{I_DOC}}</div><div><div class="name">Silver documents</div><div class="desc">Pages, page to expense map, extracted lines, bank details</div></div></div>
-    <div class="node hero rev" data-t="3400" style="left:360px;top:318px;width:250px;height:140px">
-      <span class="badge">plain SQL</span>
-      <div class="ico">{{I_DBSQL}}</div><div><div class="name">Join and rules</div><div class="desc">On da_id, attachment_id and expense category</div></div></div>
+      <div class="ico">{{I_DOC}}</div><div><div class="name">Silver documents</div><div class="desc">Invoice pages per expense, extracted amounts, bank details</div></div></div>
+    <div class="node hero rev golink" data-t="3400" data-go="6" style="left:360px;top:318px;width:250px;height:140px">
+      <span class="badge">plain SQL &middot; example &#8599;</span>
+      <div class="ico">{{I_DBSQL}}</div><div><div class="name">Join and rules</div><div class="desc">Final line to its quote, to its invoice page, to the analyst check</div></div></div>
     <div class="node db rev" data-t="5100" style="left:680px;top:196px;width:320px;height:84px">
-      <div class="ico">{{I_DELTA}}</div><div><div class="name">expense_reconciliation</div><div class="desc">Quote vs final vs invoice, per line, with pages</div></div></div>
+      <div class="ico">{{I_DELTA}}</div><div><div class="name">expense_reconciliation</div><div class="desc">Per final line: quote, final, invoice page, verdict</div></div></div>
     <div class="node db rev" data-t="5300" style="left:680px;top:296px;width:320px;height:84px">
       <div class="ico">{{I_DELTA}}</div><div><div class="name">payment_validation</div><div class="desc">Bank details: platform vs document, UC Python rules</div></div></div>
     <div class="node db rev" data-t="5500" style="left:680px;top:396px;width:320px;height:84px">
       <div class="ico">{{I_DELTA}}</div><div><div class="name">expense_benchmarks</div><div class="desc">Port, expense, vessel size: median, regional min</div></div></div>
     <div class="node db rev" data-t="5700" style="left:680px;top:496px;width:320px;height:84px">
-      <div class="ico">{{I_DELTA}}</div><div><div class="name">port_call_costs</div><div class="desc">One row per port call: quoted, final, variance</div></div></div>
-    <div class="zc rev" data-t="7000" style="left:1040px;top:196px;width:196px;height:234px;border-top-color:var(--lava)">
+      <div class="ico">{{I_DELTA}}</div><div><div class="name">port_call_costs</div><div class="desc">Plus rfq_comparison, da_workflow, document_quality</div></div></div>
+    <div class="zc rev" data-t="7000" style="left:1040px;top:196px;width:196px;height:262px;border-top-color:var(--lava)">
       <div class="zh">{{I_CHECK}}Verdicts</div>
       <div class="kv mk2" data-t="7200"><span>MATCH</span></div>
       <div class="kv mk" data-t="7300"><span>OVER_QUOTE</span></div>
       <div class="kv"><span>UNDER_QUOTE</span></div>
+      <div class="kv"><span>INVOICE_MISMATCH</span></div>
       <div class="kv"><span>CURRENCY_MISMATCH</span></div>
       <div class="kv"><span>NO_EVIDENCE</span></div>
     </div>
-    <div class="nocall rev" data-t="7700" style="left:1040px;top:452px;width:196px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>No LLM in the math: same input, same verdict</div>
+    <div class="nocall rev" data-t="7700" style="left:1040px;top:474px;width:196px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Scored against the analyst's own verdict</div>
+  </section>
+
+  <!-- ============ PART 3b: GOLD WORKED EXAMPLE ============ -->
+  <section class="scene" data-scene="6" data-dur="12000">
+    <div class="stitle rev" data-t="0"><div class="k">Part 3 &middot; worked example, mock data</div><div class="h">How one gold row is built</div></div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="x1" class="wire" pathLength="1" d="M 380 300 L 408 300" data-t="3700"/>
+      <path id="x2" class="wire hot" pathLength="1" d="M 380 518 C 395 518, 395 420, 408 420" data-t="3800"/>
+      <path id="x3" class="wire" pathLength="1" d="M 790 300 L 818 300" data-t="6200"/>
+      <path id="x4" class="wire" pathLength="1" d="M 1028 404 L 1028 420" data-t="8200"/>
+    </svg>
+    <div class="zc rev" data-t="500" style="left:40px;top:186px;width:340px;height:232px;border-top-color:var(--navy)">
+      <div class="zh">{{I_STREAMING_TABLE}}From silver platform<span class="tagsrc lk">platform</span></div>
+      <div class="kv mk2" data-t="800"><span>expense_evaluation</span><b>final 2,730.00 EUR</b></div>
+      <div class="kv mk2" data-t="1000"><span>proforma_expense</span><b>quote 2,500.00 EUR</b></div>
+      <div class="kv"><span>expense_category</span><b>Pilotage</b></div>
+      <div class="kv"><span>port_call_costs</span><b>Rotterdam, 25-50k GT</b></div>
+      <div class="kv mk2" data-t="1200"><span>verification</span><b>analyst: OVERCHARGE</b></div>
+      <div class="kv"><span>expense_benchmarks</span><b>median 2,506.43 EUR</b></div>
+    </div>
+    <div class="zc rev" data-t="2100" style="left:40px;top:434px;width:340px;height:166px;border-top-color:var(--lava)">
+      <div class="zh">{{I_DOC}}From silver documents<span class="tagsrc req">document</span></div>
+      <div class="kv"><span>documents</span><b>final_da_pack, 1 per FDA</b></div>
+      <div class="kv mk" data-t="2400"><span>page_expense_map</span><b>page 4: Pilotage</b></div>
+      <div class="kv mk" data-t="2600"><span>doc_line_items</span><b>page 4: 2,730.00 EUR</b></div>
+    </div>
+    <div class="ep tight rev" data-t="3900" style="left:410px;top:186px;width:380px;height:414px">
+      <div class="bar">{{I_DBSQL}}Joins<span class="tag">one row per final line</span></div>
+      <div class="step rev" data-t="4100"><div class="n">1</div><div class="tx">Final line to its quote<span>proforma_expense_id = proforma_expense.id</span></div></div>
+      <div class="step rev" data-t="4400"><div class="n">2</div><div class="tx">Line to category<span>category_id = expense_category.id</span></div></div>
+      <div class="step rev" data-t="4700"><div class="n">3</div><div class="tx">Line to invoice page<span>proforma_id + category, in doc_line_items</span></div></div>
+      <div class="step rev" data-t="5000"><div class="n">4</div><div class="tx">Line to analyst check<span>expense_evaluation_id, latest version</span></div></div>
+      <div class="step rev" data-t="5300"><div class="n">5</div><div class="tx">Line to benchmark<span>port + vessel type + size band + category</span></div></div>
+    </div>
+    <div class="zc rev" data-t="6300" style="left:820px;top:186px;width:416px;height:218px;border-top-color:var(--navy)">
+      <div class="zh">{{I_CHECK}}Rules, top to bottom: first match wins</div>
+      <div class="kv"><span>invoice currency differs</span><b>CURRENCY_MISMATCH</b></div>
+      <div class="kv"><span>pack received, no page</span><b>NO_EVIDENCE</b></div>
+      <div class="kv"><span>invoice vs final &gt; 0.01</span><b>INVOICE_MISMATCH</b></div>
+      <div class="kv mk" data-t="7000"><span>final &gt; quote + 2%</span><b>OVER_QUOTE</b></div>
+      <div class="kv"><span>final &lt; quote - 2%</span><b>UNDER_QUOTE</b></div>
+      <div class="kv"><span>otherwise</span><b>MATCH</b></div>
+    </div>
+    <div class="zc rev" data-t="8400" style="left:820px;top:420px;width:416px;height:180px;border-top-color:var(--lava)">
+      <div class="zh">{{I_DELTA}}gold.expense_reconciliation, this row</div>
+      <div class="kv mk" data-t="8600"><span>verdict / review_action</span><b>OVER_QUOTE / review</b></div>
+      <div class="kv"><span>variance_vs_quote_pct</span><b>9.20</b></div>
+      <div class="kv"><span>evidence_pages</span><b>[4]</b></div>
+      <div class="kv mk2" data-t="8900"><span>analyst_verdict / agrees</span><b>OVER_QUOTE / true</b></div>
+    </div>
   </section>
 
   <!-- ============ PART 4: METRIC VIEWS AND GENIE ============ -->
-  <section class="scene" data-scene="5" data-dur="8500">
+  <section class="scene" data-scene="7" data-dur="9500">
     <div class="stitle rev" data-t="0"><div class="k">Part 4</div><div class="h">Metric views power the Genie agents</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; governed in Unity Catalog</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
-      <path id="m1" class="wire hot" pathLength="1" d="M 284 396 L 338 396" data-t="1300"/>
-      <path id="m2" class="wire" pathLength="1" d="M 670 396 C 700 396, 700 256, 728 256" data-t="3300"/>
-      <path id="m3" class="wire" pathLength="1" d="M 670 396 L 728 396" data-t="3400"/>
-      <path id="m4" class="wire" pathLength="1" d="M 670 396 C 700 396, 700 520, 728 520" data-t="3500"/>
-      <path id="m5" class="wire" pathLength="1" d="M 980 256 C 1005 256, 1000 370, 1014 370" data-t="5500"/>
-      <path id="m6" class="wire" pathLength="1" d="M 980 396 L 1014 396" data-t="5550"/>
-      <path id="m7" class="wire" pathLength="1" d="M 980 520 C 1005 520, 1000 422, 1014 422" data-t="5600"/>
-      <circle class="pulse" r="5" data-t="1600"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#m1"/></animateMotion></circle>
+      <path id="m2" class="wire" pathLength="1" d="M 712 306 L 768 306" data-t="4300"/>
+      <path id="m3" class="wire" pathLength="1" d="M 712 450 L 768 450" data-t="4500"/>
+      <path id="m4" class="wire" pathLength="1" d="M 712 556 L 768 556" data-t="4700"/>
+      <path id="m5" class="wire" pathLength="1" d="M 1010 306 C 1028 306, 1028 370, 1044 370" data-t="6600"/>
+      <path id="m6" class="wire" pathLength="1" d="M 1010 450 C 1028 450, 1028 410, 1044 410" data-t="6650"/>
+      <path id="m7" class="wire" pathLength="1" d="M 1010 556 C 1032 556, 1032 440, 1044 440" data-t="6700"/>
     </svg>
-    <div class="zc rev" data-t="300" style="left:54px;top:246px;width:230px;height:300px;border-top-color:var(--navy)">
-      <div class="zh">{{I_DELTA}}Gold tables</div><div class="zs">From Part 3</div>
-      <div class="kv"><span>expense_reconciliation</span></div>
-      <div class="kv"><span>payment_validation</span></div>
-      <div class="kv"><span>expense_benchmarks</span></div>
-      <div class="kv"><span>port_call_costs</span></div>
-      <div class="kv"><span>platform_usage</span></div>
-      <div class="kv"><span>document_quality</span></div>
+    <div class="zc rev" data-t="300" style="left:40px;top:190px;width:672px;height:412px;border-top-color:var(--navy)">
+      <div class="zh">{{I_METRIC}}Metric views<span class="legend"><i class="chip-m">measure</i> what you count or sum <i class="chip-d">dimension</i> what you slice by</span></div>
+      <div class="mvg rev" data-t="1200" style="height:132px"><span class="gl">Port cost analyst</span>
+        <div class="mvr"><b>port_call_cost_metrics</b><i class="chip-m">Cost per call EUR</i><i class="chip-m">Final vs quote pct</i><i class="chip-d">Port</i><i class="chip-d">Vessel type</i></div>
+        <div class="mvr"><b>benchmark_savings_metrics</b><i class="chip-m">Potential savings EUR</i><i class="chip-d">Expense category</i><i class="chip-d">Size band</i></div>
+        <div class="mvr"><b>rfq_quote_metrics</b><i class="chip-m">Premium over lowest EUR</i><i class="chip-m">Quotes received</i><i class="chip-d">Port</i></div>
+      </div>
+      <div class="mvg rev" data-t="2200" style="height:132px"><span class="gl">DA audit</span>
+        <div class="mvr"><b>expense_reconciliation_metrics</b><i class="chip-m">Over-invoiced EUR</i><i class="chip-m">Agreement with analysts</i><i class="chip-d">Verdict</i></div>
+        <div class="mvr"><b>payment_validation_metrics</b><i class="chip-m">Bank detail mismatches</i><i class="chip-m">Payments on hold</i><i class="chip-d">Agent</i></div>
+        <div class="mvr"><b>document_quality_metrics</b><i class="chip-m">Pages processed</i><i class="chip-m">Mean extraction confidence</i><i class="chip-d">Document type</i></div>
+      </div>
+      <div class="mvg rev" data-t="3200" style="height:54px"><span class="gl">DA operations</span>
+        <div class="mvr"><b>da_workflow_metrics</b><i class="chip-m">Hours FDA to approval</i><i class="chip-m">Cancelled appointments</i><i class="chip-d">Port</i><i class="chip-d">Agent</i></div>
+      </div>
     </div>
-    <div class="zc rev" data-t="1500" style="left:340px;top:206px;width:330px;height:380px;border-top-color:var(--lava)">
-      <div class="zh">{{I_METRIC}}Metric views</div><div class="zs">One definition per KPI, joins to the dimensions included</div>
-      <div class="kv mk" data-t="1800"><span>port_call_costs</span><b>cost per call</b></div>
-      <div class="kv mk" data-t="1900"><span>expense_reconciliation</span><b>over-invoiced</b></div>
-      <div class="kv mk" data-t="2000"><span>benchmark_savings</span><b>potential savings</b></div>
-      <div class="kv mk2" data-t="2100"><span>payment_validation</span><b>mismatch rate</b></div>
-      <div class="kv mk2" data-t="2200"><span>platform_usage</span><b>active users</b></div>
-      <div class="kv mk2" data-t="2300"><span>document_quality</span><b>mean confidence</b></div>
-      <div class="formula" style="margin-top:12px">Synonyms and display names in the YAML help Genie pick the right measure</div>
-    </div>
-    <div class="node db rev" data-t="3600" style="left:730px;top:206px;width:250px;height:100px">
-      <div class="ico">{{I_GENIE}}</div><div><div class="name">Port cost analyst</div><div class="desc">Costs, benchmarks and savings by port and vessel</div></div></div>
-    <div class="node db rev" data-t="3900" style="left:730px;top:346px;width:250px;height:100px">
-      <div class="ico">{{I_GENIE}}</div><div><div class="name">DA audit</div><div class="desc">Verdicts and bank checks, with invoice pages</div></div></div>
-    <div class="node db rev" data-t="4200" style="left:730px;top:470px;width:250px;height:100px">
-      <div class="ico">{{I_GENIE}}</div><div><div class="name">Platform usage</div><div class="desc">Active users, DAs created, approval times</div></div></div>
-    <div class="node hero rev" data-t="5800" style="left:1016px;top:318px;width:220px;height:156px">
+    <div class="node db rev" data-t="4500" style="left:770px;top:254px;width:240px;height:104px">
+      <div class="ico">{{I_GENIE}}</div><div><div class="name">Port cost analyst</div><div class="desc">Costs, benchmarks and competing quotes by port and vessel</div></div></div>
+    <div class="node db rev" data-t="4800" style="left:770px;top:398px;width:240px;height:104px">
+      <div class="ico">{{I_GENIE}}</div><div><div class="name">DA audit</div><div class="desc">Verdicts, bank checks, agreement with analysts</div></div></div>
+    <div class="node db rev" data-t="5100" style="left:770px;top:526px;width:240px;height:60px">
+      <div class="ico">{{I_GENIE}}</div><div><div class="name">DA operations</div></div></div>
+    <div class="node hero rev" data-t="6900" style="left:1046px;top:330px;width:196px;height:156px">
       <span class="badge on">next phase</span>
-      <div class="ico">{{I_AGENT}}</div><div><div class="name">Supervisor agent</div><div class="desc">Routes each chat question to the right Genie agent, adds document search</div></div></div>
+      <div class="ico">{{I_AGENT}}</div><div><div class="name">Supervisor agent</div><div class="desc">Routes each question to the right Genie agent, adds document search</div></div></div>
   </section>
 
   <!-- ============ PART 5: ONE EXPENSE LINE ============ -->
-  <section class="scene" data-scene="6" data-dur="11000">
+  <section class="scene" data-scene="8" data-dur="11000">
     <div class="stitle rev" data-t="0"><div class="k">Zoom in &middot; mock data</div><div class="h">One expense line, end to end</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="z1" class="wire" pathLength="1" d="M 394 290 L 428 290" data-t="3700"/>
@@ -520,37 +638,69 @@
     <div class="zc rev" data-t="500" style="left:54px;top:192px;width:340px;height:196px;border-top-color:var(--navy)">
       <div class="zh">{{I_DB}}From the platform<span class="tagsrc lk">platform</span></div>
       <div class="kv"><span>port call</span><b>Rotterdam &middot; bulk, 32,400 GT</b></div>
-      <div class="kv mk2" data-t="900"><span>quote (PDA)</span><b>Pilotage 2,500.00 EUR</b></div>
-      <div class="kv mk2" data-t="1100"><span>final (FDA)</span><b>Pilotage 2,730.00 EUR</b></div>
-      <div class="kv"><span>agent IBAN, column mask</span><b>NL** **** 4417</b></div>
+      <div class="kv mk2" data-t="900"><span>quote (PDA line)</span><b>Pilotage 2,500.00 EUR</b></div>
+      <div class="kv mk2" data-t="1100"><span>final (FDA line)</span><b>Pilotage 2,730.00 EUR</b></div>
+      <div class="kv"><span>bank account, masked</span><b>NL** **** 8386</b></div>
     </div>
     <div class="zc rev" data-t="2100" style="left:54px;top:404px;width:340px;height:196px;border-top-color:var(--lava)">
-      <div class="zh">{{I_DOC}}From the invoice PDF<span class="tagsrc req">document</span></div>
-      <div class="kv"><span>document type</span><b>final invoice</b></div>
-      <div class="kv mk" data-t="2500"><span>page 4</span><b>Pilotage &middot; confidence 0.93</b></div>
+      <div class="zh">{{I_DOC}}From the final DA pack<span class="tagsrc req">document</span></div>
+      <div class="kv"><span>document type</span><b>final_da_pack</b></div>
+      <div class="kv mk" data-t="2500"><span>page 4</span><b>Pilotage &middot; confidence 0.95</b></div>
       <div class="kv mk" data-t="2700"><span>amount on page</span><b>2,730.00 EUR</b></div>
-      <div class="kv"><span>IBAN on invoice</span><b>NL** **** 4417</b></div>
+      <div class="kv"><span>IBAN on the pack</span><b>NL** **** 8386</b></div>
     </div>
     <div class="ep rev" data-t="3900" style="left:430px;top:192px;width:400px;height:408px">
       <div class="bar">{{I_SERVERLESS_W}}Gold rules for this line<span class="tag">plain SQL</span></div>
       <div class="step rev" data-t="4200"><div class="n">1</div><div class="tx">Quote vs final<span>+230.00 EUR, +9.2% over the quote</span></div><div class="si">{{I_DBSQL}}</div></div>
       <div class="step rev" data-t="4700"><div class="n">2</div><div class="tx">Evidence<span>Invoice page 4 shows 2,730.00 EUR, same as the final</span></div><div class="si">{{I_DOC}}</div></div>
-      <div class="step rev" data-t="5200"><div class="n">3</div><div class="tx">Bank details<span>IBAN matches the agent on file: MATCH</span></div><div class="si">{{I_CHECK}}</div></div>
-      <div class="step rev" data-t="6100"><div class="n">4</div><div class="tx">Benchmark<span>Port median 2,310.00 EUR for this size: final is +18.2%</span></div><div class="si">{{I_METRIC}}</div></div>
+      <div class="step rev" data-t="5200"><div class="n">3</div><div class="tx">Bank details<span>Account and SWIFT match the platform: MATCH</span></div><div class="si">{{I_CHECK}}</div></div>
+      <div class="step rev" data-t="6100"><div class="n">4</div><div class="tx">Benchmark<span>Port median 2,506.43 EUR for this size: final is +8.9%</span></div><div class="si">{{I_METRIC}}</div></div>
     </div>
     <div class="dec rev" data-t="7500" style="left:866px;top:192px;width:370px;height:150px">
       <div class="row"><div class="lbl">Verdict: OVER_QUOTE</div><div class="ok" style="background:#E8A23A">REVIEW</div></div>
       <div class="zones"><i style="width:13.3%;background:#BFE6D6"></i><i style="width:53.4%;background:#F7DDB0"></i><i style="width:33.3%;background:#FFD2CB"></i>
         <div class="marker" style="left:61.3%"><b>+9.2%</b></div></div>
       <div class="zticks" style="white-space:nowrap"><span style="flex:1.4">match &le; 2%</span><span style="flex:3;text-align:center">review 2 to 10%</span><span style="text-align:right;flex:1.6">dispute &gt; 10%</span></div>
-      <div class="note">Example policy, set by you</div>
+      <div class="note">Example policy, set by you. Analyst verdict: OVER_QUOTE</div>
     </div>
     <div class="zc rev" data-t="8000" style="left:866px;top:362px;width:370px;height:238px;border-top-color:var(--navy)">
       <div class="zh">{{I_GENIE}}What the DA audit agent answers</div>
-      <div class="ans">"Pilotage was invoiced <b>9.2% above the quote</b>: 2,730.00 vs 2,500.00 EUR, invoice page 4. Bank details match. The final is 18.2% above the port median for this vessel size."</div>
-      <div class="kv mk" data-t="8500"><span>over_invoiced_amount</span><b>230.00 EUR</b></div>
-      <div class="kv mk" data-t="8600"><span>benchmark_gap_pct</span><b>18.2%</b></div>
+      <div class="ans">"Pilotage was invoiced <b>9.2% above the quote</b>: 2,730.00 EUR vs 2,500.00 EUR, invoice page 4. Bank details match. The final is +8.9% against the port median for this vessel size."</div>
+      <div class="kv mk" data-t="8500"><span>Over-invoiced amount EUR</span><b>230.00</b></div>
+      <div class="kv mk" data-t="8600"><span>Gap to benchmark pct</span><b>+8.9%</b></div>
     </div>
+  </section>
+
+  <!-- ============ GLOSSARY ============ -->
+  <section class="scene" data-scene="9" data-dur="9000">
+    <div class="stitle rev" data-t="0"><div class="k">Glossary</div><div class="h">The words used on every tab</div></div>
+    <div class="lane rev" data-t="600" style="left:28px;top:186px;width:400px;height:418px"><span class="ll">The port call</span></div>
+    <div class="gt rev" data-t="800" style="left:38px;top:198px;width:380px"><b>Port call</b><span>One ship's visit to one port, from arrival to sailing</span></div>
+    <div class="gt rev" data-t="950" style="left:38px;top:248px;width:380px"><b>Buyer</b><span>Shipowner, operator or charterer who pays the port costs</span></div>
+    <div class="gt rev" data-t="1100" style="left:38px;top:298px;width:380px"><b>Port agent</b><span>Local company that handles the call and pays suppliers</span></div>
+    <div class="gt rev" data-t="1250" style="left:38px;top:348px;width:380px"><b>Request case, RFQ</b><span>The buyer asks several agents to quote for a call</span></div>
+    <div class="gt rev" data-t="1400" style="left:38px;top:398px;width:380px"><b>Quotation</b><span>One agent's priced answer to the request</span></div>
+    <div class="gt rev" data-t="1550" style="left:38px;top:448px;width:380px"><b>Appointment</b><span>The buyer appoints one agent for the call</span></div>
+    <div class="gt rev" data-t="1700" style="left:38px;top:498px;width:380px"><b>Husbandry</b><span>Services for crew and ship: crew change, water, cash</span></div>
+    <div class="gt rev" data-t="1850" style="left:38px;top:548px;width:380px"><b>GT, size band</b><span>Gross tonnage, the ship's size; most dues scale with it</span></div>
+    <div class="lane rev" data-t="3000" style="left:440px;top:186px;width:400px;height:418px"><span class="ll">The money</span></div>
+    <div class="gt rev" data-t="3200" style="left:450px;top:198px;width:380px"><b>DA</b><span>Disbursement account: the list of port costs of a call</span></div>
+    <div class="gt rev" data-t="3350" style="left:450px;top:248px;width:380px"><b>PDA, proforma</b><span>The agent's quote before arrival (table proforma)</span></div>
+    <div class="gt rev" data-t="3500" style="left:450px;top:298px;width:380px"><b>FDA, evaluation</b><span>The agent's final bill after sailing (table evaluation)</span></div>
+    <div class="gt rev" data-t="3650" style="left:450px;top:348px;width:380px"><b>Expense line</b><span>One cost on a DA, for example Pilotage 2,730.00 EUR</span></div>
+    <div class="gt rev" data-t="3800" style="left:450px;top:398px;width:380px"><b>Final DA pack</b><span>The FDA as a PDF: summary page, then one invoice per line</span></div>
+    <div class="gt rev" data-t="3950" style="left:450px;top:448px;width:380px"><b>Statement of facts</b><span>Timeline of the call: arrived, berthed, sailed</span></div>
+    <div class="gt rev" data-t="4100" style="left:450px;top:498px;width:380px"><b>Verification</b><span>An analyst's check of a line, with a discrepancy type</span></div>
+    <div class="gt rev" data-t="4250" style="left:450px;top:548px;width:380px"><b>Benchmark</b><span>Median final cost for the same port, expense and ship size</span></div>
+    <div class="lane rev" data-t="5400" style="left:852px;top:186px;width:400px;height:418px"><span class="ll">The data</span></div>
+    <div class="gt rev" data-t="5600" style="left:862px;top:198px;width:380px"><b>DMS, CDC, Op</b><span>AWS copies every database change; Op is I, U or D</span></div>
+    <div class="gt rev" data-t="5750" style="left:862px;top:248px;width:380px"><b>Bronze</b><span>Every change exactly as received, never edited</span></div>
+    <div class="gt rev" data-t="5900" style="left:862px;top:298px;width:380px"><b>Silver</b><span>Current state of each table, with history where kept</span></div>
+    <div class="gt rev" data-t="6050" style="left:862px;top:348px;width:380px"><b>Gold</b><span>Joined business tables with the rules applied</span></div>
+    <div class="gt rev" data-t="6200" style="left:862px;top:398px;width:380px"><b>SCD 1, SCD 2</b><span>1 keeps only the latest row, 2 keeps every version</span></div>
+    <div class="gt rev" data-t="6350" style="left:862px;top:448px;width:380px"><b>AI Functions</b><span>SQL functions that call a model: parse, classify, extract</span></div>
+    <div class="gt rev" data-t="6500" style="left:862px;top:498px;width:380px"><b>Metric view</b><span>One governed definition per KPI: measures and dimensions</span></div>
+    <div class="gt rev" data-t="6650" style="left:862px;top:548px;width:380px"><b>Genie agent</b><span>Answers plain-language questions on the metric views</span></div>
   </section>
 
   <div class="cap"><div class="bar"></div><div class="txt" id="cap"></div></div>
@@ -561,40 +711,57 @@
 const CAPS = {
   0: [[0, 'Platform data and documents land in S3, meet in <b>one gold layer</b>, and Genie agents query it through <b>metric views</b>']],
   1: [[0, 'Your platform data already lands in S3 through <b>DMS: full load plus CDC</b>'],
-      [1400, 'DMS writes Parquet per table, every row tagged <b>I, U or D</b>'],
-      [2600, 'Auto Loader picks up only the new files into <b>bronze</b>: nothing is lost'],
-      [4000, 'AUTO CDC applies the changes in commit order: <b>SCD 1 or SCD 2 per table</b>'],
-      [6000, 'Your example: an appointment goes from in process to <b>cancelled</b>, history kept'],
+      [1400, 'DMS writes Parquet per table; every row starts with <b>Op and _dms_commit_ts</b>'],
+      [2600, 'Auto Loader picks up only the new files into <b>bronze</b>: a change log, nothing lost'],
+      [4000, 'AUTO CDC applies the changes in order: <b>version, then commit time</b>, SCD 1 or 2'],
+      [6000, 'Your example: an appointment goes from IN_PROCESS to <b>CANCELLED</b>, history kept'],
       [8200, 'One serverless pipeline, <b>hourly today</b>, continuous later for the near real time tables']],
-  2: [[0, 'Documents land in a <b>second S3 bucket</b>, keyed by DA and attachment'],
-      [1200, 'Auto Loader reads each new PDF once as a <b>binary file</b>; the path gives the join keys'],
+  2: [[0, 'The DA database as it lands in bronze: <b>13 core tables</b>, link tables and 49 child tables'],
+      [900, 'It starts with a <b>request case</b>: the agents at the port answer with quotations'],
+      [2500, 'The buyer picks one: a <b>port call</b> and an <b>appointment</b> of that agent'],
+      [4300, 'The agent sends the <b>PDA</b>: the proforma and its quoted lines'],
+      [6100, 'After sailing, the <b>FDA</b>: every final line points to its quoted line'],
+      [7700, 'Files link through <b>file_item</b>; analysts verify every line'],
+      [9100, 'Lookups such as vessel, port and bank account are <b>assumed</b> until their columns are confirmed']],
+  3: [[0, 'Documents land in a <b>second S3 bucket</b>, under the proforma they belong to'],
+      [1200, 'Auto Loader reads each new PDF once as a <b>binary file</b>; the key gives proforma_id and file_item_id'],
       [2600, 'Step 1: <b>ai_parse_document</b> returns the text of every page, with page numbers'],
       [4200, 'Steps 2 and 3: classify the document, then <b>map every page to an expense</b>'],
       [5800, 'Step 4: <b>ai_extract</b> pulls line items, totals and bank details, with confidence'],
       [7000, 'Step 5: the statement of facts becomes an <b>ordered event timeline</b>'],
       [8200, 'Every result lands once in <b>Delta</b>. Click the pipeline to see its <b>step graph</b>']],
-  3: [[0, 'Inside the document pipeline: <b>every box is a table</b>, every arrow a dependency'],
+  4: [[0, 'Inside the document pipeline: <b>every box is a table</b>, every arrow a dependency'],
       [2000, 'Parse and classify <b>once per file</b>, then split into pages with no LLM call'],
       [3400, 'The expense list comes from <b>Postgres through Part 1</b>: categories are data, not prompt text'],
       [4800, 'Three branches by document type <b>run in parallel</b>: final packs, proformas, statements of facts'],
       [7000, 'Final packs: page map first, then <b>bank details and line items in parallel</b>'],
       [9000, 'Gold joins the results with the <b>structured tables</b>, so the job runs platform data first']],
-  4: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
-      [600, 'Platform data brings the <b>quote, the final DA and the tariffs</b>'],
-      [1800, 'Documents bring <b>what the invoice actually says</b>, page by page'],
-      [3000, 'They join on the <b>DA, the attachment and the expense category</b>'],
+  5: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
+      [600, 'Platform data brings the <b>quoted and final lines and the analyst checks</b>'],
+      [1800, 'Documents bring <b>what the invoice page actually says</b>'],
+      [3000, 'They meet on the <b>expense line</b>. Click Join and rules for a worked example'],
       [4600, 'Business rules run as <b>plain SQL</b>: tolerances, currency checks, bank matching'],
-      [6800, 'Every line gets a <b>verdict the agents can explain</b>']],
-  5: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
-      [1200, 'Gold tables feed <b>metric views</b>: one definition per KPI, in Unity Catalog'],
-      [3200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
-      [5400, 'Next phase: a <b>supervisor agent</b> routes every chat question to the right one']],
-  6: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
-      [400, 'The platform says: quoted <b>2,500 EUR</b>, final <b>2,730 EUR</b>'],
-      [2000, 'The invoice says <b>2,730 EUR on page 4</b>, confidence 0.93'],
+      [6800, 'Every line gets a verdict, <b>scored against the analyst</b>']],
+  6: [[0, 'Worked example: <b>one Pilotage line</b> of one port call'],
+      [400, 'Silver platform gives the <b>final line, its quote, the category, the port call and the analyst check</b>'],
+      [2000, 'Silver documents give <b>what the invoice page says</b>'],
+      [3600, 'Five joins put everything on <b>one row per final line</b>'],
+      [6100, 'Rules run top to bottom; <b>the first that fires</b> sets the verdict'],
+      [8100, 'The gold row: verdict, action, cited page, and <b>agreement with the analyst</b>']],
+  7: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
+      [1000, 'Each metric view holds <b>measures</b> (what you count) and <b>dimensions</b> (what you slice by)'],
+      [4200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
+      [6400, 'Next phase: a <b>supervisor agent</b> routes every chat question to the right one']],
+  8: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
+      [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
+      [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],
       [3600, 'Gold rules: <b>+9.2% over the quote</b>, evidence found, bank details match'],
-      [6000, 'Against the benchmark the final is <b>18.2% above the port median</b>'],
-      [7200, 'Verdict <b>review</b> under the example policy, with an answer the agent can cite']]
+      [6000, 'Against the benchmark the final is <b>+8.9%</b> versus the port median'],
+      [7200, 'Verdict <b>review</b> under the example policy, with an answer the agent can cite']],
+  9: [[0, 'Glossary: <b>the words used on every tab</b>'],
+      [500, '<b>The port call</b>: who is involved and what they agree'],
+      [2900, '<b>The money</b>: from the quote to the final bill'],
+      [5300, '<b>The data</b>: how it moves through Databricks']]
 };
 const scenes = [...document.querySelectorAll('.scene')];
 const capEl = document.getElementById('cap');
@@ -666,7 +833,7 @@ function prev(){
 }
 function partName(i){
   const p = document.querySelector('.pill[data-p="' + i + '"]');
-  return p ? p.lastChild.textContent.trim() : 'Part ' + i;
+  return p ? (p.dataset.name || p.lastChild.textContent.trim()) : 'Part ' + i;
 }
 function progress(){
   const h = document.querySelector('.hint'); if (!h || MODE !== 'present') return;

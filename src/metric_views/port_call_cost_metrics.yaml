@@ -1,0 +1,77 @@
+version: 1.1
+comment: >-
+  Port-call costs: what was quoted on the proforma (PDA) and finally charged on the evaluation (FDA), in EUR,
+  per port, vessel, buyer and appointed agent. Use for cost per call, overruns and FDA approval times.
+source: {catalog}.{gold_schema}.port_call_costs
+filter: evaluation_id IS NOT NULL
+dimensions:
+  - name: Port
+    expr: port_name
+    synonyms: [harbour, port name, terminal city]
+  - name: Country
+    expr: country
+  - name: Region
+    expr: region
+    comment: Commercial region of the port, for example North Europe or Mediterranean
+  - name: Vessel type
+    expr: vessel_type
+    synonyms: [ship type]
+  - name: Size band
+    expr: size_band
+    comment: Gross tonnage band of the vessel
+    synonyms: [GT band, vessel size]
+  - name: Vessel
+    expr: vessel_name
+  - name: Buyer
+    expr: buyer_name
+    comment: Shipowner, operator or charterer that pays the DA
+    synonyms: [customer, principal, owner]
+  - name: Agent
+    expr: agent_name
+    comment: Port agent appointed for the call
+    synonyms: [port agent, agency]
+  - name: Call month
+    expr: call_month
+    comment: Month of the scheduled arrival
+  - name: Evaluation state
+    expr: evaluation_state
+    synonyms: [FDA status]
+measures:
+  - name: Port calls
+    expr: COUNT(1)
+    synonyms: [calls, number of port calls]
+  - name: Quoted cost EUR
+    expr: SUM(quoted_amount_eur)
+    comment: Sum of proforma (PDA) amounts in EUR
+    synonyms: [PDA total, quoted amount]
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Final cost EUR
+    expr: SUM(final_amount_eur)
+    comment: Sum of evaluation (FDA) amounts in EUR, platform fee excluded
+    synonyms: [FDA total, actual cost, port cost]
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Platform fees EUR
+    expr: SUM(platform_fee_eur)
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Cost per call EUR
+    expr: MEASURE(`Final cost EUR`) / MEASURE(`Port calls`)
+    synonyms: [average cost per call, average port cost]
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Final vs quote pct
+    expr: MEASURE(`Final cost EUR`) / NULLIF(MEASURE(`Quoted cost EUR`), 0) - 1
+    comment: How much the final cost exceeds the quote, as a fraction (0.05 = 5 percent over)
+    synonyms: [overrun, cost overrun, variance to quote]
+    format:
+      type: percentage
+  - name: Average FDA approval hours
+    expr: AVG(fda_approval_hours)
+    comment: Hours from FDA creation to approval
+    synonyms: [approval time, time to approve]

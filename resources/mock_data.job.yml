@@ -1,0 +1,24 @@
+resources:
+  jobs:
+    mock_data:
+      name: portcall-mock-data
+      description: Writes DMS-style Parquet (full load or one CDC batch) and PDF documents into the landing volumes
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - fpdf2==2.8.3
+      parameters:
+        - name: mode
+          default: full_load
+        - name: seed
+          default: "42"
+      tasks:
+        - task_key: generate
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/mock_data/generate.py
+            parameters: ["--mode", "{{job.parameters.mode}}", "--seed", "{{job.parameters.seed}}", "--source-schema", "${var.dms_source_schema}",
+                         "--dms-path", "/Volumes/${var.catalog}/${resources.schemas.landing.name}/${resources.volumes.dms_volume.name}",
+                         "--documents-path", "/Volumes/${var.catalog}/${resources.schemas.landing.name}/${resources.volumes.documents_volume.name}"]

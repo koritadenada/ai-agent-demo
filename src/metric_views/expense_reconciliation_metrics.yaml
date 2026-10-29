@@ -1,0 +1,82 @@
+version: 1.1
+comment: >-
+  Audit of every final line: quote vs final vs the supporting invoice page, an automated verdict (MATCH, OVER_QUOTE,
+  UNDER_QUOTE, INVOICE_MISMATCH, CURRENCY_MISMATCH, NO_EVIDENCE) and the verdict of the DA analyst who verified it.
+source: {catalog}.{gold_schema}.expense_reconciliation
+dimensions:
+  - name: Expense category
+    expr: expense_category
+    synonyms: [expense, cost item, expense type]
+  - name: Expense section
+    expr: expense_section
+    comment: PORT_EXPENSES or HUSBANDRY
+  - name: Port
+    expr: port_name
+  - name: Region
+    expr: region
+  - name: Agent
+    expr: agent_name
+    synonyms: [port agent, agency]
+  - name: Buyer
+    expr: buyer_name
+  - name: Verdict
+    expr: verdict
+    comment: Automated verdict from the rules in the gold layer
+  - name: Analyst verdict
+    expr: analyst_verdict
+    comment: Verdict of the DA analyst (from the verification), on the same scale
+  - name: Review action
+    expr: review_action
+    comment: accept, review or dispute, from the example policy thresholds
+  - name: Has documents
+    expr: has_documents
+    comment: True when the final DA pack was received and processed
+  - name: Call month
+    expr: call_month
+  - name: Port call
+    expr: port_call_id
+measures:
+  - name: Lines checked
+    expr: COUNT(1)
+    synonyms: [expense lines, lines]
+  - name: Lines over quote
+    expr: COUNT(1) FILTER (WHERE verdict = 'OVER_QUOTE')
+  - name: Lines not matching
+    expr: COUNT(1) FILTER (WHERE verdict <> 'MATCH')
+  - name: Mismatch rate
+    expr: MEASURE(`Lines not matching`) / MEASURE(`Lines checked`)
+    synonyms: [exception rate, error rate]
+    format:
+      type: percentage
+  - name: Lines to dispute
+    expr: COUNT(1) FILTER (WHERE review_action = 'dispute')
+  - name: Over-invoiced amount EUR
+    expr: SUM(over_invoiced_amount_eur)
+    comment: Final minus quote, in EUR, for lines charged above the quote
+    synonyms: [overcharge, over invoiced, amount over quote]
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Lines without evidence
+    expr: COUNT(1) FILTER (WHERE verdict = 'NO_EVIDENCE')
+    synonyms: [missing invoices, unsupported lines]
+  - name: Invoice mismatches
+    expr: COUNT(1) FILTER (WHERE verdict = 'INVOICE_MISMATCH')
+  - name: Currency mismatches
+    expr: COUNT(1) FILTER (WHERE verdict = 'CURRENCY_MISMATCH')
+  - name: Evidence coverage
+    expr: COUNT(1) FILTER (WHERE has_documents AND invoiced_amount IS NOT NULL) / NULLIF(COUNT(1) FILTER (WHERE has_documents), 0)
+    comment: Share of lines on received packs that have a supporting invoice page
+    format:
+      type: percentage
+  - name: Agreement with analysts
+    expr: AVG(CASE WHEN agrees_with_analyst THEN 1.0 WHEN agrees_with_analyst = FALSE THEN 0.0 END)
+    comment: Share of verified lines where the automated verdict equals the analyst's verdict
+    synonyms: [accuracy, agreement rate, AI vs analyst]
+    format:
+      type: percentage
+  - name: Analyst flags missed by rules
+    expr: COUNT(1) FILTER (WHERE analyst_verdict <> 'MATCH' AND verdict = 'MATCH')
+  - name: Rule flags missed by analysts
+    expr: COUNT(1) FILTER (WHERE analyst_verdict = 'MATCH' AND verdict <> 'MATCH')
+    synonyms: [extra findings, missed by analysts]
