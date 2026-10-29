@@ -212,6 +212,18 @@
   .blk.sm .icons svg { width:32px; height:32px; }
   .node .desc code { font-family:ui-monospace,Menlo,monospace; font-size:11.5px; }
   .nocall > svg:not([viewBox="0 0 24 24"]) { width:18px; height:18px; flex:0 0 18px; }
+  .node.sm { padding:12px 12px; gap:9px; }
+  .node.sm .ico { flex:0 0 24px; width:24px; height:24px; }
+  .node.sm .ico svg { width:24px; height:24px; }
+  .node.sm .name { font-size:12.5px; }
+  .node.sm .desc { font-size:11.5px; }
+  .lane { position:absolute; border:1.5px dashed #9FB2BA; border-radius:14px; background:rgba(229,238,241,.35); }
+  .lane .ll { position:absolute; top:-11px; left:12px; background:#fff; padding:1px 8px; border-radius:999px; font-size:10.5px;
+    font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--navy); border:1px solid #9FB2BA; }
+  .wire.dep { stroke:var(--lava); stroke-dasharray:.018 .014; stroke-dashoffset:0; opacity:0; transition:opacity .6s; }
+  .wire.dep.on { opacity:1; }
+  .golink { cursor:pointer; }
+  .golink:hover { box-shadow:0 6px 22px rgba(27,49,57,.18); }
   .ans { font-size:13px; line-height:1.45; color:var(--navy); background:var(--wash); border-radius:8px; padding:10px 12px; margin-bottom:8px; }
   .ans b { color:var(--lava); }
 </style>
@@ -225,9 +237,10 @@
       <div class="pill" data-p="0"><b>&#8635;</b>Overview</div>
       <div class="pill" data-p="1"><b>1</b>Platform data</div>
       <div class="pill" data-p="2"><b>2</b>Documents</div>
-      <div class="pill" data-p="3"><b>3</b>Gold</div>
-      <div class="pill" data-p="4"><b>4</b>Genie</div>
-      <div class="pill" data-p="5"><b>5</b>One line</div>
+      <div class="pill" data-p="3"><b>2b</b>Doc graph</div>
+      <div class="pill" data-p="4"><b>3</b>Gold</div>
+      <div class="pill" data-p="5"><b>4</b>Genie</div>
+      <div class="pill" data-p="6"><b>5</b>One line</div>
     </div>
   </div>
 
@@ -248,7 +261,7 @@
       <div class="num">2</div><div class="bt">Documents</div><div class="bd">PDFs from a second S3 bucket, parsed, classified and extracted with AI Functions</div>
       <div class="icons">{{I_DOC}}{{I_PIPELINES}}</div>
     </div>
-    <div class="blk rev" data-t="2000" data-go="3" style="left:460px">
+    <div class="blk rev" data-t="2000" data-go="4" style="left:460px">
       <div class="num">3</div><div class="bt">Joined gold layer</div><div class="bd">Both sources meet on the disbursement account: quote vs final vs invoice, bank checks, benchmarks</div>
       <div class="icons">{{I_DELTA}}{{I_DBSQL}}{{I_UC}}</div>
       <div class="run"><div class="lbl">What runs</div>
@@ -256,7 +269,7 @@
         <div><span>Business rules</span><b>plain SQL</b></div>
         <div><span>Refresh</span><b>one Job, after both pipelines</b></div></div>
     </div>
-    <div class="blk rev" data-t="3100" data-go="4" style="left:880px">
+    <div class="blk rev" data-t="3100" data-go="5" style="left:880px">
       <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later a supervisor agent, query</div>
       <div class="icons">{{I_METRIC}}{{I_GENIE}}{{I_AGENT}}</div>
       <div class="run"><div class="lbl">What runs</div>
@@ -334,8 +347,8 @@
       <span class="badge">Auto Loader</span>
       <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">Bronze</div><div class="desc">Binary file plus the join keys from the path</div></div></div>
     <div class="nocall rev" data-t="8900" style="left:344px;top:452px;width:210px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Errors kept per page: one bad page never fails the file</div>
-    <div class="ep rev" data-t="2700" style="left:590px;top:192px;width:380px;height:402px">
-      <div class="bar">{{I_SERVERLESS_W}}Document pipeline<span class="tag">AI Functions</span></div>
+    <div class="ep rev golink" data-t="2700" data-go="3" style="left:590px;top:192px;width:380px;height:402px">
+      <div class="bar">{{I_SERVERLESS_W}}Document pipeline<span class="tag">Open the graph &#8599;</span></div>
       <div class="step rev" data-t="3000"><div class="n">1</div><div class="tx">ai_parse_document<span>Text per page, page numbers kept</span></div><div class="si">{{I_DOC}}</div></div>
       <div class="step rev" data-t="4300"><div class="n">2</div><div class="tx">ai_classify the document<span>PDA quote, invoice, port bill, SOF</span></div><div class="si">{{I_MODEL}}</div></div>
       <div class="step rev" data-t="4900"><div class="n">3</div><div class="tx">ai_query, JSON schema<span>Page to expense, with confidence</span></div><div class="si">{{I_MODEL}}</div></div>
@@ -354,8 +367,63 @@
     </div>
   </section>
 
+  <!-- ============ PART 2b: DOCUMENT PIPELINE GRAPH ============ -->
+  <section class="scene" data-scene="3" data-dur="12000">
+    <div class="stitle rev" data-t="0"><div class="k">Part 2 &middot; inside the document pipeline</div><div class="h">What runs in parallel, what needs Postgres</div></div>
+    <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; documents pipeline, every box is a table</span></div>
+    <div class="lane rev" data-t="5000" style="left:586px;top:186px;width:212px;height:416px"><span class="ll">parallel, by document type</span></div>
+    <div class="lane rev" data-t="7200" style="left:818px;top:186px;width:212px;height:280px"><span class="ll">parallel</span></div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="r1" class="wire" pathLength="1" d="M 184 402 L 208 402" data-t="700"/>
+      <path id="r2" class="wire" pathLength="1" d="M 380 402 L 400 402" data-t="2200"/>
+      <path id="r6" class="wire dep" pathLength="1" d="M 384 230 L 596 230" data-t="3800"/>
+      <path id="r7" class="wire dep" pathLength="1" d="M 384 262 C 575 262, 570 384, 596 384" data-t="3900"/>
+      <text class="wlabel" x="488" y="221" text-anchor="middle" data-t="4000">expense vocabulary</text>
+      <path id="r3" class="wire" pathLength="1" d="M 562 402 C 580 402, 575 252, 596 252" data-t="5200"/>
+      <path id="r4" class="wire" pathLength="1" d="M 562 402 L 596 402" data-t="5300"/>
+      <path id="r5" class="wire" pathLength="1" d="M 562 402 C 580 402, 575 546, 596 546" data-t="5400"/>
+      <path id="r8" class="wire hot" pathLength="1" d="M 786 236 L 828 236" data-t="7400"/>
+      <path id="r9" class="wire hot" pathLength="1" d="M 786 266 C 808 266, 806 386, 828 386" data-t="7500"/>
+      <path id="r10" class="wire" pathLength="1" d="M 786 414 L 828 414" data-t="7600"/>
+      <path id="r11" class="wire" pathLength="1" d="M 1018 242 C 1040 242, 1036 360, 1054 360" data-t="9300"/>
+      <path id="r12" class="wire" pathLength="1" d="M 1018 402 L 1054 402" data-t="9400"/>
+      <path id="r13" class="wire" pathLength="1" d="M 786 546 C 1000 546, 1030 444, 1054 444" data-t="9500"/>
+      <circle class="pulse" r="5" data-t="5600"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#r3"/></animateMotion></circle><circle class="pulse" r="5" data-t="5600"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#r4"/></animateMotion></circle><circle class="pulse" r="5" data-t="5600"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#r5"/></animateMotion></circle><circle class="pulse" r="5" data-t="7800"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#r8"/></animateMotion></circle><circle class="pulse" r="5" data-t="7800"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#r9"/></animateMotion></circle>
+    </svg>
+    <div class="node sm db rev" data-t="300" style="left:28px;top:354px;width:156px;height:96px">
+      <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">documents_raw</div><div class="desc">Bronze, new PDFs only</div></div></div>
+    <div class="node sm db rev" data-t="900" style="left:210px;top:342px;width:170px;height:120px">
+      <span class="badge">per file</span>
+      <div class="ico">{{I_DOC}}</div><div><div class="name">documents</div><div class="desc">ai_parse_document, then ai_classify on page 1</div></div></div>
+    <div class="node sm db rev" data-t="2400" style="left:402px;top:354px;width:160px;height:96px">
+      <span class="badge">no LLM</span>
+      <div class="ico">{{I_STREAMING_TABLE}}</div><div><div class="name">document_pages</div><div class="desc">One row per page</div></div></div>
+    <div class="node sm hero rev" data-t="3600" style="left:210px;top:192px;width:174px;height:96px">
+      <span class="badge on">from Part 1</span>
+      <div class="ico">{{I_DB}}</div><div><div class="name">expense_categories</div><div class="desc">Silver, from Postgres</div></div></div>
+    <div class="node sm db rev" data-t="5600" style="left:598px;top:196px;width:188px;height:100px">
+      <span class="badge">per page</span>
+      <div class="ico">{{I_MODEL}}</div><div><div class="name">page_expense_map</div><div class="desc">Final packs: ai_query, page to expense</div></div></div>
+    <div class="node sm db rev" data-t="5800" style="left:598px;top:352px;width:188px;height:100px">
+      <span class="badge">per page</span>
+      <div class="ico">{{I_MODEL}}</div><div><div class="name">quote lines</div><div class="desc">Proformas: ai_extract, all quoted lines</div></div></div>
+    <div class="node sm db rev" data-t="6000" style="left:598px;top:500px;width:188px;height:92px">
+      <span class="badge">per page</span>
+      <div class="ico">{{I_MODEL}}</div><div><div class="name">port_call_events</div><div class="desc">SOF: ai_query, timeline</div></div></div>
+    <div class="node sm db rev" data-t="7900" style="left:830px;top:196px;width:188px;height:92px">
+      <span class="badge">summary page</span>
+      <div class="ico">{{I_MODEL}}</div><div><div class="name">doc_bank_details</div><div class="desc">ai_extract v2.1, confidence</div></div></div>
+    <div class="node sm db rev" data-t="8100" style="left:830px;top:352px;width:188px;height:100px">
+      <span class="badge">2 append flows</span>
+      <div class="ico">{{I_MODEL}}</div><div><div class="name">doc_line_items</div><div class="desc">Invoice pages: ai_extract amount; plus quote lines</div></div></div>
+    <div class="node hero rev" data-t="9600" style="left:1056px;top:300px;width:184px;height:190px">
+      <span class="badge on">needs Postgres</span>
+      <div class="ico">{{I_DBSQL}}</div><div><div class="name">Gold joins</div><div class="desc">With the DA expenses, DAs, agents and port calls from Postgres (Part 3)</div></div></div>
+    <div class="nocall rev" data-t="10200" style="left:1056px;top:508px;width:184px;white-space:normal;line-height:1.3;border-color:var(--navy);color:var(--navy)">{{I_JOBS}}Job order: platform data, documents, then gold</div>
+  </section>
+
   <!-- ============ PART 3: GOLD ============ -->
-  <section class="scene" data-scene="3" data-dur="9500">
+  <section class="scene" data-scene="4" data-dur="9500">
     <div class="stitle rev" data-t="0"><div class="k">Part 3</div><div class="h">Gold: both sources meet on the disbursement account</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; one Job, after both pipelines</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
@@ -397,7 +465,7 @@
   </section>
 
   <!-- ============ PART 4: METRIC VIEWS AND GENIE ============ -->
-  <section class="scene" data-scene="4" data-dur="8500">
+  <section class="scene" data-scene="5" data-dur="8500">
     <div class="stitle rev" data-t="0"><div class="k">Part 4</div><div class="h">Metric views power the Genie agents</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; governed in Unity Catalog</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
@@ -441,7 +509,7 @@
   </section>
 
   <!-- ============ PART 5: ONE EXPENSE LINE ============ -->
-  <section class="scene" data-scene="5" data-dur="11000">
+  <section class="scene" data-scene="6" data-dur="11000">
     <div class="stitle rev" data-t="0"><div class="k">Zoom in &middot; mock data</div><div class="h">One expense line, end to end</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="z1" class="wire" pathLength="1" d="M 394 290 L 428 290" data-t="3700"/>
@@ -504,18 +572,24 @@ const CAPS = {
       [4200, 'Steps 2 and 3: classify the document, then <b>map every page to an expense</b>'],
       [5800, 'Step 4: <b>ai_extract</b> pulls line items, totals and bank details, with confidence'],
       [7000, 'Step 5: the statement of facts becomes an <b>ordered event timeline</b>'],
-      [8200, 'Every result lands once in <b>Delta</b>: no LLM call on any downstream query']],
-  3: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
+      [8200, 'Every result lands once in <b>Delta</b>. Click the pipeline to see its <b>step graph</b>']],
+  3: [[0, 'Inside the document pipeline: <b>every box is a table</b>, every arrow a dependency'],
+      [2000, 'Parse and classify <b>once per file</b>, then split into pages with no LLM call'],
+      [3400, 'The expense list comes from <b>Postgres through Part 1</b>: categories are data, not prompt text'],
+      [4800, 'Three branches by document type <b>run in parallel</b>: final packs, proformas, statements of facts'],
+      [7000, 'Final packs: page map first, then <b>bank details and line items in parallel</b>'],
+      [9000, 'Gold joins the results with the <b>structured tables</b>, so the job runs platform data first']],
+  4: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
       [600, 'Platform data brings the <b>quote, the final DA and the tariffs</b>'],
       [1800, 'Documents bring <b>what the invoice actually says</b>, page by page'],
       [3000, 'They join on the <b>DA, the attachment and the expense category</b>'],
       [4600, 'Business rules run as <b>plain SQL</b>: tolerances, currency checks, bank matching'],
       [6800, 'Every line gets a <b>verdict the agents can explain</b>']],
-  4: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
+  5: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
       [1200, 'Gold tables feed <b>metric views</b>: one definition per KPI, in Unity Catalog'],
       [3200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
       [5400, 'Next phase: a <b>supervisor agent</b> routes every chat question to the right one']],
-  5: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
+  6: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500 EUR</b>, final <b>2,730 EUR</b>'],
       [2000, 'The invoice says <b>2,730 EUR on page 4</b>, confidence 0.93'],
       [3600, 'Gold rules: <b>+9.2% over the quote</b>, evidence found, bank details match'],
@@ -625,7 +699,7 @@ if (MODE === 'present') addEventListener('click', next);
 // links open in a new tab without advancing the presentation
 document.querySelectorAll('a.uclink').forEach(a => a.addEventListener('click', e => e.stopPropagation()));
 // overview cards open their part
-document.querySelectorAll('.blk[data-go]').forEach(c => c.addEventListener('click', e => {
+document.querySelectorAll('[data-go]').forEach(c => c.addEventListener('click', e => {
   e.stopPropagation();
   const i = +c.dataset.go;
   if (MODE === 'present') { enter(i); present(i, bounds(i).length - 1, false); } else { paused = true; show(i, true); }
