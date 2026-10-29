@@ -7,7 +7,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>Port-call data for AI agents</title>
+<title>Port-call AI agents</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -26,8 +26,8 @@
   .brand { display:flex; align-items:center; gap:12px; }
   .brand svg { width:28px; height:31px; }
   .brand .t { font-size:16px; font-weight:700; letter-spacing:-.01em; }
-  .pills { display:flex; gap:5px; }
-  .pill { display:flex; align-items:center; gap:6px; padding:6px 10px 6px 6px; border-radius:999px; border:1px solid var(--line);
+  .pills { display:flex; gap:4px; }
+  .pill { display:flex; align-items:center; gap:5px; padding:6px 9px 6px 6px; border-radius:999px; border:1px solid var(--line);
     font-size:12px; font-weight:500; color:var(--muted); background:#fff; transition:all .4s; }
   .pill b { min-width:20px; height:20px; padding:0 3px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
     background:var(--wash); color:var(--muted); font-size:12px; transition:all .4s; }
@@ -250,6 +250,33 @@
   .gt { position:absolute; background:#fff; border:1px solid var(--line); border-left:3px solid var(--lava); border-radius:8px;
     padding:6px 10px; height:44px; display:flex; flex-direction:column; justify-content:center; }
   .gt b { font-size:12.5px; } .gt span { font-size:11.5px; color:var(--muted); margin-top:2px; }
+  /* use case tab */
+  .persona { position:absolute; display:flex; border:1px solid var(--line); border-radius:12px; background:var(--wash); height:52px; }
+  .persona div { flex:1; display:flex; flex-direction:column; justify-content:center; padding:0 18px; border-left:1px solid var(--line); }
+  .persona div:first-child { border-left:none; flex:.7; }
+  .persona span { font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .persona b { font-size:14px; margin-top:2px; }
+  .stage { position:absolute; top:246px; width:276px; height:32px; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700;
+    color:var(--navy); }
+  .stage b { width:24px; height:24px; border-radius:50%; background:var(--navy); color:#fff; display:inline-flex; align-items:center;
+    justify-content:center; font-size:12px; }
+  .agent { position:absolute; top:292px; width:276px; height:232px; background:#fff; border:1px solid var(--line); border-top:4px solid var(--lava);
+    border-radius:12px; box-shadow:0 2px 10px rgba(27,49,57,.07); padding:16px 16px 12px; display:flex; flex-direction:column; }
+  .agent .ah { display:flex; align-items:center; gap:10px; font-size:16px; font-weight:700; }
+  .agent .ah svg { width:30px; height:30px; }
+  .agent .ad { font-size:12.5px; color:var(--navy); line-height:1.45; margin-top:10px; }
+  .agent .au { font-family:ui-monospace,Menlo,monospace; font-size:11px; color:var(--muted); margin-top:auto; line-height:1.4; }
+  .agent .au span { display:block; font-family:"DM Sans",sans-serif; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .agent .ao { margin-top:10px; padding:7px 10px; border-radius:8px; background:#FFE3DE; color:#C42A16; font-size:12.5px; font-weight:700; }
+  .badge.ok { border-color:var(--green); color:var(--green); }
+  .decide { position:absolute; height:60px; display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-top:4px solid var(--green);
+    border-radius:12px; background:#fff; padding:0 16px; box-shadow:0 2px 10px rgba(27,49,57,.07); }
+  .decide .dl { display:flex; align-items:center; gap:8px; font-weight:700; font-size:15px; margin-right:6px; }
+  .decide .dl svg { width:26px; height:26px; }
+  .dk { font-style:normal; font-size:12.5px; font-weight:700; padding:5px 12px; border-radius:999px; }
+  .dk.ok { background:#D9F2E7; color:#007A52; } .dk.rv { background:#FBE8C8; color:#8A5A0B; } .dk.hd { background:#FFE3DE; color:#C42A16; }
+  .decide .gr { margin-left:auto; display:flex; gap:14px; font-size:11.5px; color:var(--muted); }
+  .decide .gr span::before { content:""; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--green); margin-right:6px; vertical-align:middle; }
   .ans { font-size:13px; line-height:1.45; color:var(--navy); background:var(--wash); border-radius:8px; padding:10px 12px; margin-bottom:8px; }
   .ans b { color:var(--lava); }
 </style>
@@ -258,18 +285,19 @@
 <div id="fit"><div id="stage">
 
   <div class="hdr" id="hdr">
-    <div class="brand">{{BACK}}{{I_DATABRICKS}}<div class="t">Port-call data for AI agents</div></div>
+    <div class="brand">{{BACK}}{{I_DATABRICKS}}<div class="t">Port-call AI agents</div></div>
     <div class="pills">
       <div class="pill" data-p="0"><b>&#8635;</b>Overview</div>
-      <div class="pill" data-p="1"><b>1</b>Platform</div>
-      <div class="pill sub" data-p="2" data-name="Schema" title="Source schema"><b>1b</b>Schema</div>
-      <div class="pill" data-p="3"><b>2</b>Documents</div>
-      <div class="pill sub" data-p="4" data-name="Doc graph" title="Document pipeline graph"><b>2b</b>Graph</div>
-      <div class="pill" data-p="5"><b>3</b>Gold</div>
-      <div class="pill sub" data-p="6" data-name="Gold example" title="Gold worked example"><b>3b</b>Example</div>
-      <div class="pill" data-p="7"><b>4</b>Genie</div>
-      <div class="pill" data-p="8"><b>5</b>One line</div>
-      <div class="pill" data-p="9"><b>?</b>Glossary</div>
+      <div class="pill" data-p="1"><b>U</b>Use case</div>
+      <div class="pill" data-p="2"><b>1</b>Platform</div>
+      <div class="pill sub" data-p="3" data-name="Schema" title="Source schema"><b>1b</b>Schema</div>
+      <div class="pill" data-p="4"><b>2</b>Documents</div>
+      <div class="pill sub" data-p="5" data-name="Doc graph" title="Document pipeline graph"><b>2b</b>Graph</div>
+      <div class="pill" data-p="6"><b>3</b>Gold</div>
+      <div class="pill sub" data-p="7" data-name="Gold example" title="Gold worked example"><b>3b</b>Example</div>
+      <div class="pill" data-p="8"><b>4</b>Genie</div>
+      <div class="pill" data-p="9"><b>5</b>One line</div>
+      <div class="pill" data-p="10"><b>?</b>Glossary</div>
     </div>
   </div>
 
@@ -282,15 +310,15 @@
       <path id="o3" class="wire" pathLength="1" d="M 820 345 L 876 345" data-t="2900"/>
       <circle class="pulse" r="5" data-t="1900"><animateMotion dur="1.2s" repeatCount="indefinite" begin="indefinite"><mpath href="#o1"/></animateMotion></circle><circle class="pulse" r="5" data-t="2100"><animateMotion dur="1.2s" repeatCount="indefinite" begin="indefinite"><mpath href="#o2"/></animateMotion></circle><circle class="pulse" r="5" data-t="3200"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#o3"/></animateMotion></circle>
     </svg>
-    <div class="blk sm rev" data-t="300" data-go="1" style="left:40px;top:186px">
+    <div class="blk sm rev" data-t="300" data-go="2" style="left:40px;top:186px">
       <div class="num">1</div><div class="bt">Platform data</div><div class="bd">Postgres changes via DMS to S3, then Auto Loader and AUTO CDC into silver</div>
       <div class="icons">{{I_DB}}{{I_AUTOLOADER}}</div>
     </div>
-    <div class="blk sm rev" data-t="900" data-go="3" style="left:40px;top:354px">
+    <div class="blk sm rev" data-t="900" data-go="4" style="left:40px;top:354px">
       <div class="num">2</div><div class="bt">Documents</div><div class="bd">PDFs from a second S3 bucket, parsed, classified and extracted with AI Functions</div>
       <div class="icons">{{I_DOC}}{{I_PIPELINES}}</div>
     </div>
-    <div class="blk rev" data-t="2000" data-go="5" style="left:460px">
+    <div class="blk rev" data-t="2000" data-go="6" style="left:460px">
       <div class="num">3</div><div class="bt">Joined gold layer</div><div class="bd">Both sources meet on the expense line: quote vs final vs invoice, bank checks, analyst verdicts</div>
       <div class="icons">{{I_DELTA}}{{I_DBSQL}}{{I_UC}}</div>
       <div class="run"><div class="lbl">What runs</div>
@@ -298,7 +326,7 @@
         <div><span>Business rules</span><b>plain SQL</b></div>
         <div><span>Refresh</span><b>one Job, after both pipelines</b></div></div>
     </div>
-    <div class="blk rev" data-t="3100" data-go="7" style="left:880px">
+    <div class="blk rev" data-t="3100" data-go="8" style="left:880px">
       <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later a supervisor agent, query</div>
       <div class="icons">{{I_METRIC}}{{I_GENIE}}{{I_AGENT}}</div>
       <div class="run"><div class="lbl">What runs</div>
@@ -308,8 +336,60 @@
     </div>
   </section>
 
+  <!-- ============ USE CASE ============ -->
+  <section class="scene" data-scene="1" data-dur="12000">
+    <div class="stitle rev" data-t="0"><div class="k">The agent use case</div><div class="h">Check every DA before money moves</div></div>
+    <div class="persona rev" data-t="200" style="left:40px;top:180px;width:1200px">
+      <div><span>Who</span><b>DA analysts at the buyer</b></div>
+      <div><span>Today</span><b>Every page, line and IBAN checked by hand</b></div>
+      <div><span>With the agents</span><b>The checks are done, the analyst reviews exceptions</b></div>
+    </div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="u1" class="wire" pathLength="1" d="M 318 262 L 344 262" data-t="2700"/>
+      <path id="u2" class="wire" pathLength="1" d="M 626 262 L 652 262" data-t="5200"/>
+      <path id="u3" class="wire" pathLength="1" d="M 934 262 L 960 262" data-t="7400"/>
+    </svg>
+    <div class="stage rev" data-t="1000" style="left:40px"><b>1</b>Before the call: quotes and PDA</div>
+    <div class="stage rev" data-t="2800" style="left:348px"><b>2</b>The FDA pack arrives</div>
+    <div class="stage rev" data-t="5300" style="left:656px"><b>3</b>Before money moves</div>
+    <div class="stage rev" data-t="7500" style="left:964px"><b>4</b>Any time</div>
+    <div class="agent rev" data-t="1300" style="left:40px">
+      <span class="badge on">next phase</span>
+      <div class="ah">{{I_AGENT}}Quote advisor</div>
+      <div class="ad">Compares the quotes and the PDA with past final costs, then drafts the pushback email</div>
+      <div class="au"><span>uses</span>rfq_quote_metrics, benchmark_savings_metrics</div>
+      <div class="ao">Lines to renegotiate and an email to review</div>
+    </div>
+    <div class="agent rev" data-t="3100" style="left:348px">
+      <span class="badge ok">built</span>
+      <div class="ah">{{I_DOC}}DA auditor</div>
+      <div class="ad">Reads every page of the pack once, then checks each final line against its quote, its invoice page and the benchmark</div>
+      <div class="au"><span>uses</span>document pipeline, expense_reconciliation</div>
+      <div class="ao">A review list with cited pages</div>
+    </div>
+    <div class="agent rev" data-t="5600" style="left:656px">
+      <span class="badge ok">built</span>
+      <div class="ah">{{I_CHECK}}Payment check</div>
+      <div class="ad">Compares the bank details and total printed on the pack with the bank account on the platform</div>
+      <div class="au"><span>uses</span>payment_validation, UC functions</div>
+      <div class="ao">Payments on hold when they do not match</div>
+    </div>
+    <div class="agent rev" data-t="7800" style="left:964px">
+      <span class="badge on">next phase</span>
+      <div class="ah">{{I_GENIE}}Chat assistant</div>
+      <div class="ad">Answers questions in plain language: a supervisor routes them to the right Genie agent or to document search</div>
+      <div class="au"><span>uses</span>3 Genie agents, 7 metric views</div>
+      <div class="ao">Answers with numbers and cited pages</div>
+    </div>
+    <div class="decide rev" data-t="9800" style="left:40px;top:540px;width:1200px">
+      <div class="dl">{{I_INSIGHTS}}The analyst decides</div>
+      <i class="dk ok">accept</i><i class="dk rv">dispute, with the draft email</i><i class="dk hd">hold the payment</i>
+      <div class="gr"><span>own permissions</span><span>every answer cites a table or page</span><span>no LLM in the math</span></div>
+    </div>
+  </section>
+
   <!-- ============ PART 1: PLATFORM DATA ============ -->
-  <section class="scene" data-scene="1" data-dur="10000">
+  <section class="scene" data-scene="2" data-dur="10000">
     <div class="stitle rev" data-t="0"><div class="k">Part 1</div><div class="h">Platform data: from Postgres to silver</div></div>
     <div class="zone aws rev" data-t="0" style="left:24px;top:176px;width:396px;height:432px"><span class="zl">Your AWS account</span></div>
     <div class="zone dbx rev" data-t="0" style="left:440px;top:176px;width:816px;height:432px"><span class="zl">Databricks &middot; Lakeflow Spark Declarative Pipeline</span></div>
@@ -360,7 +440,7 @@
   </section>
 
   <!-- ============ PART 1b: SOURCE SCHEMA ============ -->
-  <section class="scene" data-scene="2" data-dur="12000">
+  <section class="scene" data-scene="3" data-dur="12000">
     <div class="stitle rev" data-t="0"><div class="k">Part 1 &middot; the source schema</div><div class="h">The DA tables, from request to final bill</div></div>
     <div class="nocall rev" data-t="300" style="left:760px;top:112px;border-color:var(--navy);color:var(--navy)">{{I_DELTA}}Every bronze table: Op, _dms_commit_ts ... _source_file</div>
     <div class="lane rev" data-t="1000" style="left:28px;top:186px;width:200px;height:412px"><span class="ll">Request and quotes</span></div>
@@ -403,7 +483,7 @@
   </section>
 
   <!-- ============ PART 2: DOCUMENTS ============ -->
-  <section class="scene" data-scene="3" data-dur="10500">
+  <section class="scene" data-scene="4" data-dur="10500">
     <div class="stitle rev" data-t="0"><div class="k">Part 2</div><div class="h">Documents: from PDF to facts</div></div>
     <div class="zone aws rev" data-t="0" style="left:24px;top:176px;width:280px;height:432px"><span class="zl">Your AWS</span></div>
     <div class="zone dbx rev" data-t="0" style="left:324px;top:176px;width:932px;height:432px"><span class="zl">Databricks &middot; Lakeflow Spark Declarative Pipeline</span></div>
@@ -419,7 +499,7 @@
       <span class="badge">Auto Loader</span>
       <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">Bronze</div><div class="desc">Binary file plus proforma_id and file_item_id from the key</div></div></div>
     <div class="nocall rev" data-t="8900" style="left:344px;top:452px;width:210px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Errors kept per page: one bad page never fails the file</div>
-    <div class="ep rev golink" data-t="2700" data-go="4" style="left:590px;top:192px;width:380px;height:402px">
+    <div class="ep rev golink" data-t="2700" data-go="5" style="left:590px;top:192px;width:380px;height:402px">
       <div class="bar">{{I_SERVERLESS_W}}Document pipeline<span class="tag">Open the graph &#8599;</span></div>
       <div class="step rev" data-t="3000"><div class="n">1</div><div class="tx">ai_parse_document<span>Text per page, page numbers kept</span></div><div class="si">{{I_DOC}}</div></div>
       <div class="step rev" data-t="4300"><div class="n">2</div><div class="tx">ai_classify the document<span>PDA quote, final DA pack or SOF</span></div><div class="si">{{I_MODEL}}</div></div>
@@ -440,7 +520,7 @@
   </section>
 
   <!-- ============ PART 2b: DOCUMENT PIPELINE GRAPH ============ -->
-  <section class="scene" data-scene="4" data-dur="12000">
+  <section class="scene" data-scene="5" data-dur="12000">
     <div class="stitle rev" data-t="0"><div class="k">Part 2 &middot; inside the document pipeline</div><div class="h">What runs in parallel, what needs Postgres</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; documents pipeline, every box is a table</span></div>
     <div class="lane rev" data-t="5000" style="left:586px;top:186px;width:212px;height:416px"><span class="ll">parallel, by document type</span></div>
@@ -495,7 +575,7 @@
   </section>
 
   <!-- ============ PART 3: GOLD ============ -->
-  <section class="scene" data-scene="5" data-dur="9500">
+  <section class="scene" data-scene="6" data-dur="9500">
     <div class="stitle rev" data-t="0"><div class="k">Part 3</div><div class="h">Gold: both sources meet on the expense line</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; one Job, after both pipelines</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
@@ -514,7 +594,7 @@
     <div class="node db rev" data-t="1900" style="left:54px;top:446px;width:250px;height:120px">
       <span class="badge on">documents</span>
       <div class="ico">{{I_DOC}}</div><div><div class="name">Silver documents</div><div class="desc">Invoice pages per expense, extracted amounts, bank details</div></div></div>
-    <div class="node hero rev golink" data-t="3400" data-go="6" style="left:360px;top:318px;width:250px;height:140px">
+    <div class="node hero rev golink" data-t="3400" data-go="7" style="left:360px;top:318px;width:250px;height:140px">
       <span class="badge">plain SQL &middot; example &#8599;</span>
       <div class="ico">{{I_DBSQL}}</div><div><div class="name">Join and rules</div><div class="desc">Final line to its quote, to its invoice page, to the analyst check</div></div></div>
     <div class="node db rev" data-t="5100" style="left:680px;top:196px;width:320px;height:84px">
@@ -538,7 +618,7 @@
   </section>
 
   <!-- ============ PART 3b: GOLD WORKED EXAMPLE ============ -->
-  <section class="scene" data-scene="6" data-dur="12000">
+  <section class="scene" data-scene="7" data-dur="12000">
     <div class="stitle rev" data-t="0"><div class="k">Part 3 &middot; worked example, mock data</div><div class="h">How one gold row is built</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="x1" class="wire" pathLength="1" d="M 380 300 L 408 300" data-t="3700"/>
@@ -588,7 +668,7 @@
   </section>
 
   <!-- ============ PART 4: METRIC VIEWS AND GENIE ============ -->
-  <section class="scene" data-scene="7" data-dur="9500">
+  <section class="scene" data-scene="8" data-dur="9500">
     <div class="stitle rev" data-t="0"><div class="k">Part 4</div><div class="h">Metric views power the Genie agents</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; governed in Unity Catalog</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
@@ -627,7 +707,7 @@
   </section>
 
   <!-- ============ PART 5: ONE EXPENSE LINE ============ -->
-  <section class="scene" data-scene="8" data-dur="11000">
+  <section class="scene" data-scene="9" data-dur="11000">
     <div class="stitle rev" data-t="0"><div class="k">Zoom in &middot; mock data</div><div class="h">One expense line, end to end</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="z1" class="wire" pathLength="1" d="M 394 290 L 428 290" data-t="3700"/>
@@ -672,7 +752,7 @@
   </section>
 
   <!-- ============ GLOSSARY ============ -->
-  <section class="scene" data-scene="9" data-dur="9000">
+  <section class="scene" data-scene="10" data-dur="9000">
     <div class="stitle rev" data-t="0"><div class="k">Glossary</div><div class="h">The words used on every tab</div></div>
     <div class="lane rev" data-t="600" style="left:28px;top:186px;width:400px;height:418px"><span class="ll">The port call</span></div>
     <div class="gt rev" data-t="800" style="left:38px;top:198px;width:380px"><b>Port call</b><span>One ship's visit to one port, from arrival to sailing</span></div>
@@ -710,55 +790,61 @@
 <script>
 const CAPS = {
   0: [[0, 'Platform data and documents land in S3, meet in <b>one gold layer</b>, and Genie agents query it through <b>metric views</b>']],
-  1: [[0, 'Your platform data already lands in S3 through <b>DMS: full load plus CDC</b>'],
+  1: [[0, 'The agent use case: <b>help DA analysts check every DA</b> before money moves'],
+      [900, 'Before the call: the <b>quote advisor</b> compares quotes with past costs and drafts the pushback'],
+      [2600, 'When the FDA pack lands: the <b>DA auditor</b> reads every page and checks every line'],
+      [5100, 'Before payment: the <b>payment check</b> holds anything whose bank details do not match'],
+      [7300, 'Any time: the <b>chat assistant</b> answers questions through the right Genie agent'],
+      [9600, 'The analyst <b>always decides</b>, with the evidence in front of them']],
+  2: [[0, 'Your platform data already lands in S3 through <b>DMS: full load plus CDC</b>'],
       [1400, 'DMS writes Parquet per table; every row starts with <b>Op and _dms_commit_ts</b>'],
       [2600, 'Auto Loader picks up only the new files into <b>bronze</b>: a change log, nothing lost'],
       [4000, 'AUTO CDC applies the changes in order: <b>version, then commit time</b>, SCD 1 or 2'],
       [6000, 'Your example: an appointment goes from IN_PROCESS to <b>CANCELLED</b>, history kept'],
       [8200, 'One serverless pipeline, <b>hourly today</b>, continuous later for the near real time tables']],
-  2: [[0, 'The DA database as it lands in bronze: <b>13 core tables</b>, link tables and 49 child tables'],
+  3: [[0, 'The DA database as it lands in bronze: <b>13 core tables</b>, link tables and 49 child tables'],
       [900, 'It starts with a <b>request case</b>: the agents at the port answer with quotations'],
       [2500, 'The buyer picks one: a <b>port call</b> and an <b>appointment</b> of that agent'],
       [4300, 'The agent sends the <b>PDA</b>: the proforma and its quoted lines'],
       [6100, 'After sailing, the <b>FDA</b>: every final line points to its quoted line'],
       [7700, 'Files link through <b>file_item</b>; analysts verify every line'],
       [9100, 'Lookups such as vessel, port and bank account are <b>assumed</b> until their columns are confirmed']],
-  3: [[0, 'Documents land in a <b>second S3 bucket</b>, under the proforma they belong to'],
+  4: [[0, 'Documents land in a <b>second S3 bucket</b>, under the proforma they belong to'],
       [1200, 'Auto Loader reads each new PDF once as a <b>binary file</b>; the key gives proforma_id and file_item_id'],
       [2600, 'Step 1: <b>ai_parse_document</b> returns the text of every page, with page numbers'],
       [4200, 'Steps 2 and 3: classify the document, then <b>map every page to an expense</b>'],
       [5800, 'Step 4: <b>ai_extract</b> pulls line items, totals and bank details, with confidence'],
       [7000, 'Step 5: the statement of facts becomes an <b>ordered event timeline</b>'],
       [8200, 'Every result lands once in <b>Delta</b>. Click the pipeline to see its <b>step graph</b>']],
-  4: [[0, 'Inside the document pipeline: <b>every box is a table</b>, every arrow a dependency'],
+  5: [[0, 'Inside the document pipeline: <b>every box is a table</b>, every arrow a dependency'],
       [2000, 'Parse and classify <b>once per file</b>, then split into pages with no LLM call'],
       [3400, 'The expense list comes from <b>Postgres through Part 1</b>: categories are data, not prompt text'],
       [4800, 'Three branches by document type <b>run in parallel</b>: final packs, proformas, statements of facts'],
       [7000, 'Final packs: page map first, then <b>bank details and line items in parallel</b>'],
       [9000, 'Gold joins the results with the <b>structured tables</b>, so the job runs platform data first']],
-  5: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
+  6: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
       [600, 'Platform data brings the <b>quoted and final lines and the analyst checks</b>'],
       [1800, 'Documents bring <b>what the invoice page actually says</b>'],
       [3000, 'They meet on the <b>expense line</b>. Click Join and rules for a worked example'],
       [4600, 'Business rules run as <b>plain SQL</b>: tolerances, currency checks, bank matching'],
       [6800, 'Every line gets a verdict, <b>scored against the analyst</b>']],
-  6: [[0, 'Worked example: <b>one Pilotage line</b> of one port call'],
+  7: [[0, 'Worked example: <b>one Pilotage line</b> of one port call'],
       [400, 'Silver platform gives the <b>final line, its quote, the category, the port call and the analyst check</b>'],
       [2000, 'Silver documents give <b>what the invoice page says</b>'],
       [3600, 'Five joins put everything on <b>one row per final line</b>'],
       [6100, 'Rules run top to bottom; <b>the first that fires</b> sets the verdict'],
       [8100, 'The gold row: verdict, action, cited page, and <b>agreement with the analyst</b>']],
-  7: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
+  8: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
       [1000, 'Each metric view holds <b>measures</b> (what you count) and <b>dimensions</b> (what you slice by)'],
       [4200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
       [6400, 'Next phase: a <b>supervisor agent</b> routes every chat question to the right one']],
-  8: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
+  9: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
       [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],
       [3600, 'Gold rules: <b>+9.2% over the quote</b>, evidence found, bank details match'],
       [6000, 'Against the benchmark the final is <b>+8.9%</b> versus the port median'],
       [7200, 'Verdict <b>review</b> under the example policy, with an answer the agent can cite']],
-  9: [[0, 'Glossary: <b>the words used on every tab</b>'],
+  10: [[0, 'Glossary: <b>the words used on every tab</b>'],
       [500, '<b>The port call</b>: who is involved and what they agree'],
       [2900, '<b>The money</b>: from the quote to the final bill'],
       [5300, '<b>The data</b>: how it moves through Databricks']]

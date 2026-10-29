@@ -7,7 +7,7 @@
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<title>Port-call data for AI agents</title>
+<title>Port-call AI agents</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -26,8 +26,8 @@
   .brand { display:flex; align-items:center; gap:12px; }
   .brand svg { width:28px; height:31px; }
   .brand .t { font-size:16px; font-weight:700; letter-spacing:-.01em; }
-  .pills { display:flex; gap:5px; }
-  .pill { display:flex; align-items:center; gap:6px; padding:6px 10px 6px 6px; border-radius:999px; border:1px solid var(--line);
+  .pills { display:flex; gap:4px; }
+  .pill { display:flex; align-items:center; gap:5px; padding:6px 9px 6px 6px; border-radius:999px; border:1px solid var(--line);
     font-size:12px; font-weight:500; color:var(--muted); background:#fff; transition:all .4s; }
   .pill b { min-width:20px; height:20px; padding:0 3px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
     background:var(--wash); color:var(--muted); font-size:12px; transition:all .4s; }
@@ -250,6 +250,33 @@
   .gt { position:absolute; background:#fff; border:1px solid var(--line); border-left:3px solid var(--lava); border-radius:8px;
     padding:6px 10px; height:44px; display:flex; flex-direction:column; justify-content:center; }
   .gt b { font-size:12.5px; } .gt span { font-size:11.5px; color:var(--muted); margin-top:2px; }
+  /* use case tab */
+  .persona { position:absolute; display:flex; border:1px solid var(--line); border-radius:12px; background:var(--wash); height:52px; }
+  .persona div { flex:1; display:flex; flex-direction:column; justify-content:center; padding:0 18px; border-left:1px solid var(--line); }
+  .persona div:first-child { border-left:none; flex:.7; }
+  .persona span { font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .persona b { font-size:14px; margin-top:2px; }
+  .stage { position:absolute; top:246px; width:276px; height:32px; display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700;
+    color:var(--navy); }
+  .stage b { width:24px; height:24px; border-radius:50%; background:var(--navy); color:#fff; display:inline-flex; align-items:center;
+    justify-content:center; font-size:12px; }
+  .agent { position:absolute; top:292px; width:276px; height:232px; background:#fff; border:1px solid var(--line); border-top:4px solid var(--lava);
+    border-radius:12px; box-shadow:0 2px 10px rgba(27,49,57,.07); padding:16px 16px 12px; display:flex; flex-direction:column; }
+  .agent .ah { display:flex; align-items:center; gap:10px; font-size:16px; font-weight:700; }
+  .agent .ah svg { width:30px; height:30px; }
+  .agent .ad { font-size:12.5px; color:var(--navy); line-height:1.45; margin-top:10px; }
+  .agent .au { font-family:ui-monospace,Menlo,monospace; font-size:11px; color:var(--muted); margin-top:auto; line-height:1.4; }
+  .agent .au span { display:block; font-family:"DM Sans",sans-serif; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+  .agent .ao { margin-top:10px; padding:7px 10px; border-radius:8px; background:#FFE3DE; color:#C42A16; font-size:12.5px; font-weight:700; }
+  .badge.ok { border-color:var(--green); color:var(--green); }
+  .decide { position:absolute; height:60px; display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-top:4px solid var(--green);
+    border-radius:12px; background:#fff; padding:0 16px; box-shadow:0 2px 10px rgba(27,49,57,.07); }
+  .decide .dl { display:flex; align-items:center; gap:8px; font-weight:700; font-size:15px; margin-right:6px; }
+  .decide .dl svg { width:26px; height:26px; }
+  .dk { font-style:normal; font-size:12.5px; font-weight:700; padding:5px 12px; border-radius:999px; }
+  .dk.ok { background:#D9F2E7; color:#007A52; } .dk.rv { background:#FBE8C8; color:#8A5A0B; } .dk.hd { background:#FFE3DE; color:#C42A16; }
+  .decide .gr { margin-left:auto; display:flex; gap:14px; font-size:11.5px; color:var(--muted); }
+  .decide .gr span::before { content:""; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--green); margin-right:6px; vertical-align:middle; }
   .ans { font-size:13px; line-height:1.45; color:var(--navy); background:var(--wash); border-radius:8px; padding:10px 12px; margin-bottom:8px; }
   .ans b { color:var(--lava); }
 </style>
@@ -260,18 +287,19 @@
   <div class="hdr" id="hdr">
     <div class="brand"><svg viewBox="0 0 300 331" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M283.923 136.449L150.144 213.624L6.88995 131.168L0 134.982V194.844L150.144 281.115L283.923 204.234V235.926L150.144 313.1L6.88995 230.644L0 234.458V244.729L150.144 331L300 244.729V184.867L293.11 181.052L150.144 263.215L16.0766 186.334V154.643L150.144 231.524L300 145.253V86.2713L292.536 81.8697L150.144 163.739L22.9665 90.9663L150.144 17.8998L254.641 78.055L263.828 72.773V65.4371L150.144 0L0 86.2713V95.6613L150.144 181.933L283.923 104.758V136.449Z" fill="#FF3621"/>
-</svg><div class="t">Port-call data for AI agents</div></div>
+</svg><div class="t">Port-call AI agents</div></div>
     <div class="pills">
       <div class="pill" data-p="0"><b>&#8635;</b>Overview</div>
-      <div class="pill" data-p="1"><b>1</b>Platform</div>
-      <div class="pill sub" data-p="2" data-name="Schema" title="Source schema"><b>1b</b>Schema</div>
-      <div class="pill" data-p="3"><b>2</b>Documents</div>
-      <div class="pill sub" data-p="4" data-name="Doc graph" title="Document pipeline graph"><b>2b</b>Graph</div>
-      <div class="pill" data-p="5"><b>3</b>Gold</div>
-      <div class="pill sub" data-p="6" data-name="Gold example" title="Gold worked example"><b>3b</b>Example</div>
-      <div class="pill" data-p="7"><b>4</b>Genie</div>
-      <div class="pill" data-p="8"><b>5</b>One line</div>
-      <div class="pill" data-p="9"><b>?</b>Glossary</div>
+      <div class="pill" data-p="1"><b>U</b>Use case</div>
+      <div class="pill" data-p="2"><b>1</b>Platform</div>
+      <div class="pill sub" data-p="3" data-name="Schema" title="Source schema"><b>1b</b>Schema</div>
+      <div class="pill" data-p="4"><b>2</b>Documents</div>
+      <div class="pill sub" data-p="5" data-name="Doc graph" title="Document pipeline graph"><b>2b</b>Graph</div>
+      <div class="pill" data-p="6"><b>3</b>Gold</div>
+      <div class="pill sub" data-p="7" data-name="Gold example" title="Gold worked example"><b>3b</b>Example</div>
+      <div class="pill" data-p="8"><b>4</b>Genie</div>
+      <div class="pill" data-p="9"><b>5</b>One line</div>
+      <div class="pill" data-p="10"><b>?</b>Glossary</div>
     </div>
   </div>
 
@@ -284,7 +312,7 @@
       <path id="o3" class="wire" pathLength="1" d="M 820 345 L 876 345" data-t="2900"/>
       <circle class="pulse" r="5" data-t="1900"><animateMotion dur="1.2s" repeatCount="indefinite" begin="indefinite"><mpath href="#o1"/></animateMotion></circle><circle class="pulse" r="5" data-t="2100"><animateMotion dur="1.2s" repeatCount="indefinite" begin="indefinite"><mpath href="#o2"/></animateMotion></circle><circle class="pulse" r="5" data-t="3200"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#o3"/></animateMotion></circle>
     </svg>
-    <div class="blk sm rev" data-t="300" data-go="1" style="left:40px;top:186px">
+    <div class="blk sm rev" data-t="300" data-go="2" style="left:40px;top:186px">
       <div class="num">1</div><div class="bt">Platform data</div><div class="bd">Postgres changes via DMS to S3, then Auto Loader and AUTO CDC into silver</div>
       <div class="icons"><svg viewBox="0 0 512 512" fill="none"><ellipse cx="256" cy="120" rx="160" ry="56" fill="#FF5F46"/><path d="M96 120V392C96 423 168 448 256 448C344 448 416 423 416 392V120C416 151 344 176 256 176C168 176 96 151 96 120Z" fill="#FABFBA"/><path d="M96 256C96 287 168 312 256 312C344 312 416 287 416 256" stroke="#FF5F46" stroke-width="24"/></svg><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_5483_1940)">
@@ -305,7 +333,7 @@
 </defs>
 </svg></div>
     </div>
-    <div class="blk sm rev" data-t="900" data-go="3" style="left:40px;top:354px">
+    <div class="blk sm rev" data-t="900" data-go="4" style="left:40px;top:354px">
       <div class="num">2</div><div class="bt">Documents</div><div class="bd">PDFs from a second S3 bucket, parsed, classified and extracted with AI Functions</div>
       <div class="icons"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_3305_2125)">
@@ -327,7 +355,7 @@
 </defs>
 </svg></div>
     </div>
-    <div class="blk rev" data-t="2000" data-go="5" style="left:460px">
+    <div class="blk rev" data-t="2000" data-go="6" style="left:460px">
       <div class="num">3</div><div class="bt">Joined gold layer</div><div class="bd">Both sources meet on the expense line: quote vs final vs invoice, bank checks, analyst verdicts</div>
       <div class="icons"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
@@ -358,7 +386,7 @@
         <div><span>Business rules</span><b>plain SQL</b></div>
         <div><span>Refresh</span><b>one Job, after both pipelines</b></div></div>
     </div>
-    <div class="blk rev" data-t="3100" data-go="7" style="left:880px">
+    <div class="blk rev" data-t="3100" data-go="8" style="left:880px">
       <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later a supervisor agent, query</div>
       <div class="icons"><svg viewBox="0 0 512 512" fill="none"><rect x="48" y="64" width="416" height="384" rx="36" fill="#FABFBA"/><rect x="112" y="272" width="64" height="112" rx="10" fill="#FF5F46"/><rect x="224" y="192" width="64" height="192" rx="10" fill="#FF5F46"/><rect x="336" y="128" width="64" height="256" rx="10" fill="#FF5F46"/><path d="M96 400H416" stroke="#fff" stroke-width="22" stroke-linecap="round"/></svg><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
@@ -372,8 +400,67 @@
     </div>
   </section>
 
+  <!-- ============ USE CASE ============ -->
+  <section class="scene" data-scene="1" data-dur="12000">
+    <div class="stitle rev" data-t="0"><div class="k">The agent use case</div><div class="h">Check every DA before money moves</div></div>
+    <div class="persona rev" data-t="200" style="left:40px;top:180px;width:1200px">
+      <div><span>Who</span><b>DA analysts at the buyer</b></div>
+      <div><span>Today</span><b>Every page, line and IBAN checked by hand</b></div>
+      <div><span>With the agents</span><b>The checks are done, the analyst reviews exceptions</b></div>
+    </div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="u1" class="wire" pathLength="1" d="M 318 262 L 344 262" data-t="2700"/>
+      <path id="u2" class="wire" pathLength="1" d="M 626 262 L 652 262" data-t="5200"/>
+      <path id="u3" class="wire" pathLength="1" d="M 934 262 L 960 262" data-t="7400"/>
+    </svg>
+    <div class="stage rev" data-t="1000" style="left:40px"><b>1</b>Before the call: quotes and PDA</div>
+    <div class="stage rev" data-t="2800" style="left:348px"><b>2</b>The FDA pack arrives</div>
+    <div class="stage rev" data-t="5300" style="left:656px"><b>3</b>Before money moves</div>
+    <div class="stage rev" data-t="7500" style="left:964px"><b>4</b>Any time</div>
+    <div class="agent rev" data-t="1300" style="left:40px">
+      <span class="badge on">next phase</span>
+      <div class="ah"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg>Quote advisor</div>
+      <div class="ad">Compares the quotes and the PDA with past final costs, then drafts the pushback email</div>
+      <div class="au"><span>uses</span>rfq_quote_metrics, benchmark_savings_metrics</div>
+      <div class="ao">Lines to renegotiate and an email to review</div>
+    </div>
+    <div class="agent rev" data-t="3100" style="left:348px">
+      <span class="badge ok">built</span>
+      <div class="ah"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg>DA auditor</div>
+      <div class="ad">Reads every page of the pack once, then checks each final line against its quote, its invoice page and the benchmark</div>
+      <div class="au"><span>uses</span>document pipeline, expense_reconciliation</div>
+      <div class="ao">A review list with cited pages</div>
+    </div>
+    <div class="agent rev" data-t="5600" style="left:656px">
+      <span class="badge ok">built</span>
+      <div class="ah"><svg viewBox="0 0 512 512" fill="none"><rect x="96" y="56" width="320" height="400" rx="32" fill="#FABFBA"/><path d="M150 170L190 210L262 138" stroke="#FF5F46" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/><rect x="290" y="160" width="80" height="26" rx="13" fill="#fff"/><path d="M160 300L220 360M220 300L160 360" stroke="#FF5F46" stroke-width="30" stroke-linecap="round"/><rect x="290" y="318" width="80" height="26" rx="13" fill="#fff"/></svg>Payment check</div>
+      <div class="ad">Compares the bank details and total printed on the pack with the bank account on the platform</div>
+      <div class="au"><span>uses</span>payment_validation, UC functions</div>
+      <div class="ao">Payments on hold when they do not match</div>
+    </div>
+    <div class="agent rev" data-t="7800" style="left:964px">
+      <span class="badge on">next phase</span>
+      <div class="ah"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
+<path d="M459.812 206.815C428.864 256.533 382.402 324.948 361.655 342.503C340.909 360.058 310.141 391.703 238.824 391.703C188.862 391.703 145.885 359.614 126.81 313.595C126.811 313.648 126.811 313.703 126.812 313.756C124.109 307.041 117.538 302.298 109.855 302.297C99.7606 302.297 91.5767 310.481 91.5767 320.576C91.5769 322.945 92.0279 325.113 92.8485 327.047C97.2392 337.39 108.92 337.83 108.92 370.096C108.92 374.793 108.92 366.343 108.92 370.096C78.5784 370.096 53.9815 345.498 53.9809 315.157C53.9809 284.815 78.5781 260.218 108.92 260.218H116.288V260.208H203.559C210.079 260.208 216.337 262.969 220.41 268.059C227.547 276.978 233.017 285.281 237.048 292.133C240.783 298.481 251.969 298.543 255.667 292.173C259.566 285.456 264.744 277.343 271.309 268.619C275.386 263.201 281.863 260.208 288.644 260.208H321.094C368.515 260.208 394.508 237.472 407.78 221.085C414.648 212.606 424.403 206.815 435.315 206.815H459.812Z" fill="#FABFBA"/>
+<path d="M246.744 286.125C246.743 224.929 197.938 175.293 137.646 175.064C197.938 174.835 246.744 125.196 246.744 64C246.744 64 246.744 64 246.744 64C246.744 125.338 295.778 175.063 356.263 175.063C295.778 175.063 246.744 224.787 246.744 286.125Z" fill="#FF5F46"/>
+</svg>Chat assistant</div>
+      <div class="ad">Answers questions in plain language: a supervisor routes them to the right Genie agent or to document search</div>
+      <div class="au"><span>uses</span>3 Genie agents, 7 metric views</div>
+      <div class="ao">Answers with numbers and cited pages</div>
+    </div>
+    <div class="decide rev" data-t="9800" style="left:40px;top:540px;width:1200px">
+      <div class="dl"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M127.11 120.78L118.32 111.99V41.24L92.15 15.16H88.96V39.11C88.96 43.47 92.51 47.02 96.87 47.02H109.21V44.02H96.88C94.17 44.02 91.97 41.82 91.97 39.11V19.21L115.33 42.49V113.24L125 122.91C125.98 123.89 126.53 125.21 126.53 126.61C126.53 128.01 125.99 129.33 125.01 130.31C122.96 132.35 119.64 132.35 117.6 130.31L108.37 121.08L102 114.71L111.53 105.18L102.78 96.43L97.95 101.26L92.38 95.69C96.27 91.31 98.4 85.74 98.4 79.84C98.4 66.69 87.7 56 74.55 56C61.4 56 50.68 66.71 50.68 79.86C50.68 93.01 61.38 103.71 74.53 103.71C78.33 103.71 81.96 102.84 85.31 101.13L83.95 98.46C81.02 99.95 77.86 100.71 74.53 100.71C63.03 100.71 53.68 91.36 53.68 79.86C53.68 68.37 63.03 59.02 74.53 59.02C86.03 59.02 95.38 68.37 95.38 79.86C95.38 85.45 93.19 90.71 89.21 94.67L88.14 95.73L95.81 103.39L92.17 107.03L91.11 108.1L97.73 114.72L91.8 120.65H38.39C35.68 120.65 33.48 118.45 33.48 115.74V23.07C33.48 20.36 35.68 18.16 38.39 18.16H83.19V15.16H38.39C34.03 15.16 30.48 18.71 30.48 23.07V115.73C30.48 120.09 34.03 123.64 38.39 123.64H93.05L99.86 116.83L106.23 123.2L115.46 132.43C117.06 134.03 119.17 134.83 121.28 134.83C123.39 134.83 125.5 134.03 127.11 132.43C128.66 130.88 129.52 128.81 129.52 126.6C129.52 124.4 128.67 122.33 127.11 120.78ZM95.36 108.09L102.77 100.68L107.27 105.18L99.86 112.59L95.36 108.09Z" fill="#FF5F46"/>
+<path d="M61.4399 79.86C61.4399 87.08 67.3099 92.96 74.5299 92.96C81.7499 92.96 87.6299 87.09 87.6299 79.86C87.6299 72.63 81.7499 66.76 74.5299 66.76C67.3099 66.76 61.4399 72.64 61.4399 79.86ZM84.6299 79.86C84.6299 85.43 80.0999 89.96 74.5299 89.96C68.9599 89.96 64.4399 85.43 64.4399 79.86C64.4399 74.29 68.9699 69.76 74.5299 69.76C80.0899 69.76 84.6299 74.29 84.6299 79.86Z" fill="#FF5F46"/>
+</svg>The analyst decides</div>
+      <i class="dk ok">accept</i><i class="dk rv">dispute, with the draft email</i><i class="dk hd">hold the payment</i>
+      <div class="gr"><span>own permissions</span><span>every answer cites a table or page</span><span>no LLM in the math</span></div>
+    </div>
+  </section>
+
   <!-- ============ PART 1: PLATFORM DATA ============ -->
-  <section class="scene" data-scene="1" data-dur="10000">
+  <section class="scene" data-scene="2" data-dur="10000">
     <div class="stitle rev" data-t="0"><div class="k">Part 1</div><div class="h">Platform data: from Postgres to silver</div></div>
     <div class="zone aws rev" data-t="0" style="left:24px;top:176px;width:396px;height:432px"><span class="zl">Your AWS account</span></div>
     <div class="zone dbx rev" data-t="0" style="left:440px;top:176px;width:816px;height:432px"><span class="zl">Databricks &middot; Lakeflow Spark Declarative Pipeline</span></div>
@@ -468,7 +555,7 @@
   </section>
 
   <!-- ============ PART 1b: SOURCE SCHEMA ============ -->
-  <section class="scene" data-scene="2" data-dur="12000">
+  <section class="scene" data-scene="3" data-dur="12000">
     <div class="stitle rev" data-t="0"><div class="k">Part 1 &middot; the source schema</div><div class="h">The DA tables, from request to final bill</div></div>
     <div class="nocall rev" data-t="300" style="left:760px;top:112px;border-color:var(--navy);color:var(--navy)"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
@@ -517,7 +604,7 @@
   </section>
 
   <!-- ============ PART 2: DOCUMENTS ============ -->
-  <section class="scene" data-scene="3" data-dur="10500">
+  <section class="scene" data-scene="4" data-dur="10500">
     <div class="stitle rev" data-t="0"><div class="k">Part 2</div><div class="h">Documents: from PDF to facts</div></div>
     <div class="zone aws rev" data-t="0" style="left:24px;top:176px;width:280px;height:432px"><span class="zl">Your AWS</span></div>
     <div class="zone dbx rev" data-t="0" style="left:324px;top:176px;width:932px;height:432px"><span class="zl">Databricks &middot; Lakeflow Spark Declarative Pipeline</span></div>
@@ -550,7 +637,7 @@
 </defs>
 </svg></div><div><div class="name">Bronze</div><div class="desc">Binary file plus proforma_id and file_item_id from the key</div></div></div>
     <div class="nocall rev" data-t="8900" style="left:344px;top:452px;width:210px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Errors kept per page: one bad page never fails the file</div>
-    <div class="ep rev golink" data-t="2700" data-go="4" style="left:590px;top:192px;width:380px;height:402px">
+    <div class="ep rev golink" data-t="2700" data-go="5" style="left:590px;top:192px;width:380px;height:402px">
       <div class="bar"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M125.97 93.0402C131.97 89.5402 136.01 83.0302 136.01 75.5702C136.01 64.4102 126.96 55.3602 115.8 55.3602H108.64C107.69 37.6002 93 23.4902 75 23.4902C57 23.4902 42.31 37.6002 41.36 55.3602H34.2C23.04 55.3602 13.99 64.4102 13.99 75.5702C13.99 86.7302 23.04 95.7802 34.2 95.7802H114.42" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
 <path d="M114.42 95.7803V79.5903H108.97" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
@@ -590,7 +677,7 @@
   </section>
 
   <!-- ============ PART 2b: DOCUMENT PIPELINE GRAPH ============ -->
-  <section class="scene" data-scene="4" data-dur="12000">
+  <section class="scene" data-scene="5" data-dur="12000">
     <div class="stitle rev" data-t="0"><div class="k">Part 2 &middot; inside the document pipeline</div><div class="h">What runs in parallel, what needs Postgres</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; documents pipeline, every box is a table</span></div>
     <div class="lane rev" data-t="5000" style="left:586px;top:186px;width:212px;height:416px"><span class="ll">parallel, by document type</span></div>
@@ -672,7 +759,7 @@
   </section>
 
   <!-- ============ PART 3: GOLD ============ -->
-  <section class="scene" data-scene="5" data-dur="9500">
+  <section class="scene" data-scene="6" data-dur="9500">
     <div class="stitle rev" data-t="0"><div class="k">Part 3</div><div class="h">Gold: both sources meet on the expense line</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; one Job, after both pipelines</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
@@ -695,7 +782,7 @@
     <div class="node db rev" data-t="1900" style="left:54px;top:446px;width:250px;height:120px">
       <span class="badge on">documents</span>
       <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg></div><div><div class="name">Silver documents</div><div class="desc">Invoice pages per expense, extracted amounts, bank details</div></div></div>
-    <div class="node hero rev golink" data-t="3400" data-go="6" style="left:360px;top:318px;width:250px;height:140px">
+    <div class="node hero rev golink" data-t="3400" data-go="7" style="left:360px;top:318px;width:250px;height:140px">
       <span class="badge">plain SQL &middot; example &#8599;</span>
       <div class="ico"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M152 448L448 448V272L152 272C103.399 272 64 311.399 64 360C64 408.601 103.399 448 152 448ZM152 400C174.091 400 192 382.091 192 360C192 337.909 174.091 320 152 320C129.909 320 112 337.909 112 360C112 382.091 129.909 400 152 400Z" fill="#FF5F46"/>
@@ -746,7 +833,7 @@
   </section>
 
   <!-- ============ PART 3b: GOLD WORKED EXAMPLE ============ -->
-  <section class="scene" data-scene="6" data-dur="12000">
+  <section class="scene" data-scene="7" data-dur="12000">
     <div class="stitle rev" data-t="0"><div class="k">Part 3 &middot; worked example, mock data</div><div class="h">How one gold row is built</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="x1" class="wire" pathLength="1" d="M 380 300 L 408 300" data-t="3700"/>
@@ -809,7 +896,7 @@
   </section>
 
   <!-- ============ PART 4: METRIC VIEWS AND GENIE ============ -->
-  <section class="scene" data-scene="7" data-dur="9500">
+  <section class="scene" data-scene="8" data-dur="9500">
     <div class="stitle rev" data-t="0"><div class="k">Part 4</div><div class="h">Metric views power the Genie agents</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; governed in Unity Catalog</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
@@ -860,7 +947,7 @@
   </section>
 
   <!-- ============ PART 5: ONE EXPENSE LINE ============ -->
-  <section class="scene" data-scene="8" data-dur="11000">
+  <section class="scene" data-scene="9" data-dur="11000">
     <div class="stitle rev" data-t="0"><div class="k">Zoom in &middot; mock data</div><div class="h">One expense line, end to end</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="z1" class="wire" pathLength="1" d="M 394 290 L 428 290" data-t="3700"/>
@@ -925,7 +1012,7 @@
   </section>
 
   <!-- ============ GLOSSARY ============ -->
-  <section class="scene" data-scene="9" data-dur="9000">
+  <section class="scene" data-scene="10" data-dur="9000">
     <div class="stitle rev" data-t="0"><div class="k">Glossary</div><div class="h">The words used on every tab</div></div>
     <div class="lane rev" data-t="600" style="left:28px;top:186px;width:400px;height:418px"><span class="ll">The port call</span></div>
     <div class="gt rev" data-t="800" style="left:38px;top:198px;width:380px"><b>Port call</b><span>One ship's visit to one port, from arrival to sailing</span></div>
@@ -963,55 +1050,61 @@
 <script>
 const CAPS = {
   0: [[0, 'Platform data and documents land in S3, meet in <b>one gold layer</b>, and Genie agents query it through <b>metric views</b>']],
-  1: [[0, 'Your platform data already lands in S3 through <b>DMS: full load plus CDC</b>'],
+  1: [[0, 'The agent use case: <b>help DA analysts check every DA</b> before money moves'],
+      [900, 'Before the call: the <b>quote advisor</b> compares quotes with past costs and drafts the pushback'],
+      [2600, 'When the FDA pack lands: the <b>DA auditor</b> reads every page and checks every line'],
+      [5100, 'Before payment: the <b>payment check</b> holds anything whose bank details do not match'],
+      [7300, 'Any time: the <b>chat assistant</b> answers questions through the right Genie agent'],
+      [9600, 'The analyst <b>always decides</b>, with the evidence in front of them']],
+  2: [[0, 'Your platform data already lands in S3 through <b>DMS: full load plus CDC</b>'],
       [1400, 'DMS writes Parquet per table; every row starts with <b>Op and _dms_commit_ts</b>'],
       [2600, 'Auto Loader picks up only the new files into <b>bronze</b>: a change log, nothing lost'],
       [4000, 'AUTO CDC applies the changes in order: <b>version, then commit time</b>, SCD 1 or 2'],
       [6000, 'Your example: an appointment goes from IN_PROCESS to <b>CANCELLED</b>, history kept'],
       [8200, 'One serverless pipeline, <b>hourly today</b>, continuous later for the near real time tables']],
-  2: [[0, 'The DA database as it lands in bronze: <b>13 core tables</b>, link tables and 49 child tables'],
+  3: [[0, 'The DA database as it lands in bronze: <b>13 core tables</b>, link tables and 49 child tables'],
       [900, 'It starts with a <b>request case</b>: the agents at the port answer with quotations'],
       [2500, 'The buyer picks one: a <b>port call</b> and an <b>appointment</b> of that agent'],
       [4300, 'The agent sends the <b>PDA</b>: the proforma and its quoted lines'],
       [6100, 'After sailing, the <b>FDA</b>: every final line points to its quoted line'],
       [7700, 'Files link through <b>file_item</b>; analysts verify every line'],
       [9100, 'Lookups such as vessel, port and bank account are <b>assumed</b> until their columns are confirmed']],
-  3: [[0, 'Documents land in a <b>second S3 bucket</b>, under the proforma they belong to'],
+  4: [[0, 'Documents land in a <b>second S3 bucket</b>, under the proforma they belong to'],
       [1200, 'Auto Loader reads each new PDF once as a <b>binary file</b>; the key gives proforma_id and file_item_id'],
       [2600, 'Step 1: <b>ai_parse_document</b> returns the text of every page, with page numbers'],
       [4200, 'Steps 2 and 3: classify the document, then <b>map every page to an expense</b>'],
       [5800, 'Step 4: <b>ai_extract</b> pulls line items, totals and bank details, with confidence'],
       [7000, 'Step 5: the statement of facts becomes an <b>ordered event timeline</b>'],
       [8200, 'Every result lands once in <b>Delta</b>. Click the pipeline to see its <b>step graph</b>']],
-  4: [[0, 'Inside the document pipeline: <b>every box is a table</b>, every arrow a dependency'],
+  5: [[0, 'Inside the document pipeline: <b>every box is a table</b>, every arrow a dependency'],
       [2000, 'Parse and classify <b>once per file</b>, then split into pages with no LLM call'],
       [3400, 'The expense list comes from <b>Postgres through Part 1</b>: categories are data, not prompt text'],
       [4800, 'Three branches by document type <b>run in parallel</b>: final packs, proformas, statements of facts'],
       [7000, 'Final packs: page map first, then <b>bank details and line items in parallel</b>'],
       [9000, 'Gold joins the results with the <b>structured tables</b>, so the job runs platform data first']],
-  5: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
+  6: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
       [600, 'Platform data brings the <b>quoted and final lines and the analyst checks</b>'],
       [1800, 'Documents bring <b>what the invoice page actually says</b>'],
       [3000, 'They meet on the <b>expense line</b>. Click Join and rules for a worked example'],
       [4600, 'Business rules run as <b>plain SQL</b>: tolerances, currency checks, bank matching'],
       [6800, 'Every line gets a verdict, <b>scored against the analyst</b>']],
-  6: [[0, 'Worked example: <b>one Pilotage line</b> of one port call'],
+  7: [[0, 'Worked example: <b>one Pilotage line</b> of one port call'],
       [400, 'Silver platform gives the <b>final line, its quote, the category, the port call and the analyst check</b>'],
       [2000, 'Silver documents give <b>what the invoice page says</b>'],
       [3600, 'Five joins put everything on <b>one row per final line</b>'],
       [6100, 'Rules run top to bottom; <b>the first that fires</b> sets the verdict'],
       [8100, 'The gold row: verdict, action, cited page, and <b>agreement with the analyst</b>']],
-  7: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
+  8: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
       [1000, 'Each metric view holds <b>measures</b> (what you count) and <b>dimensions</b> (what you slice by)'],
       [4200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
       [6400, 'Next phase: a <b>supervisor agent</b> routes every chat question to the right one']],
-  8: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
+  9: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
       [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],
       [3600, 'Gold rules: <b>+9.2% over the quote</b>, evidence found, bank details match'],
       [6000, 'Against the benchmark the final is <b>+8.9%</b> versus the port median'],
       [7200, 'Verdict <b>review</b> under the example policy, with an answer the agent can cite']],
-  9: [[0, 'Glossary: <b>the words used on every tab</b>'],
+  10: [[0, 'Glossary: <b>the words used on every tab</b>'],
       [500, '<b>The port call</b>: who is involved and what they agree'],
       [2900, '<b>The money</b>: from the quote to the final bill'],
       [5300, '<b>The data</b>: how it moves through Databricks']]
