@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Port-call data for AI agents</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --lava:#FF3621; --lava2:#FF5F46; --peach:#FABFBA; --navy:#1B3139; --muted:#5A6B72;
+    --line:#E2E6EA; --line2:#CDD5DB; --card:#FFFFFF; --wash:#F5F7F9; --uc:#2272B4; --green:#00A06B;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:#FFFFFF; overflow:hidden;
+    font-family:"DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:var(--navy); }
+  #fit { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  #stage { position:relative; width:1280px; height:720px; background:#FFFFFF; transform-origin:center center; overflow:hidden; }
+
+  /* header */
+  .hdr { position:absolute; z-index:10; left:40px; right:40px; top:26px; height:44px; display:flex; align-items:center; justify-content:space-between; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .brand svg { width:28px; height:31px; }
+  .brand .t { font-size:19px; font-weight:700; letter-spacing:-.01em; }
+  .pills { display:flex; gap:8px; }
+  .pill { display:flex; align-items:center; gap:8px; padding:7px 13px 7px 8px; border-radius:999px; border:1px solid var(--line);
+    font-size:13px; font-weight:500; color:var(--muted); background:#fff; transition:all .4s; }
+  .pill b { width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
+    background:var(--wash); color:var(--muted); font-size:12px; transition:all .4s; }
+  .pill { cursor:pointer; user-select:none; }
+  .pill:hover { border-color:var(--line2); color:var(--navy); }
+  .pill.cur { border-color:var(--navy); color:var(--navy); box-shadow:0 2px 8px rgba(27,49,57,.10); }
+  .pill.cur b { background:var(--lava); color:#fff; }
+  .pill.done b { background:var(--navy); color:#fff; }
+
+  /* scenes */
+  .scene { position:absolute; inset:0; opacity:0; pointer-events:none; transition:opacity .6s ease; }
+  .scene.show { opacity:1; pointer-events:auto; }
+  .stitle { position:absolute; left:40px; top:96px; }
+  .stitle .k { font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--lava); }
+  .stitle .h { font-size:30px; font-weight:700; letter-spacing:-.015em; margin-top:2px; }
+
+  .node { position:absolute; background:var(--card); border:1px solid var(--line); border-top:4px solid var(--line2);
+    border-radius:12px; padding:16px 18px; box-shadow:0 2px 10px rgba(27,49,57,.07);
+    display:flex; gap:11px; align-items:center; }
+  .node .ico { flex:0 0 38px; width:38px; height:38px; }
+  .node .ico svg { width:38px; height:38px; display:block; }
+  .node .name { font-size:15px; font-weight:700; line-height:1.2; }
+  .node .desc { font-size:12.5px; color:var(--muted); margin-top:4px; line-height:1.35; }
+  .node.ext { border-top-color:var(--line2); background:var(--wash); }
+  .node.db { border-top-color:var(--lava); }
+  .node.hero { border-top-color:var(--navy); }
+  .badge { position:absolute; right:10px; top:-13px; font-size:11px; font-weight:700; padding:3px 8px; border-radius:999px;
+    background:#fff; border:1px solid var(--line2); color:var(--muted); letter-spacing:.02em; }
+  .badge.on { border-color:var(--lava); color:var(--lava); }
+
+  /* reveal */
+  .rev { opacity:0; transform:translateY(8px); transition:opacity .5s ease, transform .5s ease; }
+  .rev.on { opacity:1; transform:none; }
+
+  svg.wires { position:absolute; inset:0; width:1280px; height:720px; pointer-events:none; overflow:visible; }
+  .wire { fill:none; stroke:var(--line2); stroke-width:2.2; stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset .8s ease; }
+  .wire.hot { stroke:var(--lava); }
+  .wire.dash { stroke-dasharray:none; }
+  .wire.on { stroke-dashoffset:0; }
+  .wlabel { font-size:12px; fill:var(--muted); font-weight:500; opacity:0; transition:opacity .5s; }
+  .wlabel.on { opacity:1; }
+  .pulse { fill:var(--lava); opacity:0; }
+  .pulse.on { opacity:1; }
+
+  /* endpoint card */
+  .ep { position:absolute; background:#fff; border:1px solid var(--line); border-top:4px solid var(--navy); border-radius:14px;
+    box-shadow:0 4px 16px rgba(27,49,57,.10); overflow:hidden; }
+  .ep .bar { background:var(--navy); color:#fff; display:flex; align-items:center; gap:10px; padding:11px 16px; font-weight:700; font-size:15px; }
+  .ep .bar svg { width:26px; height:26px; }
+  .ep .bar .tag { margin-left:auto; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--peach); }
+  .step { display:flex; align-items:center; gap:12px; margin:10px 14px; padding:10px 12px; border-radius:10px;
+    border:1px solid var(--line); background:var(--wash); transition:all .45s ease; }
+  .step .n { width:26px; height:26px; flex:0 0 26px; border-radius:50%; background:#fff; border:1px solid var(--line2);
+    display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:var(--muted); transition:all .45s; }
+  .step .tx { font-size:14px; font-weight:500; }
+  .step .tx span { display:block; font-size:12px; color:var(--muted); font-weight:400; margin-top:2px; }
+  .step .si { margin-left:auto; width:28px; height:28px; opacity:.35; transition:opacity .45s; }
+  .step .si svg { width:28px; height:28px; }
+  .step.on { background:#fff; border-color:var(--lava); box-shadow:0 2px 10px rgba(255,54,33,.12); }
+  .step.on .n { background:var(--lava); border-color:var(--lava); color:#fff; }
+  .step.on .si { opacity:1; }
+
+  /* request / score labels and moving envelopes */
+  .chip { position:absolute; padding:6px 11px; border-radius:8px; font-size:12.5px; font-weight:700; white-space:nowrap;
+    background:#fff; border:1.5px solid var(--lava); color:var(--navy); }
+  .chip.dark { border-color:var(--navy); }
+  .chip code, .packet code { font-family:ui-monospace,Menlo,monospace; font-weight:600; font-size:12px; }
+  .env { position:absolute; width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 10px rgba(27,49,57,.2); opacity:0; transition:transform 1.5s cubic-bezier(.55,.05,.35,1), opacity .3s; }
+  .env svg { width:16px; height:16px; }
+  .env.req { background:var(--lava); } .env.res { background:var(--navy); }
+  .env.on { opacity:1; transform:translateX(var(--dx)); }
+  /* moving request / score chips (unused) */
+  .packet { position:absolute; padding:8px 12px; border-radius:9px; font-size:12.5px; font-weight:700; white-space:nowrap;
+    box-shadow:0 3px 12px rgba(27,49,57,.16); opacity:0; transition:transform 1.6s cubic-bezier(.55,.05,.35,1), opacity .3s; }
+  .packet code { font-family:"DM Mono",ui-monospace,Menlo,monospace; font-weight:500; font-size:12px; }
+  .packet.req { background:var(--lava); color:#fff; }
+  .packet.res { background:var(--navy); color:#fff; }
+  .packet.on { opacity:1; transform:translateX(var(--dx)); }
+
+  /* mini drift chart */
+  .chart { display:flex; align-items:flex-end; gap:5px; height:34px; margin-top:8px; }
+  .chart i { display:block; width:14px; border-radius:3px 3px 0 0; background:var(--peach); height:4px; transition:height .9s ease; }
+  .chart i.base { background:var(--line2); }
+  .on .chart i { height:var(--h); }
+  .on .chart i.hi { background:var(--lava); }
+
+  /* caption */
+  .cap { position:absolute; left:40px; right:40px; bottom:34px; height:56px; display:flex; align-items:center; gap:14px;
+    border-radius:12px; background:var(--wash); border:1px solid var(--line); padding:0 18px; }
+  .cap .bar { width:4px; height:28px; border-radius:2px; background:var(--lava); flex:0 0 4px; }
+  .cap .txt { font-size:17px; font-weight:500; transition:opacity .35s ease; }
+  .cap .txt b { color:var(--lava); font-weight:700; }
+
+  /* overview blocks */
+  .blk { position:absolute; top:186px; width:360px; height:318px; border-radius:16px; background:#fff; border:1px solid var(--line);
+    box-shadow:0 4px 16px rgba(27,49,57,.08); padding:18px 20px; }
+  .blk { cursor:pointer; transition:box-shadow .2s, border-color .2s; }
+  .blk:hover { border-color:var(--line2); box-shadow:0 6px 20px rgba(27,49,57,.14); }
+  .blk .num { width:34px; height:34px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .blk .bt { font-size:20px; font-weight:700; margin-top:12px; }
+  .blk .bd { font-size:13.5px; color:var(--muted); margin-top:4px; line-height:1.4; }
+  .blk .icons { display:flex; gap:10px; margin-top:14px; }
+  .blk .icons svg { width:38px; height:38px; }
+  .blk .run { position:absolute; left:20px; right:20px; bottom:16px; border-top:1px dashed var(--line2); padding-top:10px; font-size:13px; }
+  .blk .run div { display:flex; justify-content:space-between; margin-top:4px; }
+  .blk .run b { font-weight:700; }
+  .blk .run .always { color:var(--lava); }
+  .blk .run .lbl { font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+
+  /* intro */
+  .intro { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
+  .intro svg { width:58px; height:64px; }
+  .intro .a { font-size:44px; font-weight:700; letter-spacing:-.02em; margin-top:22px; }
+  .intro .b { font-size:19px; color:var(--muted); margin-top:10px; }
+  .intro .parts { display:flex; gap:14px; margin-top:30px; }
+  .intro .parts span { padding:9px 16px; border-radius:999px; border:1px solid var(--line); font-weight:500; font-size:15px; }
+  .intro .parts b { color:var(--lava); margin-right:6px; }
+
+
+  /* precomputed features zoom-in */
+  .zc { position:absolute; background:#fff; border:1px solid var(--line); border-top:4px solid var(--line2); border-radius:12px;
+    box-shadow:0 2px 10px rgba(27,49,57,.07); padding:12px 14px; }
+  .zc .zh { display:flex; align-items:center; gap:9px; font-weight:700; font-size:15px; margin-bottom:8px; }
+  .zc .zh svg { width:26px; height:26px; }
+  .zc .zs { font-size:11.5px; color:var(--muted); margin:-4px 0 8px; }
+  .kv { display:flex; justify-content:space-between; gap:10px; font-family:ui-monospace,Menlo,monospace; font-size:12.5px;
+    padding:5px 8px; border-radius:6px; transition:background .4s, color .4s; }
+  .kv span:first-child { color:var(--muted); }
+  .kv b { font-weight:600; color:var(--navy); }
+  .mk.on { background:#FFE3DE; }
+  .mk.on span:first-child { color:var(--lava); }
+  .mk2.on { background:#E5EEF1; }
+  .bigv { font-size:30px; font-weight:700; color:var(--lava); margin-top:6px; }
+  .formula { font-family:ui-monospace,Menlo,monospace; font-size:13px; background:var(--wash); border-radius:6px; padding:8px; margin-top:8px; }
+  .tagsrc { font-size:10px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; padding:1px 6px; border-radius:4px; margin-left:6px; }
+  .tagsrc.req { background:#FFE3DE; color:var(--lava); } .tagsrc.lk { background:#E5EEF1; color:var(--navy); }
+
+  /* decision strip */
+  .dec { position:absolute; background:#fff; border:1px solid var(--line); border-top:4px solid var(--green); border-radius:12px;
+    box-shadow:0 2px 10px rgba(27,49,57,.07); padding:10px 16px; }
+  .dec .row { display:flex; align-items:center; justify-content:space-between; }
+  .dec .lbl { font-weight:700; font-size:15px; }
+  .dec .ok { background:var(--green); color:#fff; font-weight:700; font-size:14px; padding:4px 12px; border-radius:999px; letter-spacing:.04em; }
+  .zones { position:relative; display:flex; height:14px; margin:22px 0 6px; }
+  .zones i:first-of-type { border-radius:7px 0 0 7px; } .zones i:last-of-type { border-radius:0 7px 7px 0; }
+  .zones i { display:block; height:100%; }
+  .zticks { display:flex; font-size:11.5px; color:var(--muted); }
+  .zticks span { flex:1; }
+  .marker { position:absolute; top:-9px; width:3px; height:32px; background:var(--navy); border-radius:2px; }
+  .marker b { position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:12px; color:var(--navy); white-space:nowrap; }
+  .dec .note { font-size:10.5px; color:var(--muted); }
+
+  .uclink { color:var(--uc); font-weight:700; text-decoration:none; border-bottom:1px solid currentColor; white-space:nowrap; }
+  .uclink:hover { color:var(--lava); }
+  .ep .bar .uclink { color:var(--peach); font-size:12px; font-weight:700; }
+  .hint { position:absolute; right:14px; bottom:8px; font-size:10.5px; color:#B8C2C8; }
+
+  /* boundary zones: Databricks vs your AWS account */
+  .zone { position:absolute; border:1.5px dashed var(--line2); border-radius:18px; background:#FCFDFD; }
+  .zone.dbx { border-color:#F7B4AA; background:#FFFBFA; }
+  .zone.aws { border-color:#9FB2BA; background:#F8FAFB; }
+  .zone .zl { position:absolute; top:-12px; left:18px; background:#fff; padding:2px 10px; border-radius:999px; font-size:11.5px;
+    font-weight:700; letter-spacing:.07em; text-transform:uppercase; border:1px solid var(--line); }
+  .zone.dbx .zl { color:var(--lava); border-color:#F7B4AA; } .zone.aws .zl { color:var(--navy); border-color:#9FB2BA; }
+  .wtag { display:inline-block; margin-top:10px; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    padding:3px 9px; border-radius:999px; }
+  .wtag.dbx { background:#FFE3DE; color:var(--lava); } .wtag.aws { background:#E5EEF1; color:var(--navy); }
+  .nocall { position:absolute; display:flex; align-items:center; gap:8px; padding:7px 12px; border-radius:999px; background:#fff;
+    border:1.5px solid var(--green); color:var(--green); font-size:12.5px; font-weight:700; white-space:nowrap; }
+  .nocall svg { width:16px; height:16px; }
+  .ep.tight .step { margin:8px 14px; padding:7px 12px; }
+  .back { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; margin-right:4px; border-radius:50%;
+    border:1px solid var(--line); color:var(--muted); text-decoration:none; background:#fff; flex:0 0 32px; }
+  .back:hover { border-color:var(--line2); color:var(--navy); }
+  .back svg { width:15px; height:15px; }
+
+  /* overview: two stacked half-height blocks */
+  .blk.sm { height:150px; padding:16px 20px; }
+  .blk.sm .bt { margin-top:8px; font-size:18px; }
+  .blk.sm .bd { padding-right:8px; }
+  .blk.sm .icons { position:absolute; right:18px; top:16px; margin:0; }
+  .blk.sm .icons svg { width:32px; height:32px; }
+  .node .desc code { font-family:ui-monospace,Menlo,monospace; font-size:11.5px; }
+  .nocall > svg:not([viewBox="0 0 24 24"]) { width:18px; height:18px; flex:0 0 18px; }
+  .ans { font-size:13px; line-height:1.45; color:var(--navy); background:var(--wash); border-radius:8px; padding:10px 12px; margin-bottom:8px; }
+  .ans b { color:var(--lava); }
+</style>
+</head>
+<body>
+<div id="fit"><div id="stage">
+
+  <div class="hdr" id="hdr">
+    <div class="brand"><svg viewBox="0 0 300 331" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M283.923 136.449L150.144 213.624L6.88995 131.168L0 134.982V194.844L150.144 281.115L283.923 204.234V235.926L150.144 313.1L6.88995 230.644L0 234.458V244.729L150.144 331L300 244.729V184.867L293.11 181.052L150.144 263.215L16.0766 186.334V154.643L150.144 231.524L300 145.253V86.2713L292.536 81.8697L150.144 163.739L22.9665 90.9663L150.144 17.8998L254.641 78.055L263.828 72.773V65.4371L150.144 0L0 86.2713V95.6613L150.144 181.933L283.923 104.758V136.449Z" fill="#FF3621"/>
+</svg><div class="t">Port-call data for AI agents</div></div>
+    <div class="pills">
+      <div class="pill" data-p="0"><b>&#8635;</b>Overview</div>
+      <div class="pill" data-p="1"><b>1</b>Platform data</div>
+      <div class="pill" data-p="2"><b>2</b>Documents</div>
+      <div class="pill" data-p="3"><b>3</b>Gold</div>
+      <div class="pill" data-p="4"><b>4</b>Genie</div>
+      <div class="pill" data-p="5"><b>5</b>One line</div>
+    </div>
+  </div>
+
+  <!-- ============ OVERVIEW ============ -->
+  <section class="scene" data-scene="0" data-dur="9000">
+    <div class="stitle rev" data-t="0"><div class="k">From raw data to agent-ready gold</div><div class="h">Two sources in S3, one gold layer, Genie on top</div></div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="o1" class="wire hot" pathLength="1" d="M 400 261 C 430 261, 430 320, 460 320" data-t="1600"/>
+      <path id="o2" class="wire hot" pathLength="1" d="M 400 429 C 430 429, 430 370, 460 370" data-t="1800"/>
+      <path id="o3" class="wire" pathLength="1" d="M 820 345 L 876 345" data-t="2900"/>
+      <circle class="pulse" r="5" data-t="1900"><animateMotion dur="1.2s" repeatCount="indefinite" begin="indefinite"><mpath href="#o1"/></animateMotion></circle><circle class="pulse" r="5" data-t="2100"><animateMotion dur="1.2s" repeatCount="indefinite" begin="indefinite"><mpath href="#o2"/></animateMotion></circle><circle class="pulse" r="5" data-t="3200"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#o3"/></animateMotion></circle>
+    </svg>
+    <div class="blk sm rev" data-t="300" data-go="1" style="left:40px;top:186px">
+      <div class="num">1</div><div class="bt">Platform data</div><div class="bd">Postgres changes via DMS to S3, then Auto Loader and AUTO CDC into silver</div>
+      <div class="icons"><svg viewBox="0 0 512 512" fill="none"><ellipse cx="256" cy="120" rx="160" ry="56" fill="#FF5F46"/><path d="M96 120V392C96 423 168 448 256 448C344 448 416 423 416 392V120C416 151 344 176 256 176C168 176 96 151 96 120Z" fill="#FABFBA"/><path d="M96 256C96 287 168 312 256 312C344 312 416 287 416 256" stroke="#FF5F46" stroke-width="24"/></svg><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_5483_1940)">
+<path d="M118.5 113.91C113.61 115.09 108.5 115.72 103.25 115.72C93.12 115.72 83.54 113.39 75 109.24C66.46 105.09 56.88 102.76 46.75 102.76C36.62 102.76 27.04 105.09 18.5 109.24L18.52 60.1301H28.8C29.67 57.3401 30.8 54.6601 32.14 52.1101L24.86 44.8301L45.27 24.4201L52.55 31.7001C55.1 30.3601 57.78 29.2301 60.57 28.3601V18.0801H89.43V28.3601C92.22 29.2301 94.9 30.3601 97.45 31.7001L104.73 24.4201L125.14 44.8301L117.86 52.1101C119.2 54.6601 120.33 57.3401 121.2 60.1301H131.48L131.5 121.97C122.96 126.12 113.38 128.45 103.25 128.45C93.12 128.45 83.54 126.12 75 121.97C66.46 117.82 56.88 115.49 46.75 115.49C36.62 115.49 27.04 117.82 18.5 121.97" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M99.2 74.5599C99.2 61.1899 88.37 50.3599 75 50.3599C61.63 50.3599 50.8 61.1899 50.8 74.5599V92.2499" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M115.36 72.4302V103.96" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M34.66 72.4302V93.2502" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M83.08 72.4302V101.88" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M66.9399 72.4302V95.3402" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M99.2 74.5601V104.96" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M18.51 72.4302H131.49" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M18.51 87.1602H130.92" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+</g>
+<defs>
+<clipPath id="clip0_5483_1940">
+<rect width="150" height="150" fill="white"/>
+</clipPath>
+</defs>
+</svg></div>
+    </div>
+    <div class="blk sm rev" data-t="900" data-go="2" style="left:40px;top:354px">
+      <div class="num">2</div><div class="bt">Documents</div><div class="bd">PDFs from a second S3 bucket, parsed, classified and extracted with AI Functions</div>
+      <div class="icons"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_3305_2125)">
+<path d="M68.37 74.16C68.37 95.05 85.3 111.98 106.19 111.98V126.76C77.14 126.76 53.6 103.21 53.6 74.17" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3"/>
+<path d="M68.37 74.16C68.37 53.27 51.44 36.34 30.55 36.34V21.56C59.6 21.56 83.14 45.11 83.14 74.15" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3"/>
+<path d="M53.59 74.16H44.22" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3"/>
+<path d="M92.49 74.16H83.12" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3"/>
+<path d="M53.59 74.16C53.59 61.42 43.29 51.1 30.55 51.1V57.85H18.82V47.14" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3"/>
+<path d="M30.55 21.56V15.67H18.82V25.27" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3"/>
+<path d="M126.94 128.97H139.18V116.73H126.94V122.85H117.92V132.66H106.18V126.75" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3"/>
+<path d="M117.92 99.98V121.87" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3"/>
+<path d="M83.14 74.16C83.14 86.9 93.44 97.22 106.18 97.22V91.39H117.91V107.88H125.76L132.47 95.3L139.18 107.88H130.56" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3"/>
+<path d="M21.92 32.01C20.61 30.28 18.53 29.16 16.19 29.16C12.23 29.16 9.01 32.37 9.01 36.34C9.01 40.31 12.22 43.52 16.19 43.52C20.16 43.52 23.37 40.31 23.37 36.34H30.55" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3"/>
+</g>
+<defs>
+<clipPath id="clip0_3305_2125">
+<rect width="150" height="150" fill="white"/>
+</clipPath>
+</defs>
+</svg></div>
+    </div>
+    <div class="blk rev" data-t="2000" data-go="3" style="left:460px">
+      <div class="num">3</div><div class="bt">Joined gold layer</div><div class="bd">Both sources meet on the disbursement account: quote vs final vs invoice, bank checks, benchmarks</div>
+      <div class="icons"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
+<path d="M25.6 36.18C25.602 36.6364 25.7391 37.0821 25.9942 37.4606C26.2492 37.8392 26.6106 38.1337 27.0329 38.307C27.4552 38.4803 27.9193 38.5246 28.3668 38.4344C28.8142 38.3441 29.2249 38.1233 29.5469 37.7999C29.869 37.4764 30.088 37.0648 30.1763 36.617C30.2646 36.1692 30.2183 35.7052 30.0432 35.2837C29.8681 34.8622 29.572 34.502 29.1923 34.2486C28.8127 33.9952 28.3664 33.86 27.91 33.86C27.6058 33.86 27.3046 33.9201 27.0237 34.0368C26.7428 34.1535 26.4877 34.3245 26.273 34.5401C26.0584 34.7557 25.8885 35.0115 25.773 35.2929C25.6575 35.5743 25.5987 35.8758 25.6 36.18Z" fill="#FF5F46"/>
+<path d="M34.51 36.18C34.51 36.6388 34.6461 37.0874 34.901 37.4689C35.1559 37.8504 35.5183 38.1478 35.9422 38.3234C36.3661 38.499 36.8326 38.5449 37.2826 38.4554C37.7327 38.3659 38.146 38.1449 38.4705 37.8205C38.795 37.496 39.0159 37.0826 39.1054 36.6326C39.195 36.1826 39.149 35.7161 38.9734 35.2922C38.7978 34.8682 38.5005 34.5059 38.1189 34.251C37.7374 33.9961 37.2889 33.86 36.83 33.86C36.2147 33.86 35.6246 34.1044 35.1895 34.5395C34.7544 34.9746 34.51 35.5647 34.51 36.18Z" fill="#FF5F46"/>
+<path d="M43.4301 36.18C43.4301 36.6393 43.5664 37.0882 43.8218 37.47C44.0771 37.8517 44.44 38.149 44.8646 38.3243C45.2891 38.4996 45.756 38.545 46.2064 38.4547C46.6567 38.3643 47.07 38.1424 47.3941 37.8169C47.7181 37.4915 47.9383 37.0771 48.0267 36.6265C48.1151 36.1758 48.0677 35.709 47.8906 35.2852C47.7134 34.8615 47.4145 34.4998 47.0317 34.2461C46.6489 33.9924 46.1993 33.858 45.7401 33.86C45.1265 33.8627 44.5389 34.1082 44.106 34.543C43.6731 34.9778 43.43 35.5664 43.4301 36.18Z" fill="#FF5F46"/>
+<path d="M122.93 112.58V58.24H27.0699V112.58H30.0699V96.47H45.6399V112.58H48.6399V96.47H64.2199V112.58H67.2199V96.47H82.7899V112.58H85.7899V96.47H101.36V112.58H104.36V96.47H119.93V112.58H122.93ZM119.93 75.85H104.36V61.24H119.93V75.85ZM67.2199 61.24H82.7899V75.85H67.2199V61.24ZM64.2199 75.85H48.6399V61.24H64.2199V75.85ZM85.7899 61.24H101.36V75.85H85.7899V61.24ZM45.6399 61.24V75.85H30.0699V61.24H45.6399ZM30.0699 93.47V78.85H45.6399V93.47H30.0699ZM48.6399 93.47V78.85H64.2199V93.47H48.6399ZM67.2199 93.47V78.85H82.7899V93.47H67.2199ZM85.7899 93.47V78.85H101.36V93.47H85.7899ZM104.36 93.47V78.85H119.93V93.47H104.36Z" fill="#FF5F46"/>
+</svg><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M152 448L448 448V272L152 272C103.399 272 64 311.399 64 360C64 408.601 103.399 448 152 448ZM152 400C174.091 400 192 382.091 192 360C192 337.909 174.091 320 152 320C129.909 320 112 337.909 112 360C112 382.091 129.909 400 152 400Z" fill="#FF5F46"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M360 240C408.601 240 448 200.601 448 152C448 103.399 408.601 64 360 64L64 64V240L360 240ZM360 192C382.091 192 400 174.091 400 152C400 129.909 382.091 112 360 112C337.909 112 320 129.909 320 152C320 174.091 337.909 192 360 192Z" fill="#FABFBA"/>
+</svg><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M255.38 185.263L194.172 220.632V291.368L255.38 326.737L316.588 291.368V220.632L255.38 185.263Z" fill="#FF5F46"/>
+<path d="M384.434 181.579H454.86L419.462 120.421L384.434 181.579Z" fill="#FF5F46"/>
+<path d="M384.434 330.79L419.831 391.947L455.229 330.79H384.434Z" fill="#FF5F46"/>
+<path d="M219.98 466H290.407L255.009 404.842L219.98 466Z" fill="#FF5F46"/>
+<path d="M55.5312 330.79L90.9288 391.947L126.326 330.79H55.5312Z" fill="#FF5F46"/>
+<path d="M55.5312 181.579H125.958L90.5601 120.421L55.5312 181.579Z" fill="#FF5F46"/>
+<path d="M219.98 46L255.378 107.158L290.776 46H219.98Z" fill="#FF5F46"/>
+<path d="M322.487 58.1582L281.559 128.895L352.354 169.79L393.282 99.0529L322.487 58.1582Z" fill="#FABFBA"/>
+<path d="M460.392 215.105H378.535V296.895H460.392V215.105Z" fill="#FABFBA"/>
+<path d="M352.354 342.579L281.559 383.474L322.487 454.211L393.282 413.316L352.354 342.579Z" fill="#FABFBA"/>
+<path d="M158.038 342.579L117.109 413.316L187.905 454.211L228.833 383.474L158.038 342.579Z" fill="#FABFBA"/>
+<path d="M131.857 215.105H50V296.895H131.857V215.105Z" fill="#FABFBA"/>
+<path d="M187.905 58.1582L117.109 99.0529L158.038 169.79L228.833 128.895L187.905 58.1582Z" fill="#FABFBA"/>
+</svg></div>
+      <div class="run"><div class="lbl">What runs</div>
+        <div><span>Join keys</span><b>DA, attachment, expense</b></div>
+        <div><span>Business rules</span><b>plain SQL</b></div>
+        <div><span>Refresh</span><b>one Job, after both pipelines</b></div></div>
+    </div>
+    <div class="blk rev" data-t="3100" data-go="4" style="left:880px">
+      <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later a supervisor agent, query</div>
+      <div class="icons"><svg viewBox="0 0 512 512" fill="none"><rect x="48" y="64" width="416" height="384" rx="36" fill="#FABFBA"/><rect x="112" y="272" width="64" height="112" rx="10" fill="#FF5F46"/><rect x="224" y="192" width="64" height="192" rx="10" fill="#FF5F46"/><rect x="336" y="128" width="64" height="256" rx="10" fill="#FF5F46"/><path d="M96 400H416" stroke="#fff" stroke-width="22" stroke-linecap="round"/></svg><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
+<path d="M459.812 206.815C428.864 256.533 382.402 324.948 361.655 342.503C340.909 360.058 310.141 391.703 238.824 391.703C188.862 391.703 145.885 359.614 126.81 313.595C126.811 313.648 126.811 313.703 126.812 313.756C124.109 307.041 117.538 302.298 109.855 302.297C99.7606 302.297 91.5767 310.481 91.5767 320.576C91.5769 322.945 92.0279 325.113 92.8485 327.047C97.2392 337.39 108.92 337.83 108.92 370.096C108.92 374.793 108.92 366.343 108.92 370.096C78.5784 370.096 53.9815 345.498 53.9809 315.157C53.9809 284.815 78.5781 260.218 108.92 260.218H116.288V260.208H203.559C210.079 260.208 216.337 262.969 220.41 268.059C227.547 276.978 233.017 285.281 237.048 292.133C240.783 298.481 251.969 298.543 255.667 292.173C259.566 285.456 264.744 277.343 271.309 268.619C275.386 263.201 281.863 260.208 288.644 260.208H321.094C368.515 260.208 394.508 237.472 407.78 221.085C414.648 212.606 424.403 206.815 435.315 206.815H459.812Z" fill="#FABFBA"/>
+<path d="M246.744 286.125C246.743 224.929 197.938 175.293 137.646 175.064C197.938 174.835 246.744 125.196 246.744 64C246.744 64 246.744 64 246.744 64C246.744 125.338 295.778 175.063 356.263 175.063C295.778 175.063 246.744 224.787 246.744 286.125Z" fill="#FF5F46"/>
+</svg><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg></div>
+      <div class="run"><div class="lbl">What runs</div>
+        <div><span>Metric views</span><b>6</b></div>
+        <div><span>Genie agents</span><b>3</b></div>
+        <div><span>Supervisor agent</span><b class="always">next phase</b></div></div>
+    </div>
+  </section>
+
+  <!-- ============ PART 1: PLATFORM DATA ============ -->
+  <section class="scene" data-scene="1" data-dur="10000">
+    <div class="stitle rev" data-t="0"><div class="k">Part 1</div><div class="h">Platform data: from Postgres to silver</div></div>
+    <div class="zone aws rev" data-t="0" style="left:24px;top:176px;width:396px;height:432px"><span class="zl">Your AWS account</span></div>
+    <div class="zone dbx rev" data-t="0" style="left:440px;top:176px;width:816px;height:432px"><span class="zl">Databricks &middot; Lakeflow Spark Declarative Pipeline</span></div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="p1" class="wire" pathLength="1" d="M 222 300 L 222 336" data-t="600"/>
+      <path id="p2" class="wire" pathLength="1" d="M 222 438 L 222 474" data-t="1500"/>
+      <path id="p3" class="wire hot" pathLength="1" d="M 400 532 L 468 532" data-t="2700"/>
+      <path id="p4" class="wire" pathLength="1" d="M 700 532 L 738 532" data-t="4100"/>
+      <path id="p5" class="wire" pathLength="1" d="M 970 532 L 1008 532" data-t="4600"/>
+      <circle class="pulse" r="5" data-t="3000"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#p3"/></animateMotion></circle><circle class="pulse" r="5" data-t="4400"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#p4"/></animateMotion></circle>
+    </svg>
+    <div class="node ext rev" data-t="300" style="left:44px;top:200px;width:356px;height:100px">
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><ellipse cx="256" cy="120" rx="160" ry="56" fill="#FF5F46"/><path d="M96 120V392C96 423 168 448 256 448C344 448 416 423 416 392V120C416 151 344 176 256 176C168 176 96 151 96 120Z" fill="#FABFBA"/><path d="M96 256C96 287 168 312 256 312C344 312 416 287 416 256" stroke="#FF5F46" stroke-width="24"/></svg></div><div><div class="name">RDS PostgreSQL</div><div class="desc">Port calls, DAs, expenses, tariffs, users</div></div></div>
+    <div class="node ext rev" data-t="800" style="left:44px;top:338px;width:356px;height:100px">
+      <span class="badge">already running</span>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><rect x="48" y="112" width="152" height="288" rx="28" fill="#FABFBA"/><rect x="312" y="112" width="152" height="288" rx="28" fill="#FABFBA"/><path d="M216 208H296M268 176L300 208L268 240" stroke="#FF5F46" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/><path d="M296 304H216M244 272L212 304L244 336" stroke="#FF5F46" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><div class="name">AWS DMS</div><div class="desc">Full load plus ongoing CDC, written as Parquet</div></div></div>
+    <div class="node ext rev" data-t="1700" style="left:44px;top:476px;width:356px;height:112px">
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M80 128H432L392 440C390 456 378 464 362 464H150C134 464 122 456 120 440Z" fill="#FABFBA"/><ellipse cx="256" cy="128" rx="176" ry="56" fill="#FF5F46"/><ellipse cx="256" cy="128" rx="120" ry="30" fill="#FABFBA"/><path d="M136 280C200 300 312 300 376 280" stroke="#FF5F46" stroke-width="26" stroke-linecap="round"/></svg></div><div><div class="name">Platform bucket</div><div class="desc"><code>schema/table/</code> files, every row tagged <b style="color:var(--lava)">Op = I, U or D</b></div></div></div>
+    <div class="node db rev" data-t="2900" style="left:470px;top:476px;width:230px;height:112px">
+      <span class="badge">Auto Loader</span>
+      <div class="ico"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_5483_1940)">
+<path d="M118.5 113.91C113.61 115.09 108.5 115.72 103.25 115.72C93.12 115.72 83.54 113.39 75 109.24C66.46 105.09 56.88 102.76 46.75 102.76C36.62 102.76 27.04 105.09 18.5 109.24L18.52 60.1301H28.8C29.67 57.3401 30.8 54.6601 32.14 52.1101L24.86 44.8301L45.27 24.4201L52.55 31.7001C55.1 30.3601 57.78 29.2301 60.57 28.3601V18.0801H89.43V28.3601C92.22 29.2301 94.9 30.3601 97.45 31.7001L104.73 24.4201L125.14 44.8301L117.86 52.1101C119.2 54.6601 120.33 57.3401 121.2 60.1301H131.48L131.5 121.97C122.96 126.12 113.38 128.45 103.25 128.45C93.12 128.45 83.54 126.12 75 121.97C66.46 117.82 56.88 115.49 46.75 115.49C36.62 115.49 27.04 117.82 18.5 121.97" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M99.2 74.5599C99.2 61.1899 88.37 50.3599 75 50.3599C61.63 50.3599 50.8 61.1899 50.8 74.5599V92.2499" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M115.36 72.4302V103.96" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M34.66 72.4302V93.2502" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M83.08 72.4302V101.88" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M66.9399 72.4302V95.3402" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M99.2 74.5601V104.96" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M18.51 72.4302H131.49" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M18.51 87.1602H130.92" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+</g>
+<defs>
+<clipPath id="clip0_5483_1940">
+<rect width="150" height="150" fill="white"/>
+</clipPath>
+</defs>
+</svg></div><div><div class="name">Bronze</div><div class="desc">Every change appended, with file and commit time</div></div></div>
+    <div class="node db rev" data-t="4300" style="left:740px;top:476px;width:230px;height:112px">
+      <span class="badge">AUTO CDC</span>
+      <div class="ico"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M1.75 1C1.33579 1 1 1.33579 1 1.75V14.25C1 14.6642 1.33579 15 1.75 15H6.5V7H9.5V8H11V7H13.5V8H15V1.75C15 1.33579 14.6642 1 14.25 1H1.75ZM5 7V13.5H2.5V7H5ZM13.5 5.5V2.5H2.5V5.5H13.5Z" fill="#FF3621"/>
+<path d="M9.02387 10.9205C9.5085 10.3147 10.4345 10.3292 10.9 10.9498C11.9538 12.3549 14.0502 12.3876 15.1473 11.0161L15.5856 10.4683L14.4143 9.53128L13.976 10.0791C13.4914 10.6849 12.5654 10.6704 12.1 10.0498C11.0462 8.64474 8.94974 8.61199 7.85257 9.98345L7.41431 10.5313L8.58561 11.4683L9.02387 10.9205Z" fill="#FF3621"/>
+<path d="M9.02387 13.9205C9.5085 13.3147 10.4345 13.3292 10.9 13.9498C11.9538 15.3549 14.0502 15.3876 15.1473 14.0161L15.5856 13.4683L14.4143 12.5313L13.976 13.0791C13.4914 13.6849 12.5654 13.6704 12.1 13.0498C11.0462 11.6447 8.94974 11.612 7.85257 12.9834L7.41431 13.5313L8.58561 14.4683L9.02387 13.9205Z" fill="#FF3621"/>
+</svg></div><div><div class="name">Silver</div><div class="desc">Changes applied in commit order, SCD 1 or 2</div></div></div>
+    <div class="zc rev" data-t="4800" style="left:1010px;top:200px;width:226px;height:388px;border-top-color:var(--navy)">
+      <div class="zh"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
+<path d="M25.6 36.18C25.602 36.6364 25.7391 37.0821 25.9942 37.4606C26.2492 37.8392 26.6106 38.1337 27.0329 38.307C27.4552 38.4803 27.9193 38.5246 28.3668 38.4344C28.8142 38.3441 29.2249 38.1233 29.5469 37.7999C29.869 37.4764 30.088 37.0648 30.1763 36.617C30.2646 36.1692 30.2183 35.7052 30.0432 35.2837C29.8681 34.8622 29.572 34.502 29.1923 34.2486C28.8127 33.9952 28.3664 33.86 27.91 33.86C27.6058 33.86 27.3046 33.9201 27.0237 34.0368C26.7428 34.1535 26.4877 34.3245 26.273 34.5401C26.0584 34.7557 25.8885 35.0115 25.773 35.2929C25.6575 35.5743 25.5987 35.8758 25.6 36.18Z" fill="#FF5F46"/>
+<path d="M34.51 36.18C34.51 36.6388 34.6461 37.0874 34.901 37.4689C35.1559 37.8504 35.5183 38.1478 35.9422 38.3234C36.3661 38.499 36.8326 38.5449 37.2826 38.4554C37.7327 38.3659 38.146 38.1449 38.4705 37.8205C38.795 37.496 39.0159 37.0826 39.1054 36.6326C39.195 36.1826 39.149 35.7161 38.9734 35.2922C38.7978 34.8682 38.5005 34.5059 38.1189 34.251C37.7374 33.9961 37.2889 33.86 36.83 33.86C36.2147 33.86 35.6246 34.1044 35.1895 34.5395C34.7544 34.9746 34.51 35.5647 34.51 36.18Z" fill="#FF5F46"/>
+<path d="M43.4301 36.18C43.4301 36.6393 43.5664 37.0882 43.8218 37.47C44.0771 37.8517 44.44 38.149 44.8646 38.3243C45.2891 38.4996 45.756 38.545 46.2064 38.4547C46.6567 38.3643 47.07 38.1424 47.3941 37.8169C47.7181 37.4915 47.9383 37.0771 48.0267 36.6265C48.1151 36.1758 48.0677 35.709 47.8906 35.2852C47.7134 34.8615 47.4145 34.4998 47.0317 34.2461C46.6489 33.9924 46.1993 33.858 45.7401 33.86C45.1265 33.8627 44.5389 34.1082 44.106 34.543C43.6731 34.9778 43.43 35.5664 43.4301 36.18Z" fill="#FF5F46"/>
+<path d="M122.93 112.58V58.24H27.0699V112.58H30.0699V96.47H45.6399V112.58H48.6399V96.47H64.2199V112.58H67.2199V96.47H82.7899V112.58H85.7899V96.47H101.36V112.58H104.36V96.47H119.93V112.58H122.93ZM119.93 75.85H104.36V61.24H119.93V75.85ZM67.2199 61.24H82.7899V75.85H67.2199V61.24ZM64.2199 75.85H48.6399V61.24H64.2199V75.85ZM85.7899 61.24H101.36V75.85H85.7899V61.24ZM45.6399 61.24V75.85H30.0699V61.24H45.6399ZM30.0699 93.47V78.85H45.6399V93.47H30.0699ZM48.6399 93.47V78.85H64.2199V93.47H48.6399ZM67.2199 93.47V78.85H82.7899V93.47H67.2199ZM85.7899 93.47V78.85H101.36V93.47H85.7899ZM104.36 93.47V78.85H119.93V93.47H104.36Z" fill="#FF5F46"/>
+</svg>Silver tables</div><div class="zs">A clean mirror of Postgres</div>
+      <div class="kv"><span>port_calls</span><b>SCD 1</b></div>
+      <div class="kv mk" data-t="4900"><span>appointments</span><b>SCD 2</b></div>
+      <div class="kv"><span>disb_accounts</span><b>SCD 2</b></div>
+      <div class="kv"><span>da_expenses</span><b>SCD 1</b></div>
+      <div class="kv"><span>tariffs</span><b>SCD 2</b></div>
+      <div class="kv"><span>categories</span><b>SCD 1</b></div>
+      <div class="kv"><span>vessels, ports</span><b>SCD 1</b></div>
+      <div class="kv"><span>companies, agents</span><b>SCD 1</b></div>
+      <div class="kv"><span>da_attachments</span><b>SCD 1</b></div>
+      <div class="kv"><span>payments</span><b>SCD 1</b></div>
+      <div class="kv"><span>user_events</span><b>append</b></div>
+    </div>
+    <div class="zc rev" data-t="6100" style="left:470px;top:200px;width:500px;height:250px;border-top-color:var(--lava)">
+      <div class="zh"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M1.75 1C1.33579 1 1 1.33579 1 1.75V14.25C1 14.6642 1.33579 15 1.75 15H6.5V7H9.5V8H11V7H13.5V8H15V1.75C15 1.33579 14.6642 1 14.25 1H1.75ZM5 7V13.5H2.5V7H5ZM13.5 5.5V2.5H2.5V5.5H13.5Z" fill="#FF3621"/>
+<path d="M9.02387 10.9205C9.5085 10.3147 10.4345 10.3292 10.9 10.9498C11.9538 12.3549 14.0502 12.3876 15.1473 11.0161L15.5856 10.4683L14.4143 9.53128L13.976 10.0791C13.4914 10.6849 12.5654 10.6704 12.1 10.0498C11.0462 8.64474 8.94974 8.61199 7.85257 9.98345L7.41431 10.5313L8.58561 11.4683L9.02387 10.9205Z" fill="#FF3621"/>
+<path d="M9.02387 13.9205C9.5085 13.3147 10.4345 13.3292 10.9 13.9498C11.9538 15.3549 14.0502 15.3876 15.1473 14.0161L15.5856 13.4683L14.4143 12.5313L13.976 13.0791C13.4914 13.6849 12.5654 13.6704 12.1 13.0498C11.0462 11.6447 8.94974 11.612 7.85257 12.9834L7.41431 13.5313L8.58561 14.4683L9.02387 13.9205Z" fill="#FF3621"/>
+</svg>One change: an appointment is cancelled</div><div class="zs">appointments, kept as SCD type 2</div>
+      <div class="kv mk" data-t="6600"><span>DMS file, Op = U</span><b>appointment 88213 &middot; type = cancelled</b></div>
+      <div class="kv mk2" data-t="7000"><span>version 1</span><b>in process &middot; 14 Oct to 21 Oct</b></div>
+      <div class="kv mk" data-t="7400"><span>version 2, current</span><b>cancelled &middot; from 21 Oct</b></div>
+      <div class="kv" style="margin-top:10px"><span>Op = D</span><b>closes the row, history kept</b></div>
+      <div class="kv"><span>late or replayed files</span><b>ordered by commit time</b></div>
+    </div>
+    <div class="nocall rev" data-t="8300" style="left:850px;top:112px;border-color:var(--navy);color:var(--navy)"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M125.97 93.0402C131.97 89.5402 136.01 83.0302 136.01 75.5702C136.01 64.4102 126.96 55.3602 115.8 55.3602H108.64C107.69 37.6002 93 23.4902 75 23.4902C57 23.4902 42.31 37.6002 41.36 55.3602H34.2C23.04 55.3602 13.99 64.4102 13.99 75.5702C13.99 86.7302 23.04 95.7802 34.2 95.7802H114.42" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M114.42 95.7803V79.5903H108.97" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M95.89 79.5903H35.58V95.7803" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M42.8 95.7803H114.42V111.97H77.05" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M63.8199 111.97H35.58" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M42.8 87.6904H44.2" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M52.61 87.6904H87.48" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M99.63 87.6904H103.36" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M42.8 103.88H44.2" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M52.61 103.88H71.29" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M83.28 103.88H103.36" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M110.06 66.9204L50.48 126.5" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+</svg>Serverless Job: hourly today, continuous later</div>
+  </section>
+
+  <!-- ============ PART 2: DOCUMENTS ============ -->
+  <section class="scene" data-scene="2" data-dur="10500">
+    <div class="stitle rev" data-t="0"><div class="k">Part 2</div><div class="h">Documents: from PDF to facts</div></div>
+    <div class="zone aws rev" data-t="0" style="left:24px;top:176px;width:280px;height:432px"><span class="zl">Your AWS</span></div>
+    <div class="zone dbx rev" data-t="0" style="left:324px;top:176px;width:932px;height:432px"><span class="zl">Databricks &middot; Lakeflow Spark Declarative Pipeline</span></div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="q1" class="wire hot" pathLength="1" d="M 288 365 L 342 365" data-t="1300"/>
+      <path id="q2" class="wire" pathLength="1" d="M 554 365 L 588 365" data-t="2650"/>
+      <path id="q3" class="wire" pathLength="1" d="M 970 393 L 998 393" data-t="8300"/>
+      <circle class="pulse" r="5" data-t="1600"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#q1"/></animateMotion></circle>
+    </svg>
+    <div class="node ext rev" data-t="300" style="left:40px;top:300px;width:248px;height:130px">
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M80 128H432L392 440C390 456 378 464 362 464H150C134 464 122 456 120 440Z" fill="#FABFBA"/><ellipse cx="256" cy="128" rx="176" ry="56" fill="#FF5F46"/><ellipse cx="256" cy="128" rx="120" ry="30" fill="#FABFBA"/><path d="M136 280C200 300 312 300 376 280" stroke="#FF5F46" stroke-width="26" stroke-linecap="round"/></svg></div><div><div class="name">Documents bucket</div><div class="desc"><code>proforma/<b style="color:var(--lava)">da_id</b>/<br><b style="color:var(--lava)">attachment_id</b>.pdf</code></div></div></div>
+    <div class="node db rev" data-t="1500" style="left:344px;top:300px;width:210px;height:130px">
+      <span class="badge">Auto Loader</span>
+      <div class="ico"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_5483_1940)">
+<path d="M118.5 113.91C113.61 115.09 108.5 115.72 103.25 115.72C93.12 115.72 83.54 113.39 75 109.24C66.46 105.09 56.88 102.76 46.75 102.76C36.62 102.76 27.04 105.09 18.5 109.24L18.52 60.1301H28.8C29.67 57.3401 30.8 54.6601 32.14 52.1101L24.86 44.8301L45.27 24.4201L52.55 31.7001C55.1 30.3601 57.78 29.2301 60.57 28.3601V18.0801H89.43V28.3601C92.22 29.2301 94.9 30.3601 97.45 31.7001L104.73 24.4201L125.14 44.8301L117.86 52.1101C119.2 54.6601 120.33 57.3401 121.2 60.1301H131.48L131.5 121.97C122.96 126.12 113.38 128.45 103.25 128.45C93.12 128.45 83.54 126.12 75 121.97C66.46 117.82 56.88 115.49 46.75 115.49C36.62 115.49 27.04 117.82 18.5 121.97" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M99.2 74.5599C99.2 61.1899 88.37 50.3599 75 50.3599C61.63 50.3599 50.8 61.1899 50.8 74.5599V92.2499" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M115.36 72.4302V103.96" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M34.66 72.4302V93.2502" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M83.08 72.4302V101.88" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M66.9399 72.4302V95.3402" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M99.2 74.5601V104.96" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M18.51 72.4302H131.49" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M18.51 87.1602H130.92" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+</g>
+<defs>
+<clipPath id="clip0_5483_1940">
+<rect width="150" height="150" fill="white"/>
+</clipPath>
+</defs>
+</svg></div><div><div class="name">Bronze</div><div class="desc">Binary file plus the join keys from the path</div></div></div>
+    <div class="nocall rev" data-t="8900" style="left:344px;top:452px;width:210px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Errors kept per page: one bad page never fails the file</div>
+    <div class="ep rev" data-t="2700" style="left:590px;top:192px;width:380px;height:402px">
+      <div class="bar"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M125.97 93.0402C131.97 89.5402 136.01 83.0302 136.01 75.5702C136.01 64.4102 126.96 55.3602 115.8 55.3602H108.64C107.69 37.6002 93 23.4902 75 23.4902C57 23.4902 42.31 37.6002 41.36 55.3602H34.2C23.04 55.3602 13.99 64.4102 13.99 75.5702C13.99 86.7302 23.04 95.7802 34.2 95.7802H114.42" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M114.42 95.7803V79.5903H108.97" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M95.89 79.5903H35.58V95.7803" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M42.8 95.7803H114.42V111.97H77.05" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M63.8199 111.97H35.58" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M42.8 87.6904H44.2" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M52.61 87.6904H87.48" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M99.63 87.6904H103.36" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M42.8 103.88H44.2" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M52.61 103.88H71.29" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M83.28 103.88H103.36" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M110.06 66.9204L50.48 126.5" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+</svg>Document pipeline<span class="tag">AI Functions</span></div>
+      <div class="step rev" data-t="3000"><div class="n">1</div><div class="tx">ai_parse_document<span>Text per page, page numbers kept</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg></div></div>
+      <div class="step rev" data-t="4300"><div class="n">2</div><div class="tx">ai_classify the document<span>PDA quote, invoice, port bill, SOF</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div></div>
+      <div class="step rev" data-t="4900"><div class="n">3</div><div class="tx">ai_query, JSON schema<span>Page to expense, with confidence</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div></div>
+      <div class="step rev" data-t="5900"><div class="n">4</div><div class="tx">ai_extract<span>Lines, totals, bank details, confidence</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div></div>
+      <div class="step rev" data-t="7100"><div class="n">5</div><div class="tx">ai_query<span>Statement of facts to event timeline</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div></div>
+    </div>
+    <div class="zc rev" data-t="8500" style="left:1000px;top:192px;width:236px;height:402px;border-top-color:var(--navy)">
+      <div class="zh"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
+<path d="M25.6 36.18C25.602 36.6364 25.7391 37.0821 25.9942 37.4606C26.2492 37.8392 26.6106 38.1337 27.0329 38.307C27.4552 38.4803 27.9193 38.5246 28.3668 38.4344C28.8142 38.3441 29.2249 38.1233 29.5469 37.7999C29.869 37.4764 30.088 37.0648 30.1763 36.617C30.2646 36.1692 30.2183 35.7052 30.0432 35.2837C29.8681 34.8622 29.572 34.502 29.1923 34.2486C28.8127 33.9952 28.3664 33.86 27.91 33.86C27.6058 33.86 27.3046 33.9201 27.0237 34.0368C26.7428 34.1535 26.4877 34.3245 26.273 34.5401C26.0584 34.7557 25.8885 35.0115 25.773 35.2929C25.6575 35.5743 25.5987 35.8758 25.6 36.18Z" fill="#FF5F46"/>
+<path d="M34.51 36.18C34.51 36.6388 34.6461 37.0874 34.901 37.4689C35.1559 37.8504 35.5183 38.1478 35.9422 38.3234C36.3661 38.499 36.8326 38.5449 37.2826 38.4554C37.7327 38.3659 38.146 38.1449 38.4705 37.8205C38.795 37.496 39.0159 37.0826 39.1054 36.6326C39.195 36.1826 39.149 35.7161 38.9734 35.2922C38.7978 34.8682 38.5005 34.5059 38.1189 34.251C37.7374 33.9961 37.2889 33.86 36.83 33.86C36.2147 33.86 35.6246 34.1044 35.1895 34.5395C34.7544 34.9746 34.51 35.5647 34.51 36.18Z" fill="#FF5F46"/>
+<path d="M43.4301 36.18C43.4301 36.6393 43.5664 37.0882 43.8218 37.47C44.0771 37.8517 44.44 38.149 44.8646 38.3243C45.2891 38.4996 45.756 38.545 46.2064 38.4547C46.6567 38.3643 47.07 38.1424 47.3941 37.8169C47.7181 37.4915 47.9383 37.0771 48.0267 36.6265C48.1151 36.1758 48.0677 35.709 47.8906 35.2852C47.7134 34.8615 47.4145 34.4998 47.0317 34.2461C46.6489 33.9924 46.1993 33.858 45.7401 33.86C45.1265 33.8627 44.5389 34.1082 44.106 34.543C43.6731 34.9778 43.43 35.5664 43.4301 36.18Z" fill="#FF5F46"/>
+<path d="M122.93 112.58V58.24H27.0699V112.58H30.0699V96.47H45.6399V112.58H48.6399V96.47H64.2199V112.58H67.2199V96.47H82.7899V112.58H85.7899V96.47H101.36V112.58H104.36V96.47H119.93V112.58H122.93ZM119.93 75.85H104.36V61.24H119.93V75.85ZM67.2199 61.24H82.7899V75.85H67.2199V61.24ZM64.2199 75.85H48.6399V61.24H64.2199V75.85ZM85.7899 61.24H101.36V75.85H85.7899V61.24ZM45.6399 61.24V75.85H30.0699V61.24H45.6399ZM30.0699 93.47V78.85H45.6399V93.47H30.0699ZM48.6399 93.47V78.85H64.2199V93.47H48.6399ZM67.2199 93.47V78.85H82.7899V93.47H67.2199ZM85.7899 93.47V78.85H101.36V93.47H85.7899ZM104.36 93.47V78.85H119.93V93.47H104.36Z" fill="#FF5F46"/>
+</svg>Silver tables</div><div class="zs">One row per page, file, line or event</div>
+      <div class="kv"><span>document_pages</span><b>page</b></div>
+      <div class="kv"><span>documents</span><b>file</b></div>
+      <div class="kv mk" data-t="8600"><span>page_expense_map</span><b>page</b></div>
+      <div class="kv mk" data-t="8700"><span>doc_line_items</span><b>line</b></div>
+      <div class="kv"><span>doc_bank_details</span><b>file</b></div>
+      <div class="kv"><span>port_call_events</span><b>event</b></div>
+      <div class="formula" style="margin-top:14px">No LLM call on any downstream query: results are plain Delta</div>
+    </div>
+  </section>
+
+  <!-- ============ PART 3: GOLD ============ -->
+  <section class="scene" data-scene="3" data-dur="9500">
+    <div class="stitle rev" data-t="0"><div class="k">Part 3</div><div class="h">Gold: both sources meet on the disbursement account</div></div>
+    <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; one Job, after both pipelines</span></div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="g1" class="wire" pathLength="1" d="M 304 270 C 334 270, 330 362, 358 362" data-t="3100"/>
+      <path id="g2" class="wire hot" pathLength="1" d="M 304 506 C 334 506, 330 414, 358 414" data-t="3200"/>
+      <path id="g3" class="wire" pathLength="1" d="M 610 388 C 645 388, 645 238, 678 238" data-t="4700"/>
+      <path id="g4" class="wire" pathLength="1" d="M 610 388 C 645 388, 645 338, 678 338" data-t="4800"/>
+      <path id="g5" class="wire" pathLength="1" d="M 610 388 C 645 388, 645 438, 678 438" data-t="4900"/>
+      <path id="g6" class="wire" pathLength="1" d="M 610 388 C 645 388, 645 538, 678 538" data-t="5000"/>
+      <path id="g7" class="wire hot" pathLength="1" d="M 1000 238 L 1038 238" data-t="6900"/>
+      <circle class="pulse" r="5" data-t="3400"><animateMotion dur="1.1s" repeatCount="indefinite" begin="indefinite"><mpath href="#g1"/></animateMotion></circle><circle class="pulse" r="5" data-t="3500"><animateMotion dur="1.1s" repeatCount="indefinite" begin="indefinite"><mpath href="#g2"/></animateMotion></circle>
+    </svg>
+    <div class="node db rev" data-t="700" style="left:54px;top:210px;width:250px;height:120px">
+      <span class="badge">platform</span>
+      <div class="ico"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M1.75 1C1.33579 1 1 1.33579 1 1.75V14.25C1 14.6642 1.33579 15 1.75 15H6.5V7H9.5V8H11V7H13.5V8H15V1.75C15 1.33579 14.6642 1 14.25 1H1.75ZM5 7V13.5H2.5V7H5ZM13.5 5.5V2.5H2.5V5.5H13.5Z" fill="#FF3621"/>
+<path d="M9.02387 10.9205C9.5085 10.3147 10.4345 10.3292 10.9 10.9498C11.9538 12.3549 14.0502 12.3876 15.1473 11.0161L15.5856 10.4683L14.4143 9.53128L13.976 10.0791C13.4914 10.6849 12.5654 10.6704 12.1 10.0498C11.0462 8.64474 8.94974 8.61199 7.85257 9.98345L7.41431 10.5313L8.58561 11.4683L9.02387 10.9205Z" fill="#FF3621"/>
+<path d="M9.02387 13.9205C9.5085 13.3147 10.4345 13.3292 10.9 13.9498C11.9538 15.3549 14.0502 15.3876 15.1473 14.0161L15.5856 13.4683L14.4143 12.5313L13.976 13.0791C13.4914 13.6849 12.5654 13.6704 12.1 13.0498C11.0462 11.6447 8.94974 11.612 7.85257 12.9834L7.41431 13.5313L8.58561 14.4683L9.02387 13.9205Z" fill="#FF3621"/>
+</svg></div><div><div class="name">Silver platform</div><div class="desc">Quotes and finals per expense, tariffs, port calls</div></div></div>
+    <div class="node db rev" data-t="1900" style="left:54px;top:446px;width:250px;height:120px">
+      <span class="badge on">documents</span>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg></div><div><div class="name">Silver documents</div><div class="desc">Pages, page to expense map, extracted lines, bank details</div></div></div>
+    <div class="node hero rev" data-t="3400" style="left:360px;top:318px;width:250px;height:140px">
+      <span class="badge">plain SQL</span>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M152 448L448 448V272L152 272C103.399 272 64 311.399 64 360C64 408.601 103.399 448 152 448ZM152 400C174.091 400 192 382.091 192 360C192 337.909 174.091 320 152 320C129.909 320 112 337.909 112 360C112 382.091 129.909 400 152 400Z" fill="#FF5F46"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M360 240C408.601 240 448 200.601 448 152C448 103.399 408.601 64 360 64L64 64V240L360 240ZM360 192C382.091 192 400 174.091 400 152C400 129.909 382.091 112 360 112C337.909 112 320 129.909 320 152C320 174.091 337.909 192 360 192Z" fill="#FABFBA"/>
+</svg></div><div><div class="name">Join and rules</div><div class="desc">On da_id, attachment_id and expense category</div></div></div>
+    <div class="node db rev" data-t="5100" style="left:680px;top:196px;width:320px;height:84px">
+      <div class="ico"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
+<path d="M25.6 36.18C25.602 36.6364 25.7391 37.0821 25.9942 37.4606C26.2492 37.8392 26.6106 38.1337 27.0329 38.307C27.4552 38.4803 27.9193 38.5246 28.3668 38.4344C28.8142 38.3441 29.2249 38.1233 29.5469 37.7999C29.869 37.4764 30.088 37.0648 30.1763 36.617C30.2646 36.1692 30.2183 35.7052 30.0432 35.2837C29.8681 34.8622 29.572 34.502 29.1923 34.2486C28.8127 33.9952 28.3664 33.86 27.91 33.86C27.6058 33.86 27.3046 33.9201 27.0237 34.0368C26.7428 34.1535 26.4877 34.3245 26.273 34.5401C26.0584 34.7557 25.8885 35.0115 25.773 35.2929C25.6575 35.5743 25.5987 35.8758 25.6 36.18Z" fill="#FF5F46"/>
+<path d="M34.51 36.18C34.51 36.6388 34.6461 37.0874 34.901 37.4689C35.1559 37.8504 35.5183 38.1478 35.9422 38.3234C36.3661 38.499 36.8326 38.5449 37.2826 38.4554C37.7327 38.3659 38.146 38.1449 38.4705 37.8205C38.795 37.496 39.0159 37.0826 39.1054 36.6326C39.195 36.1826 39.149 35.7161 38.9734 35.2922C38.7978 34.8682 38.5005 34.5059 38.1189 34.251C37.7374 33.9961 37.2889 33.86 36.83 33.86C36.2147 33.86 35.6246 34.1044 35.1895 34.5395C34.7544 34.9746 34.51 35.5647 34.51 36.18Z" fill="#FF5F46"/>
+<path d="M43.4301 36.18C43.4301 36.6393 43.5664 37.0882 43.8218 37.47C44.0771 37.8517 44.44 38.149 44.8646 38.3243C45.2891 38.4996 45.756 38.545 46.2064 38.4547C46.6567 38.3643 47.07 38.1424 47.3941 37.8169C47.7181 37.4915 47.9383 37.0771 48.0267 36.6265C48.1151 36.1758 48.0677 35.709 47.8906 35.2852C47.7134 34.8615 47.4145 34.4998 47.0317 34.2461C46.6489 33.9924 46.1993 33.858 45.7401 33.86C45.1265 33.8627 44.5389 34.1082 44.106 34.543C43.6731 34.9778 43.43 35.5664 43.4301 36.18Z" fill="#FF5F46"/>
+<path d="M122.93 112.58V58.24H27.0699V112.58H30.0699V96.47H45.6399V112.58H48.6399V96.47H64.2199V112.58H67.2199V96.47H82.7899V112.58H85.7899V96.47H101.36V112.58H104.36V96.47H119.93V112.58H122.93ZM119.93 75.85H104.36V61.24H119.93V75.85ZM67.2199 61.24H82.7899V75.85H67.2199V61.24ZM64.2199 75.85H48.6399V61.24H64.2199V75.85ZM85.7899 61.24H101.36V75.85H85.7899V61.24ZM45.6399 61.24V75.85H30.0699V61.24H45.6399ZM30.0699 93.47V78.85H45.6399V93.47H30.0699ZM48.6399 93.47V78.85H64.2199V93.47H48.6399ZM67.2199 93.47V78.85H82.7899V93.47H67.2199ZM85.7899 93.47V78.85H101.36V93.47H85.7899ZM104.36 93.47V78.85H119.93V93.47H104.36Z" fill="#FF5F46"/>
+</svg></div><div><div class="name">expense_reconciliation</div><div class="desc">Quote vs final vs invoice, per line, with pages</div></div></div>
+    <div class="node db rev" data-t="5300" style="left:680px;top:296px;width:320px;height:84px">
+      <div class="ico"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
+<path d="M25.6 36.18C25.602 36.6364 25.7391 37.0821 25.9942 37.4606C26.2492 37.8392 26.6106 38.1337 27.0329 38.307C27.4552 38.4803 27.9193 38.5246 28.3668 38.4344C28.8142 38.3441 29.2249 38.1233 29.5469 37.7999C29.869 37.4764 30.088 37.0648 30.1763 36.617C30.2646 36.1692 30.2183 35.7052 30.0432 35.2837C29.8681 34.8622 29.572 34.502 29.1923 34.2486C28.8127 33.9952 28.3664 33.86 27.91 33.86C27.6058 33.86 27.3046 33.9201 27.0237 34.0368C26.7428 34.1535 26.4877 34.3245 26.273 34.5401C26.0584 34.7557 25.8885 35.0115 25.773 35.2929C25.6575 35.5743 25.5987 35.8758 25.6 36.18Z" fill="#FF5F46"/>
+<path d="M34.51 36.18C34.51 36.6388 34.6461 37.0874 34.901 37.4689C35.1559 37.8504 35.5183 38.1478 35.9422 38.3234C36.3661 38.499 36.8326 38.5449 37.2826 38.4554C37.7327 38.3659 38.146 38.1449 38.4705 37.8205C38.795 37.496 39.0159 37.0826 39.1054 36.6326C39.195 36.1826 39.149 35.7161 38.9734 35.2922C38.7978 34.8682 38.5005 34.5059 38.1189 34.251C37.7374 33.9961 37.2889 33.86 36.83 33.86C36.2147 33.86 35.6246 34.1044 35.1895 34.5395C34.7544 34.9746 34.51 35.5647 34.51 36.18Z" fill="#FF5F46"/>
+<path d="M43.4301 36.18C43.4301 36.6393 43.5664 37.0882 43.8218 37.47C44.0771 37.8517 44.44 38.149 44.8646 38.3243C45.2891 38.4996 45.756 38.545 46.2064 38.4547C46.6567 38.3643 47.07 38.1424 47.3941 37.8169C47.7181 37.4915 47.9383 37.0771 48.0267 36.6265C48.1151 36.1758 48.0677 35.709 47.8906 35.2852C47.7134 34.8615 47.4145 34.4998 47.0317 34.2461C46.6489 33.9924 46.1993 33.858 45.7401 33.86C45.1265 33.8627 44.5389 34.1082 44.106 34.543C43.6731 34.9778 43.43 35.5664 43.4301 36.18Z" fill="#FF5F46"/>
+<path d="M122.93 112.58V58.24H27.0699V112.58H30.0699V96.47H45.6399V112.58H48.6399V96.47H64.2199V112.58H67.2199V96.47H82.7899V112.58H85.7899V96.47H101.36V112.58H104.36V96.47H119.93V112.58H122.93ZM119.93 75.85H104.36V61.24H119.93V75.85ZM67.2199 61.24H82.7899V75.85H67.2199V61.24ZM64.2199 75.85H48.6399V61.24H64.2199V75.85ZM85.7899 61.24H101.36V75.85H85.7899V61.24ZM45.6399 61.24V75.85H30.0699V61.24H45.6399ZM30.0699 93.47V78.85H45.6399V93.47H30.0699ZM48.6399 93.47V78.85H64.2199V93.47H48.6399ZM67.2199 93.47V78.85H82.7899V93.47H67.2199ZM85.7899 93.47V78.85H101.36V93.47H85.7899ZM104.36 93.47V78.85H119.93V93.47H104.36Z" fill="#FF5F46"/>
+</svg></div><div><div class="name">payment_validation</div><div class="desc">Bank details: platform vs document, UC Python rules</div></div></div>
+    <div class="node db rev" data-t="5500" style="left:680px;top:396px;width:320px;height:84px">
+      <div class="ico"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
+<path d="M25.6 36.18C25.602 36.6364 25.7391 37.0821 25.9942 37.4606C26.2492 37.8392 26.6106 38.1337 27.0329 38.307C27.4552 38.4803 27.9193 38.5246 28.3668 38.4344C28.8142 38.3441 29.2249 38.1233 29.5469 37.7999C29.869 37.4764 30.088 37.0648 30.1763 36.617C30.2646 36.1692 30.2183 35.7052 30.0432 35.2837C29.8681 34.8622 29.572 34.502 29.1923 34.2486C28.8127 33.9952 28.3664 33.86 27.91 33.86C27.6058 33.86 27.3046 33.9201 27.0237 34.0368C26.7428 34.1535 26.4877 34.3245 26.273 34.5401C26.0584 34.7557 25.8885 35.0115 25.773 35.2929C25.6575 35.5743 25.5987 35.8758 25.6 36.18Z" fill="#FF5F46"/>
+<path d="M34.51 36.18C34.51 36.6388 34.6461 37.0874 34.901 37.4689C35.1559 37.8504 35.5183 38.1478 35.9422 38.3234C36.3661 38.499 36.8326 38.5449 37.2826 38.4554C37.7327 38.3659 38.146 38.1449 38.4705 37.8205C38.795 37.496 39.0159 37.0826 39.1054 36.6326C39.195 36.1826 39.149 35.7161 38.9734 35.2922C38.7978 34.8682 38.5005 34.5059 38.1189 34.251C37.7374 33.9961 37.2889 33.86 36.83 33.86C36.2147 33.86 35.6246 34.1044 35.1895 34.5395C34.7544 34.9746 34.51 35.5647 34.51 36.18Z" fill="#FF5F46"/>
+<path d="M43.4301 36.18C43.4301 36.6393 43.5664 37.0882 43.8218 37.47C44.0771 37.8517 44.44 38.149 44.8646 38.3243C45.2891 38.4996 45.756 38.545 46.2064 38.4547C46.6567 38.3643 47.07 38.1424 47.3941 37.8169C47.7181 37.4915 47.9383 37.0771 48.0267 36.6265C48.1151 36.1758 48.0677 35.709 47.8906 35.2852C47.7134 34.8615 47.4145 34.4998 47.0317 34.2461C46.6489 33.9924 46.1993 33.858 45.7401 33.86C45.1265 33.8627 44.5389 34.1082 44.106 34.543C43.6731 34.9778 43.43 35.5664 43.4301 36.18Z" fill="#FF5F46"/>
+<path d="M122.93 112.58V58.24H27.0699V112.58H30.0699V96.47H45.6399V112.58H48.6399V96.47H64.2199V112.58H67.2199V96.47H82.7899V112.58H85.7899V96.47H101.36V112.58H104.36V96.47H119.93V112.58H122.93ZM119.93 75.85H104.36V61.24H119.93V75.85ZM67.2199 61.24H82.7899V75.85H67.2199V61.24ZM64.2199 75.85H48.6399V61.24H64.2199V75.85ZM85.7899 61.24H101.36V75.85H85.7899V61.24ZM45.6399 61.24V75.85H30.0699V61.24H45.6399ZM30.0699 93.47V78.85H45.6399V93.47H30.0699ZM48.6399 93.47V78.85H64.2199V93.47H48.6399ZM67.2199 93.47V78.85H82.7899V93.47H67.2199ZM85.7899 93.47V78.85H101.36V93.47H85.7899ZM104.36 93.47V78.85H119.93V93.47H104.36Z" fill="#FF5F46"/>
+</svg></div><div><div class="name">expense_benchmarks</div><div class="desc">Port, expense, vessel size: median, regional min</div></div></div>
+    <div class="node db rev" data-t="5700" style="left:680px;top:496px;width:320px;height:84px">
+      <div class="ico"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
+<path d="M25.6 36.18C25.602 36.6364 25.7391 37.0821 25.9942 37.4606C26.2492 37.8392 26.6106 38.1337 27.0329 38.307C27.4552 38.4803 27.9193 38.5246 28.3668 38.4344C28.8142 38.3441 29.2249 38.1233 29.5469 37.7999C29.869 37.4764 30.088 37.0648 30.1763 36.617C30.2646 36.1692 30.2183 35.7052 30.0432 35.2837C29.8681 34.8622 29.572 34.502 29.1923 34.2486C28.8127 33.9952 28.3664 33.86 27.91 33.86C27.6058 33.86 27.3046 33.9201 27.0237 34.0368C26.7428 34.1535 26.4877 34.3245 26.273 34.5401C26.0584 34.7557 25.8885 35.0115 25.773 35.2929C25.6575 35.5743 25.5987 35.8758 25.6 36.18Z" fill="#FF5F46"/>
+<path d="M34.51 36.18C34.51 36.6388 34.6461 37.0874 34.901 37.4689C35.1559 37.8504 35.5183 38.1478 35.9422 38.3234C36.3661 38.499 36.8326 38.5449 37.2826 38.4554C37.7327 38.3659 38.146 38.1449 38.4705 37.8205C38.795 37.496 39.0159 37.0826 39.1054 36.6326C39.195 36.1826 39.149 35.7161 38.9734 35.2922C38.7978 34.8682 38.5005 34.5059 38.1189 34.251C37.7374 33.9961 37.2889 33.86 36.83 33.86C36.2147 33.86 35.6246 34.1044 35.1895 34.5395C34.7544 34.9746 34.51 35.5647 34.51 36.18Z" fill="#FF5F46"/>
+<path d="M43.4301 36.18C43.4301 36.6393 43.5664 37.0882 43.8218 37.47C44.0771 37.8517 44.44 38.149 44.8646 38.3243C45.2891 38.4996 45.756 38.545 46.2064 38.4547C46.6567 38.3643 47.07 38.1424 47.3941 37.8169C47.7181 37.4915 47.9383 37.0771 48.0267 36.6265C48.1151 36.1758 48.0677 35.709 47.8906 35.2852C47.7134 34.8615 47.4145 34.4998 47.0317 34.2461C46.6489 33.9924 46.1993 33.858 45.7401 33.86C45.1265 33.8627 44.5389 34.1082 44.106 34.543C43.6731 34.9778 43.43 35.5664 43.4301 36.18Z" fill="#FF5F46"/>
+<path d="M122.93 112.58V58.24H27.0699V112.58H30.0699V96.47H45.6399V112.58H48.6399V96.47H64.2199V112.58H67.2199V96.47H82.7899V112.58H85.7899V96.47H101.36V112.58H104.36V96.47H119.93V112.58H122.93ZM119.93 75.85H104.36V61.24H119.93V75.85ZM67.2199 61.24H82.7899V75.85H67.2199V61.24ZM64.2199 75.85H48.6399V61.24H64.2199V75.85ZM85.7899 61.24H101.36V75.85H85.7899V61.24ZM45.6399 61.24V75.85H30.0699V61.24H45.6399ZM30.0699 93.47V78.85H45.6399V93.47H30.0699ZM48.6399 93.47V78.85H64.2199V93.47H48.6399ZM67.2199 93.47V78.85H82.7899V93.47H67.2199ZM85.7899 93.47V78.85H101.36V93.47H85.7899ZM104.36 93.47V78.85H119.93V93.47H104.36Z" fill="#FF5F46"/>
+</svg></div><div><div class="name">port_call_costs</div><div class="desc">One row per port call: quoted, final, variance</div></div></div>
+    <div class="zc rev" data-t="7000" style="left:1040px;top:196px;width:196px;height:234px;border-top-color:var(--lava)">
+      <div class="zh"><svg viewBox="0 0 512 512" fill="none"><rect x="96" y="56" width="320" height="400" rx="32" fill="#FABFBA"/><path d="M150 170L190 210L262 138" stroke="#FF5F46" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/><rect x="290" y="160" width="80" height="26" rx="13" fill="#fff"/><path d="M160 300L220 360M220 300L160 360" stroke="#FF5F46" stroke-width="30" stroke-linecap="round"/><rect x="290" y="318" width="80" height="26" rx="13" fill="#fff"/></svg>Verdicts</div>
+      <div class="kv mk2" data-t="7200"><span>MATCH</span></div>
+      <div class="kv mk" data-t="7300"><span>OVER_QUOTE</span></div>
+      <div class="kv"><span>UNDER_QUOTE</span></div>
+      <div class="kv"><span>CURRENCY_MISMATCH</span></div>
+      <div class="kv"><span>NO_EVIDENCE</span></div>
+    </div>
+    <div class="nocall rev" data-t="7700" style="left:1040px;top:452px;width:196px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>No LLM in the math: same input, same verdict</div>
+  </section>
+
+  <!-- ============ PART 4: METRIC VIEWS AND GENIE ============ -->
+  <section class="scene" data-scene="4" data-dur="8500">
+    <div class="stitle rev" data-t="0"><div class="k">Part 4</div><div class="h">Metric views power the Genie agents</div></div>
+    <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; governed in Unity Catalog</span></div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="m1" class="wire hot" pathLength="1" d="M 284 396 L 338 396" data-t="1300"/>
+      <path id="m2" class="wire" pathLength="1" d="M 670 396 C 700 396, 700 256, 728 256" data-t="3300"/>
+      <path id="m3" class="wire" pathLength="1" d="M 670 396 L 728 396" data-t="3400"/>
+      <path id="m4" class="wire" pathLength="1" d="M 670 396 C 700 396, 700 520, 728 520" data-t="3500"/>
+      <path id="m5" class="wire" pathLength="1" d="M 980 256 C 1005 256, 1000 370, 1014 370" data-t="5500"/>
+      <path id="m6" class="wire" pathLength="1" d="M 980 396 L 1014 396" data-t="5550"/>
+      <path id="m7" class="wire" pathLength="1" d="M 980 520 C 1005 520, 1000 422, 1014 422" data-t="5600"/>
+      <circle class="pulse" r="5" data-t="1600"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#m1"/></animateMotion></circle>
+    </svg>
+    <div class="zc rev" data-t="300" style="left:54px;top:246px;width:230px;height:300px;border-top-color:var(--navy)">
+      <div class="zh"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
+<path d="M25.6 36.18C25.602 36.6364 25.7391 37.0821 25.9942 37.4606C26.2492 37.8392 26.6106 38.1337 27.0329 38.307C27.4552 38.4803 27.9193 38.5246 28.3668 38.4344C28.8142 38.3441 29.2249 38.1233 29.5469 37.7999C29.869 37.4764 30.088 37.0648 30.1763 36.617C30.2646 36.1692 30.2183 35.7052 30.0432 35.2837C29.8681 34.8622 29.572 34.502 29.1923 34.2486C28.8127 33.9952 28.3664 33.86 27.91 33.86C27.6058 33.86 27.3046 33.9201 27.0237 34.0368C26.7428 34.1535 26.4877 34.3245 26.273 34.5401C26.0584 34.7557 25.8885 35.0115 25.773 35.2929C25.6575 35.5743 25.5987 35.8758 25.6 36.18Z" fill="#FF5F46"/>
+<path d="M34.51 36.18C34.51 36.6388 34.6461 37.0874 34.901 37.4689C35.1559 37.8504 35.5183 38.1478 35.9422 38.3234C36.3661 38.499 36.8326 38.5449 37.2826 38.4554C37.7327 38.3659 38.146 38.1449 38.4705 37.8205C38.795 37.496 39.0159 37.0826 39.1054 36.6326C39.195 36.1826 39.149 35.7161 38.9734 35.2922C38.7978 34.8682 38.5005 34.5059 38.1189 34.251C37.7374 33.9961 37.2889 33.86 36.83 33.86C36.2147 33.86 35.6246 34.1044 35.1895 34.5395C34.7544 34.9746 34.51 35.5647 34.51 36.18Z" fill="#FF5F46"/>
+<path d="M43.4301 36.18C43.4301 36.6393 43.5664 37.0882 43.8218 37.47C44.0771 37.8517 44.44 38.149 44.8646 38.3243C45.2891 38.4996 45.756 38.545 46.2064 38.4547C46.6567 38.3643 47.07 38.1424 47.3941 37.8169C47.7181 37.4915 47.9383 37.0771 48.0267 36.6265C48.1151 36.1758 48.0677 35.709 47.8906 35.2852C47.7134 34.8615 47.4145 34.4998 47.0317 34.2461C46.6489 33.9924 46.1993 33.858 45.7401 33.86C45.1265 33.8627 44.5389 34.1082 44.106 34.543C43.6731 34.9778 43.43 35.5664 43.4301 36.18Z" fill="#FF5F46"/>
+<path d="M122.93 112.58V58.24H27.0699V112.58H30.0699V96.47H45.6399V112.58H48.6399V96.47H64.2199V112.58H67.2199V96.47H82.7899V112.58H85.7899V96.47H101.36V112.58H104.36V96.47H119.93V112.58H122.93ZM119.93 75.85H104.36V61.24H119.93V75.85ZM67.2199 61.24H82.7899V75.85H67.2199V61.24ZM64.2199 75.85H48.6399V61.24H64.2199V75.85ZM85.7899 61.24H101.36V75.85H85.7899V61.24ZM45.6399 61.24V75.85H30.0699V61.24H45.6399ZM30.0699 93.47V78.85H45.6399V93.47H30.0699ZM48.6399 93.47V78.85H64.2199V93.47H48.6399ZM67.2199 93.47V78.85H82.7899V93.47H67.2199ZM85.7899 93.47V78.85H101.36V93.47H85.7899ZM104.36 93.47V78.85H119.93V93.47H104.36Z" fill="#FF5F46"/>
+</svg>Gold tables</div><div class="zs">From Part 3</div>
+      <div class="kv"><span>expense_reconciliation</span></div>
+      <div class="kv"><span>payment_validation</span></div>
+      <div class="kv"><span>expense_benchmarks</span></div>
+      <div class="kv"><span>port_call_costs</span></div>
+      <div class="kv"><span>platform_usage</span></div>
+      <div class="kv"><span>document_quality</span></div>
+    </div>
+    <div class="zc rev" data-t="1500" style="left:340px;top:206px;width:330px;height:380px;border-top-color:var(--lava)">
+      <div class="zh"><svg viewBox="0 0 512 512" fill="none"><rect x="48" y="64" width="416" height="384" rx="36" fill="#FABFBA"/><rect x="112" y="272" width="64" height="112" rx="10" fill="#FF5F46"/><rect x="224" y="192" width="64" height="192" rx="10" fill="#FF5F46"/><rect x="336" y="128" width="64" height="256" rx="10" fill="#FF5F46"/><path d="M96 400H416" stroke="#fff" stroke-width="22" stroke-linecap="round"/></svg>Metric views</div><div class="zs">One definition per KPI, joins to the dimensions included</div>
+      <div class="kv mk" data-t="1800"><span>port_call_costs</span><b>cost per call</b></div>
+      <div class="kv mk" data-t="1900"><span>expense_reconciliation</span><b>over-invoiced</b></div>
+      <div class="kv mk" data-t="2000"><span>benchmark_savings</span><b>potential savings</b></div>
+      <div class="kv mk2" data-t="2100"><span>payment_validation</span><b>mismatch rate</b></div>
+      <div class="kv mk2" data-t="2200"><span>platform_usage</span><b>active users</b></div>
+      <div class="kv mk2" data-t="2300"><span>document_quality</span><b>mean confidence</b></div>
+      <div class="formula" style="margin-top:12px">Synonyms and display names in the YAML help Genie pick the right measure</div>
+    </div>
+    <div class="node db rev" data-t="3600" style="left:730px;top:206px;width:250px;height:100px">
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
+<path d="M459.812 206.815C428.864 256.533 382.402 324.948 361.655 342.503C340.909 360.058 310.141 391.703 238.824 391.703C188.862 391.703 145.885 359.614 126.81 313.595C126.811 313.648 126.811 313.703 126.812 313.756C124.109 307.041 117.538 302.298 109.855 302.297C99.7606 302.297 91.5767 310.481 91.5767 320.576C91.5769 322.945 92.0279 325.113 92.8485 327.047C97.2392 337.39 108.92 337.83 108.92 370.096C108.92 374.793 108.92 366.343 108.92 370.096C78.5784 370.096 53.9815 345.498 53.9809 315.157C53.9809 284.815 78.5781 260.218 108.92 260.218H116.288V260.208H203.559C210.079 260.208 216.337 262.969 220.41 268.059C227.547 276.978 233.017 285.281 237.048 292.133C240.783 298.481 251.969 298.543 255.667 292.173C259.566 285.456 264.744 277.343 271.309 268.619C275.386 263.201 281.863 260.208 288.644 260.208H321.094C368.515 260.208 394.508 237.472 407.78 221.085C414.648 212.606 424.403 206.815 435.315 206.815H459.812Z" fill="#FABFBA"/>
+<path d="M246.744 286.125C246.743 224.929 197.938 175.293 137.646 175.064C197.938 174.835 246.744 125.196 246.744 64C246.744 64 246.744 64 246.744 64C246.744 125.338 295.778 175.063 356.263 175.063C295.778 175.063 246.744 224.787 246.744 286.125Z" fill="#FF5F46"/>
+</svg></div><div><div class="name">Port cost analyst</div><div class="desc">Costs, benchmarks and savings by port and vessel</div></div></div>
+    <div class="node db rev" data-t="3900" style="left:730px;top:346px;width:250px;height:100px">
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
+<path d="M459.812 206.815C428.864 256.533 382.402 324.948 361.655 342.503C340.909 360.058 310.141 391.703 238.824 391.703C188.862 391.703 145.885 359.614 126.81 313.595C126.811 313.648 126.811 313.703 126.812 313.756C124.109 307.041 117.538 302.298 109.855 302.297C99.7606 302.297 91.5767 310.481 91.5767 320.576C91.5769 322.945 92.0279 325.113 92.8485 327.047C97.2392 337.39 108.92 337.83 108.92 370.096C108.92 374.793 108.92 366.343 108.92 370.096C78.5784 370.096 53.9815 345.498 53.9809 315.157C53.9809 284.815 78.5781 260.218 108.92 260.218H116.288V260.208H203.559C210.079 260.208 216.337 262.969 220.41 268.059C227.547 276.978 233.017 285.281 237.048 292.133C240.783 298.481 251.969 298.543 255.667 292.173C259.566 285.456 264.744 277.343 271.309 268.619C275.386 263.201 281.863 260.208 288.644 260.208H321.094C368.515 260.208 394.508 237.472 407.78 221.085C414.648 212.606 424.403 206.815 435.315 206.815H459.812Z" fill="#FABFBA"/>
+<path d="M246.744 286.125C246.743 224.929 197.938 175.293 137.646 175.064C197.938 174.835 246.744 125.196 246.744 64C246.744 64 246.744 64 246.744 64C246.744 125.338 295.778 175.063 356.263 175.063C295.778 175.063 246.744 224.787 246.744 286.125Z" fill="#FF5F46"/>
+</svg></div><div><div class="name">DA audit</div><div class="desc">Verdicts and bank checks, with invoice pages</div></div></div>
+    <div class="node db rev" data-t="4200" style="left:730px;top:470px;width:250px;height:100px">
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
+<path d="M459.812 206.815C428.864 256.533 382.402 324.948 361.655 342.503C340.909 360.058 310.141 391.703 238.824 391.703C188.862 391.703 145.885 359.614 126.81 313.595C126.811 313.648 126.811 313.703 126.812 313.756C124.109 307.041 117.538 302.298 109.855 302.297C99.7606 302.297 91.5767 310.481 91.5767 320.576C91.5769 322.945 92.0279 325.113 92.8485 327.047C97.2392 337.39 108.92 337.83 108.92 370.096C108.92 374.793 108.92 366.343 108.92 370.096C78.5784 370.096 53.9815 345.498 53.9809 315.157C53.9809 284.815 78.5781 260.218 108.92 260.218H116.288V260.208H203.559C210.079 260.208 216.337 262.969 220.41 268.059C227.547 276.978 233.017 285.281 237.048 292.133C240.783 298.481 251.969 298.543 255.667 292.173C259.566 285.456 264.744 277.343 271.309 268.619C275.386 263.201 281.863 260.208 288.644 260.208H321.094C368.515 260.208 394.508 237.472 407.78 221.085C414.648 212.606 424.403 206.815 435.315 206.815H459.812Z" fill="#FABFBA"/>
+<path d="M246.744 286.125C246.743 224.929 197.938 175.293 137.646 175.064C197.938 174.835 246.744 125.196 246.744 64C246.744 64 246.744 64 246.744 64C246.744 125.338 295.778 175.063 356.263 175.063C295.778 175.063 246.744 224.787 246.744 286.125Z" fill="#FF5F46"/>
+</svg></div><div><div class="name">Platform usage</div><div class="desc">Active users, DAs created, approval times</div></div></div>
+    <div class="node hero rev" data-t="5800" style="left:1016px;top:318px;width:220px;height:156px">
+      <span class="badge on">next phase</span>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg></div><div><div class="name">Supervisor agent</div><div class="desc">Routes each chat question to the right Genie agent, adds document search</div></div></div>
+  </section>
+
+  <!-- ============ PART 5: ONE EXPENSE LINE ============ -->
+  <section class="scene" data-scene="5" data-dur="11000">
+    <div class="stitle rev" data-t="0"><div class="k">Zoom in &middot; mock data</div><div class="h">One expense line, end to end</div></div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="z1" class="wire" pathLength="1" d="M 394 290 L 428 290" data-t="3700"/>
+      <path id="z2" class="wire hot" pathLength="1" d="M 394 502 L 428 502" data-t="3800"/>
+      <path id="z3" class="wire" pathLength="1" d="M 830 267 L 864 267" data-t="7300"/>
+      <path id="z4" class="wire" pathLength="1" d="M 830 480 L 864 480" data-t="7400"/>
+    </svg>
+    <div class="zc rev" data-t="500" style="left:54px;top:192px;width:340px;height:196px;border-top-color:var(--navy)">
+      <div class="zh"><svg viewBox="0 0 512 512" fill="none"><ellipse cx="256" cy="120" rx="160" ry="56" fill="#FF5F46"/><path d="M96 120V392C96 423 168 448 256 448C344 448 416 423 416 392V120C416 151 344 176 256 176C168 176 96 151 96 120Z" fill="#FABFBA"/><path d="M96 256C96 287 168 312 256 312C344 312 416 287 416 256" stroke="#FF5F46" stroke-width="24"/></svg>From the platform<span class="tagsrc lk">platform</span></div>
+      <div class="kv"><span>port call</span><b>Rotterdam &middot; bulk, 32,400 GT</b></div>
+      <div class="kv mk2" data-t="900"><span>quote (PDA)</span><b>Pilotage 2,500.00 EUR</b></div>
+      <div class="kv mk2" data-t="1100"><span>final (FDA)</span><b>Pilotage 2,730.00 EUR</b></div>
+      <div class="kv"><span>agent IBAN, column mask</span><b>NL** **** 4417</b></div>
+    </div>
+    <div class="zc rev" data-t="2100" style="left:54px;top:404px;width:340px;height:196px;border-top-color:var(--lava)">
+      <div class="zh"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg>From the invoice PDF<span class="tagsrc req">document</span></div>
+      <div class="kv"><span>document type</span><b>final invoice</b></div>
+      <div class="kv mk" data-t="2500"><span>page 4</span><b>Pilotage &middot; confidence 0.93</b></div>
+      <div class="kv mk" data-t="2700"><span>amount on page</span><b>2,730.00 EUR</b></div>
+      <div class="kv"><span>IBAN on invoice</span><b>NL** **** 4417</b></div>
+    </div>
+    <div class="ep rev" data-t="3900" style="left:430px;top:192px;width:400px;height:408px">
+      <div class="bar"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M125.97 93.0402C131.97 89.5402 136.01 83.0302 136.01 75.5702C136.01 64.4102 126.96 55.3602 115.8 55.3602H108.64C107.69 37.6002 93 23.4902 75 23.4902C57 23.4902 42.31 37.6002 41.36 55.3602H34.2C23.04 55.3602 13.99 64.4102 13.99 75.5702C13.99 86.7302 23.04 95.7802 34.2 95.7802H114.42" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M114.42 95.7803V79.5903H108.97" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M95.89 79.5903H35.58V95.7803" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M42.8 95.7803H114.42V111.97H77.05" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M63.8199 111.97H35.58" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M42.8 87.6904H44.2" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M52.61 87.6904H87.48" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M99.63 87.6904H103.36" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M42.8 103.88H44.2" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M52.61 103.88H71.29" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M83.28 103.88H103.36" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+<path d="M110.06 66.9204L50.48 126.5" stroke="#FFFFFF" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
+</svg>Gold rules for this line<span class="tag">plain SQL</span></div>
+      <div class="step rev" data-t="4200"><div class="n">1</div><div class="tx">Quote vs final<span>+230.00 EUR, +9.2% over the quote</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M152 448L448 448V272L152 272C103.399 272 64 311.399 64 360C64 408.601 103.399 448 152 448ZM152 400C174.091 400 192 382.091 192 360C192 337.909 174.091 320 152 320C129.909 320 112 337.909 112 360C112 382.091 129.909 400 152 400Z" fill="#FF5F46"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M360 240C408.601 240 448 200.601 448 152C448 103.399 408.601 64 360 64L64 64V240L360 240ZM360 192C382.091 192 400 174.091 400 152C400 129.909 382.091 112 360 112C337.909 112 320 129.909 320 152C320 174.091 337.909 192 360 192Z" fill="#FABFBA"/>
+</svg></div></div>
+      <div class="step rev" data-t="4700"><div class="n">2</div><div class="tx">Evidence<span>Invoice page 4 shows 2,730.00 EUR, same as the final</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg></div></div>
+      <div class="step rev" data-t="5200"><div class="n">3</div><div class="tx">Bank details<span>IBAN matches the agent on file: MATCH</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><rect x="96" y="56" width="320" height="400" rx="32" fill="#FABFBA"/><path d="M150 170L190 210L262 138" stroke="#FF5F46" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/><rect x="290" y="160" width="80" height="26" rx="13" fill="#fff"/><path d="M160 300L220 360M220 300L160 360" stroke="#FF5F46" stroke-width="30" stroke-linecap="round"/><rect x="290" y="318" width="80" height="26" rx="13" fill="#fff"/></svg></div></div>
+      <div class="step rev" data-t="6100"><div class="n">4</div><div class="tx">Benchmark<span>Port median 2,310.00 EUR for this size: final is +18.2%</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><rect x="48" y="64" width="416" height="384" rx="36" fill="#FABFBA"/><rect x="112" y="272" width="64" height="112" rx="10" fill="#FF5F46"/><rect x="224" y="192" width="64" height="192" rx="10" fill="#FF5F46"/><rect x="336" y="128" width="64" height="256" rx="10" fill="#FF5F46"/><path d="M96 400H416" stroke="#fff" stroke-width="22" stroke-linecap="round"/></svg></div></div>
+    </div>
+    <div class="dec rev" data-t="7500" style="left:866px;top:192px;width:370px;height:150px">
+      <div class="row"><div class="lbl">Verdict: OVER_QUOTE</div><div class="ok" style="background:#E8A23A">REVIEW</div></div>
+      <div class="zones"><i style="width:13.3%;background:#BFE6D6"></i><i style="width:53.4%;background:#F7DDB0"></i><i style="width:33.3%;background:#FFD2CB"></i>
+        <div class="marker" style="left:61.3%"><b>+9.2%</b></div></div>
+      <div class="zticks" style="white-space:nowrap"><span style="flex:1.4">match &le; 2%</span><span style="flex:3;text-align:center">review 2 to 10%</span><span style="text-align:right;flex:1.6">dispute &gt; 10%</span></div>
+      <div class="note">Example policy, set by you</div>
+    </div>
+    <div class="zc rev" data-t="8000" style="left:866px;top:362px;width:370px;height:238px;border-top-color:var(--navy)">
+      <div class="zh"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
+<path d="M459.812 206.815C428.864 256.533 382.402 324.948 361.655 342.503C340.909 360.058 310.141 391.703 238.824 391.703C188.862 391.703 145.885 359.614 126.81 313.595C126.811 313.648 126.811 313.703 126.812 313.756C124.109 307.041 117.538 302.298 109.855 302.297C99.7606 302.297 91.5767 310.481 91.5767 320.576C91.5769 322.945 92.0279 325.113 92.8485 327.047C97.2392 337.39 108.92 337.83 108.92 370.096C108.92 374.793 108.92 366.343 108.92 370.096C78.5784 370.096 53.9815 345.498 53.9809 315.157C53.9809 284.815 78.5781 260.218 108.92 260.218H116.288V260.208H203.559C210.079 260.208 216.337 262.969 220.41 268.059C227.547 276.978 233.017 285.281 237.048 292.133C240.783 298.481 251.969 298.543 255.667 292.173C259.566 285.456 264.744 277.343 271.309 268.619C275.386 263.201 281.863 260.208 288.644 260.208H321.094C368.515 260.208 394.508 237.472 407.78 221.085C414.648 212.606 424.403 206.815 435.315 206.815H459.812Z" fill="#FABFBA"/>
+<path d="M246.744 286.125C246.743 224.929 197.938 175.293 137.646 175.064C197.938 174.835 246.744 125.196 246.744 64C246.744 64 246.744 64 246.744 64C246.744 125.338 295.778 175.063 356.263 175.063C295.778 175.063 246.744 224.787 246.744 286.125Z" fill="#FF5F46"/>
+</svg>What the DA audit agent answers</div>
+      <div class="ans">"Pilotage was invoiced <b>9.2% above the quote</b>: 2,730.00 vs 2,500.00 EUR, invoice page 4. Bank details match. The final is 18.2% above the port median for this vessel size."</div>
+      <div class="kv mk" data-t="8500"><span>over_invoiced_amount</span><b>230.00 EUR</b></div>
+      <div class="kv mk" data-t="8600"><span>benchmark_gap_pct</span><b>18.2%</b></div>
+    </div>
+  </section>
+
+  <div class="cap"><div class="bar"></div><div class="txt" id="cap"></div></div>
+  <div class="hint">Space: pause &nbsp; Left/Right: part</div>
+</div></div>
+
+<script>
+const CAPS = {
+  0: [[0, 'Platform data and documents land in S3, meet in <b>one gold layer</b>, and Genie agents query it through <b>metric views</b>']],
+  1: [[0, 'Your platform data already lands in S3 through <b>DMS: full load plus CDC</b>'],
+      [1400, 'DMS writes Parquet per table, every row tagged <b>I, U or D</b>'],
+      [2600, 'Auto Loader picks up only the new files into <b>bronze</b>: nothing is lost'],
+      [4000, 'AUTO CDC applies the changes in commit order: <b>SCD 1 or SCD 2 per table</b>'],
+      [6000, 'Your example: an appointment goes from in process to <b>cancelled</b>, history kept'],
+      [8200, 'One serverless pipeline, <b>hourly today</b>, continuous later for the near real time tables']],
+  2: [[0, 'Documents land in a <b>second S3 bucket</b>, keyed by DA and attachment'],
+      [1200, 'Auto Loader reads each new PDF once as a <b>binary file</b>; the path gives the join keys'],
+      [2600, 'Step 1: <b>ai_parse_document</b> returns the text of every page, with page numbers'],
+      [4200, 'Steps 2 and 3: classify the document, then <b>map every page to an expense</b>'],
+      [5800, 'Step 4: <b>ai_extract</b> pulls line items, totals and bank details, with confidence'],
+      [7000, 'Step 5: the statement of facts becomes an <b>ordered event timeline</b>'],
+      [8200, 'Every result lands once in <b>Delta</b>: no LLM call on any downstream query']],
+  3: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
+      [600, 'Platform data brings the <b>quote, the final DA and the tariffs</b>'],
+      [1800, 'Documents bring <b>what the invoice actually says</b>, page by page'],
+      [3000, 'They join on the <b>DA, the attachment and the expense category</b>'],
+      [4600, 'Business rules run as <b>plain SQL</b>: tolerances, currency checks, bank matching'],
+      [6800, 'Every line gets a <b>verdict the agents can explain</b>']],
+  4: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
+      [1200, 'Gold tables feed <b>metric views</b>: one definition per KPI, in Unity Catalog'],
+      [3200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
+      [5400, 'Next phase: a <b>supervisor agent</b> routes every chat question to the right one']],
+  5: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
+      [400, 'The platform says: quoted <b>2,500 EUR</b>, final <b>2,730 EUR</b>'],
+      [2000, 'The invoice says <b>2,730 EUR on page 4</b>, confidence 0.93'],
+      [3600, 'Gold rules: <b>+9.2% over the quote</b>, evidence found, bank details match'],
+      [6000, 'Against the benchmark the final is <b>18.2% above the port median</b>'],
+      [7200, 'Verdict <b>review</b> under the example policy, with an answer the agent can cite']]
+};
+const scenes = [...document.querySelectorAll('.scene')];
+const capEl = document.getElementById('cap');
+const MODE = new URLSearchParams(location.search).get('mode') || 'present';
+let cur = -1, step = 0, timers = [], paused = false;
+
+function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+function setCap(html, instant){
+  if (instant){ capEl.innerHTML = html; capEl.style.opacity = 1; return; }
+  capEl.style.opacity = 0; setTimeout(() => { capEl.innerHTML = html; capEl.style.opacity = 1; }, 250);
+}
+function reveal(el){
+  el.classList.add('on');
+  if (el.tagName === 'path' && el.classList.contains('wire')) el.setAttribute('marker-end', 'url(#' + (el.classList.contains('hot') ? 'ah' : 'ag') + ')');
+  const am = el.querySelector && el.querySelector('animateMotion');
+  if (am) am.beginElement();
+}
+function reset(sc){
+  sc.querySelectorAll('.rev,.wire,.wlabel,.pulse,.mk,.mk2').forEach(e => { e.classList.remove('on'); if (e.tagName === 'path') e.removeAttribute('marker-end'); });
+}
+function pills(i){
+  document.querySelectorAll('.pill').forEach(p => {
+    const n = +p.dataset.p; p.classList.toggle('cur', n === i); p.classList.toggle('done', n < i);
+  });
+}
+function enter(i){
+  clearTimers();
+  scenes.forEach(s => s.classList.remove('show'));
+  const sc = scenes[i]; reset(sc); sc.classList.add('show'); cur = i; pills(i);
+  return sc;
+}
+function bounds(i){ return (CAPS[i] || [[0, '']]).map(c => c[0]); }
+function stepEls(sc, i, k){
+  const b = bounds(i), lo = b[k], hi = k + 1 < b.length ? b[k + 1] : Infinity;
+  return [...sc.querySelectorAll('[data-t]')].filter(e => +e.dataset.t >= lo && +e.dataset.t < hi).map(e => [e, +e.dataset.t - lo]);
+}
+
+/* auto mode: timed playback, loops */
+function show(i, staticMode){
+  const sc = enter(i);
+  const els = [...sc.querySelectorAll('[data-t]')];
+  if (staticMode){ els.forEach(reveal); const c = CAPS[i]; capEl.innerHTML = c[c.length-1][1]; return; }
+  els.forEach(e => timers.push(setTimeout(() => reveal(e), +e.dataset.t + 200)));
+  (CAPS[i] || []).forEach(([t, html]) => timers.push(setTimeout(() => setCap(html), t)));
+  timers.push(setTimeout(() => { if (!paused) show((i + 1) % scenes.length); }, +sc.dataset.dur));
+}
+
+/* presenter mode: one key press = one step */
+function present(i, k, animate){
+  const sc = (i !== cur || !animate) ? enter(i) : scenes[i];
+  clearTimers(); step = k;
+  if (!animate){
+    for (let j = 0; j <= k; j++) stepEls(sc, i, j).forEach(([e]) => reveal(e));
+  } else {
+    // finish earlier steps instantly (a fast key press must not leave anything hidden), then animate this step
+    for (let j = 0; j < k; j++) stepEls(sc, i, j).forEach(([e]) => { if (!e.classList.contains('on')) reveal(e); });
+    stepEls(sc, i, k).forEach(([e, d]) => timers.push(setTimeout(() => reveal(e), d + 150)));
+  }
+  setCap(CAPS[i][k][1], !animate);
+  progress();
+}
+function next(){
+  if (step + 1 < bounds(cur).length) present(cur, step + 1, true);
+  else if (cur + 1 < scenes.length) { enter(cur + 1); present(cur, 0, true); }
+}
+function prev(){
+  if (step > 0) present(cur, step - 1, false);
+  else if (cur > 0) present(cur - 1, bounds(cur - 1).length - 1, false);
+}
+function partName(i){
+  const p = document.querySelector('.pill[data-p="' + i + '"]');
+  return p ? p.lastChild.textContent.trim() : 'Part ' + i;
+}
+function progress(){
+  const h = document.querySelector('.hint'); if (!h || MODE !== 'present') return;
+  h.textContent = partName(cur) + '  ' + (step + 1) + '/' + bounds(cur).length + '   ·   click a tab, or use the arrow keys';
+}
+
+// arrow markers
+const svgns = 'http://www.w3.org/2000/svg';
+const defs = document.createElementNS(svgns, 'svg'); defs.setAttribute('width', 0); defs.setAttribute('height', 0); defs.style.position = 'absolute';
+defs.innerHTML = '<defs><marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#CDD5DB"/></marker><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#FF3621"/></marker></defs>';
+document.body.prepend(defs);
+
+function fit(){ const s = Math.min(innerWidth / 1280, innerHeight / 720); document.getElementById('stage').style.transform = 'scale(' + s + ')'; }
+addEventListener('resize', fit); fit();
+addEventListener('keydown', e => {
+  if (MODE === 'present'){
+    if (['ArrowRight','Space','PageDown','Enter','ArrowDown'].includes(e.code)){ e.preventDefault(); next(); }
+    if (['ArrowLeft','PageUp','Backspace','ArrowUp'].includes(e.code)){ e.preventDefault(); prev(); }
+    if (/^Digit[0-9]$/.test(e.code) && +e.code.slice(5) < scenes.length) { const i = +e.code.slice(5); enter(i); present(i, bounds(i).length - 1, false); }
+    if (e.code === 'Home') { enter(0); present(0, 0, true); }
+    if (e.code === 'KeyR') { const i = cur; enter(i); present(i, 0, true); }
+    return;
+  }
+  if (e.code === 'Space'){ paused = !paused; if (!paused) show(cur); }
+  if (e.code === 'ArrowRight') show((cur + 1) % scenes.length);
+  if (e.code === 'ArrowLeft') show((cur - 1 + scenes.length) % scenes.length);
+  if (/^Digit[0-9]$/.test(e.code) && +e.code.slice(5) < scenes.length) show(+e.code.slice(5));
+});
+if (MODE === 'present') addEventListener('click', next);
+// links open in a new tab without advancing the presentation
+document.querySelectorAll('a.uclink').forEach(a => a.addEventListener('click', e => e.stopPropagation()));
+// overview cards open their part
+document.querySelectorAll('.blk[data-go]').forEach(c => c.addEventListener('click', e => {
+  e.stopPropagation();
+  const i = +c.dataset.go;
+  if (MODE === 'present') { enter(i); present(i, bounds(i).length - 1, false); } else { paused = true; show(i, true); }
+}));
+// tabs: click to open a part immediately, fully shown
+document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', e => {
+  e.stopPropagation();
+  const i = +p.dataset.p;
+  if (MODE === 'present') { enter(i); present(i, bounds(i).length - 1, false); }
+  else { paused = true; show(i, true); }
+}));
+const q = new URLSearchParams(location.search);
+if (q.has('nohint')) document.querySelector('.hint').style.display = 'none';
+const first = q.has('scene') ? +q.get('scene') : 0;
+if (MODE === 'present') { enter(first); present(first, 0, true); }
+else show(first, q.has('static'));
+</script>
+</body>
+</html>

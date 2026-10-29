@@ -1,0 +1,11 @@
+.databricks/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+/out/
