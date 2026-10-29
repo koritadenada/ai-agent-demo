@@ -9,7 +9,7 @@ Both go bronze to silver to gold with Lakeflow Spark Declarative Pipelines, meet
 expense line, and are exposed through Unity Catalog metric views to Genie agents.
 
 **Architecture (animated):** https://koritadenada.github.io/ai-agent-demo/architecture.html
-Click or use the arrow keys; `?mode=auto` loops it. Tabs: 1b source schema, 2b document pipeline graph,
+Click or use the arrow keys; `?mode=auto` loops it. Tabs: the agent use case, 1b source schema, 2b document pipeline graph,
 3b a worked gold example, and a glossary of the shipping and data terms.
 
 ## What is in the repo
