@@ -1,0 +1,39 @@
+version: 1.1
+comment: >-
+  Bank details and totals printed on final DA packs vs the bank account on the evaluation, checked with deterministic
+  rules before payment. A payment is held when the account or SWIFT does not match.
+source: {catalog}.{gold_schema}.payment_validation
+dimensions:
+  - name: Port
+    expr: port_name
+  - name: Region
+    expr: region
+  - name: Agent
+    expr: agent_name
+    synonyms: [port agent, agency, beneficiary]
+  - name: Overall status
+    expr: overall_status
+  - name: Account status
+    expr: account_status
+    synonyms: [IBAN status]
+  - name: Amount status
+    expr: amount_status
+  - name: Evaluation state
+    expr: evaluation_state
+  - name: Call month
+    expr: call_month
+measures:
+  - name: Packs checked
+    expr: COUNT(1)
+    synonyms: [payments checked, documents checked]
+  - name: Bank detail mismatches
+    expr: COUNT(1) FILTER (WHERE account_status = 'NO_MATCH' OR swift_status = 'NO_MATCH')
+    synonyms: [IBAN mismatches, wrong bank details]
+  - name: Bank mismatch rate
+    expr: MEASURE(`Bank detail mismatches`) / MEASURE(`Packs checked`)
+    format:
+      type: percentage
+  - name: Payments on hold
+    expr: COUNT(1) FILTER (WHERE hold_payment)
+  - name: Average extraction confidence
+    expr: AVG(bank_confidence)

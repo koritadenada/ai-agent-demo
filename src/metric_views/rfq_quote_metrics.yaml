@@ -1,0 +1,49 @@
+version: 1.1
+comment: >-
+  Competing quotations per request case and expense category: the accepted quote against the lowest and highest
+  quote received, in EUR. Use to see how much quote competition saves and where the accepted agent was not cheapest.
+source: {catalog}.{gold_schema}.rfq_comparison
+dimensions:
+  - name: Port
+    expr: port_name
+  - name: Region
+    expr: region
+  - name: Expense category
+    expr: expense_category
+  - name: Vessel type
+    expr: vessel_type
+  - name: Size band
+    expr: size_band
+  - name: Buyer
+    expr: buyer_name
+  - name: Call month
+    expr: call_month
+measures:
+  - name: Request cases
+    expr: COUNT(DISTINCT request_case_id)
+  - name: Quotes received
+    expr: SUM(quotes_received)
+  - name: Accepted amount EUR
+    expr: SUM(accepted_amount_eur)
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Lowest quote EUR
+    expr: SUM(lowest_amount_eur)
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Premium over lowest EUR
+    expr: SUM(accepted_amount_eur - lowest_amount_eur)
+    comment: How much more the accepted quotes cost than the cheapest quote received
+    synonyms: [premium paid, not cheapest]
+    format:
+      type: currency
+      currency_code: EUR
+  - name: Spread between quotes EUR
+    expr: SUM(highest_amount_eur - lowest_amount_eur)
+    comment: Difference between the highest and lowest quote, what competition between agents is worth
+    synonyms: [savings from competition, quote spread]
+    format:
+      type: currency
+      currency_code: EUR

@@ -1,0 +1,32 @@
+resources:
+  schemas:
+    landing:
+      catalog_name: ${var.catalog}
+      name: ${var.schema_prefix}landing
+      comment: Raw files as they land in S3 (DMS Parquet, PDF documents)
+    bronze:
+      catalog_name: ${var.catalog}
+      name: ${var.schema_prefix}bronze
+      comment: Append-only copies of every file and change, as received
+    silver:
+      catalog_name: ${var.catalog}
+      name: ${var.schema_prefix}silver
+      comment: Postgres mirror with history (AUTO CDC) and document facts (AI Functions)
+    gold:
+      catalog_name: ${var.catalog}
+      name: ${var.schema_prefix}gold
+      comment: Joined business tables, UC functions and metric views for the Genie agents
+
+  volumes:
+    dms_volume:
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.landing.name}
+      name: dms
+      volume_type: MANAGED
+      comment: AWS DMS target, layout <schema>/<table>/LOAD*.parquet and <timestamp>.parquet
+    documents_volume:
+      catalog_name: ${var.catalog}
+      schema_name: ${resources.schemas.landing.name}
+      name: documents
+      volume_type: MANAGED
+      comment: PDFs, layout <family>/<da_id>/<attachment_id>.pdf

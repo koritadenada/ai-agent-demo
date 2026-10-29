@@ -1,0 +1,22 @@
+resources:
+  pipelines:
+    platform_pipeline:
+      name: portcall-platform-data
+      catalog: ${var.catalog}
+      schema: ${resources.schemas.bronze.name}
+      serverless: true
+      continuous: false
+      channel: CURRENT
+      root_path: ../src/pipelines/platform
+      libraries:
+        - glob:
+            include: ../src/pipelines/platform/transformations/**
+      configuration:
+        catalog: ${var.catalog}
+        bronze_schema: ${resources.schemas.bronze.name}
+        silver_schema: ${resources.schemas.silver.name}
+        dms_path: /Volumes/${var.catalog}/${resources.schemas.landing.name}/${resources.volumes.dms_volume.name}
+        dms_source_schema: ${var.dms_source_schema}
+        bronze_mode: ${var.bronze_mode}
+        bronze_source: ${var.bronze_source}
+        column_renames: ${var.column_renames}

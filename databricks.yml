@@ -1,0 +1,101 @@
+# Port-call data platform for AI agents: platform data (DMS -> S3) and documents (PDF -> S3),
+# bronze -> silver -> gold, metric views for Genie.
+bundle:
+  name: ai-agent-demo
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog that holds every schema of this project
+  schema_prefix:
+    description: Optional prefix for the landing, bronze, silver and gold schemas
+    default: ""
+  warehouse_id:
+    description: SQL warehouse used for metric views and Genie
+    lookup:
+      warehouse: Serverless Starter Warehouse
+  dms_source_schema:
+    description: Source schema name as DMS writes it in the bucket (<schema>/<table>/)
+    default: da_schema
+  bronze_mode:
+    description: build (ingest the DMS files into this bundle's bronze) or existing (silver reads bronze_source)
+    default: build
+  bronze_source:
+    description: catalog.schema of an existing bronze with the same envelope, used when bronze_mode is existing
+    default: ""
+  column_renames:
+    description: 'JSON map of source columns to neutral silver names, {"table": {"source_column": "silver_column"}}'
+    default: "{}"
+  llm_endpoint:
+    description: Foundation model endpoint used by ai_query in the document pipeline
+    default: databricks-gpt-5-mini
+  refresh_schedule_status:
+    description: PAUSED or UNPAUSED for the hourly refresh job
+    default: PAUSED
+  match_tolerance_pct:
+    description: Final vs quote difference still considered a match (percent)
+    default: "2"
+  dispute_threshold_pct:
+    description: Final vs quote difference above which a line is disputed (percent)
+    default: "10"
+  # Only used by the prod target (external storage in your AWS account)
+  storage_credential_name:
+    description: UC storage credential created by infra/terraform
+    default: ""
+  dms_bucket_url:
+    description: s3:// URL of the DMS target bucket, for example s3://my-dms-bucket/
+    default: ""
+  documents_bucket_url:
+    description: s3:// URL of the documents bucket
+    default: ""
+
+targets:
+  # Self-contained demo: managed volumes stand in for the two S3 buckets, mock data fills them.
+  demo:
+    default: true
+    presets:
+      pipelines_development: true
+      trigger_pause_status: PAUSED
+    variables:
+      catalog: main
+      schema_prefix: portcall_
+
+  # Your AWS account: the volumes point at the real DMS and documents buckets.
+  prod:
+    mode: production
+    # Deploy from CI as a service principal; one copy per principal
+    workspace:
+      root_path: /Workspace/Users/${workspace.current_user.userName}/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: portcall
+      refresh_schedule_status: UNPAUSED
+    resources:
+      catalogs:
+        portcall:
+          name: ${var.catalog}
+          comment: Port-call data platform for AI agents
+      external_locations:
+        dms_bucket:
+          name: portcall_dms_bucket
+          url: ${var.dms_bucket_url}
+          credential_name: ${var.storage_credential_name}
+          read_only: true
+          comment: DMS full load and CDC files (Parquet)
+        documents_bucket:
+          name: portcall_documents_bucket
+          url: ${var.documents_bucket_url}
+          credential_name: ${var.storage_credential_name}
+          read_only: true
+          comment: PDF documents keyed by DA and attachment
+      schemas:
+        landing:
+          catalog_name: ${resources.catalogs.portcall.name}
+      volumes:
+        dms_volume:
+          volume_type: EXTERNAL
+          storage_location: ${resources.external_locations.dms_bucket.url}
+        documents_volume:
+          volume_type: EXTERNAL
+          storage_location: ${resources.external_locations.documents_bucket.url}
