@@ -28,7 +28,8 @@ PAGES = ("IF(page_count > 0, transform(sequence(0, page_count - 1), p -> named_s
 
 @dp.table(
     name=f"{CATALOG}.{SILVER}.documents",
-    comment="One row per document: parsed structure (ai_parse_document), page count, parse errors, classified type",
+    comment="One row per document: parsed structure (ai_parse_document), text per page, page count, parse errors, "
+            "classified type",
     cluster_by=["proforma_id"],
     table_properties=AI_TABLE_PROPERTIES,
 )
@@ -65,7 +66,7 @@ def documents():
                 f"map('version', '2.0', 'instructions', {sql_str(TYPE_PROMPT.template)})):response[0]::STRING")
     return parsed.select(
         "file_item_id", "proforma_id", "entity", "entity_id", "path", "size_bytes", "landed_at",
-        "parsed", "elements", "page_count", "parse_errors",
+        "parsed", "page_count", "parse_errors",
         F.expr(PAGES).alias("pages"),
         F.expr(classify).alias("doc_type"),
         F.lit(TYPE_PROMPT.version).alias("prompt_version"),

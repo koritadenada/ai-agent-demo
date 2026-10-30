@@ -49,7 +49,7 @@ vs CDC, how it runs, adapting it to your schema) and the [document pipeline](src
 |---|---|---|
 | Landing | DMS writes `da_schema/<table>/LOAD*.parquet`, then CDC files | `proforma/<proforma_id>/<file_item_id>.pdf` |
 | Bronze | Auto Loader, one change-log table per source table (`Op`, `_dms_commit_ts` ... `_source_file`) | None: the bucket is the raw layer |
-| Silver | AUTO CDC: full load first, then version, then commit time; deletes on `Op = 'D'`; SCD 2 where history matters | `ai_parse_document` per file, `ai_classify` the type, `ai_query` page to the DA's expense line, `ai_extract` amounts, bank details and rate of exchange, `ai_query` statement of facts timeline |
+| Silver | AUTO CDC: full load first, then version, then commit time; deletes on `Op = 'D'`; SCD 2 where history matters | `ai_parse_document` per file, `ai_classify` the type, `ai_query` page to the DA's expense line and its amount, `ai_extract` bank details and rate of exchange, `ai_query` statement of facts timeline |
 | Gold | Joined on the expense line: final line to its quote (`proforma_expense_id`), to its invoice pages, to the analyst's verification; bank checks, benchmarks, quote flags, costs, workflow | |
 | Semantic | Metric views per KPI group, for the Genie agents | |
 

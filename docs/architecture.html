@@ -685,8 +685,8 @@
 </svg>Document pipeline<span class="tag">Open the graph &#8599;</span></div>
       <div class="step rev" data-t="3000"><div class="n">1</div><div class="tx">ai_parse_document<span>Text per page, page numbers kept</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg></div></div>
       <div class="step rev" data-t="4300"><div class="n">2</div><div class="tx">ai_classify the document<span>PDA quote, final DA pack or SOF</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div></div>
-      <div class="step rev" data-t="4900"><div class="n">3</div><div class="tx">ai_query, JSON schema<span>Page to the DA&#39;s own expense line</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div></div>
-      <div class="step rev" data-t="5900"><div class="n">4</div><div class="tx">ai_extract<span>Lines, totals, bank details, confidence</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div></div>
+      <div class="step rev" data-t="4900"><div class="n">3</div><div class="tx">ai_query, JSON schema<span>Page to the DA&#39;s own expense line, and its amount</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div></div>
+      <div class="step rev" data-t="5900"><div class="n">4</div><div class="tx">ai_extract<span>Bank details and totals, with confidence</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div></div>
       <div class="step rev" data-t="7100"><div class="n">5</div><div class="tx">ai_query<span>Statement of facts to event timeline</span></div><div class="si"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div></div>
     </div>
     <div class="zc rev" data-t="8500" style="left:1000px;top:192px;width:236px;height:402px;border-top-color:var(--navy)">
@@ -700,7 +700,6 @@
       <div class="kv"><span>document_pages</span><b>page</b></div>
       <div class="kv"><span>documents</span><b>file</b></div>
       <div class="kv mk" data-t="8600"><span>page_expense_map</span><b>page</b></div>
-      <div class="kv mk" data-t="8700"><span>doc_line_items</span><b>line</b></div>
       <div class="kv"><span>doc_bank_details</span><b>file</b></div>
       <div class="kv"><span>port_call_events</span><b>event</b></div>
       <div class="formula" style="margin-top:14px">No LLM call on any downstream query: results are plain Delta</div>
@@ -712,7 +711,6 @@
     <div class="stitle rev" data-t="0"><div class="k">Part 2 &middot; inside the document pipeline</div><div class="h">What runs in parallel, what needs Postgres</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; documents pipeline and its dependencies</span></div>
     <div class="lane rev" data-t="5000" style="left:590px;top:196px;width:208px;height:404px"><span class="ll">parallel by document type</span></div>
-    <div class="lane rev" data-t="7200" style="left:818px;top:196px;width:212px;height:270px"><span class="ll">parallel</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="r1" class="wire" pathLength="1" d="M 184 402 L 208 402" data-t="700"/>
       <path id="r2" class="wire" pathLength="1" d="M 380 402 L 400 402" data-t="2200"/>
@@ -720,11 +718,10 @@
       <text class="wlabel" x="488" y="247" text-anchor="middle" data-t="4000">expense vocabulary</text>
       <path id="r3" class="wire" pathLength="1" d="M 562 402 L 565 402 C 572 402, 572 270, 579 270 L 596 270" data-t="5200"/>
       <path id="r4" class="wire" pathLength="1" d="M 562 402 L 596 402" data-t="5300"/>
-      <path id="r5" class="wire" pathLength="1" d="M 562 402 L 565 402 C 572 402, 572 542, 579 542 L 596 542" data-t="5400"/>
+      <path id="r5" class="wire" pathLength="1" d="M 295 462 L 295 537 Q 295 542 300 542 L 596 542" data-t="5400"/>
       <path id="r8" class="wire hot" pathLength="1" d="M 786 262 L 828 262" data-t="7400"/>
-      <path id="r9" class="wire hot" pathLength="1" d="M 786 292 L 796 292 C 808 292, 806 392, 818 392 L 828 392" data-t="7500"/>
+      <path id="r9" class="wire hot" pathLength="1" d="M 786 292 L 796 292 C 808 292, 806 400, 818 400 L 1054 400" data-t="9400"/>
       <path id="r11" class="wire" pathLength="1" d="M 1018 268 L 1031 268 Q 1036 268 1036 273 L 1036 355 Q 1036 360 1041 360 L 1054 360" data-t="9300"/>
-      <path id="r12" class="wire" pathLength="1" d="M 1018 402 L 1054 402" data-t="9400"/>
       <path id="r13" class="wire" pathLength="1" d="M 786 542 L 796 542 C 1000 542, 1030 444, 1044 444 L 1054 444" data-t="9500"/>
     </svg>
     <div class="node sm db rev" data-t="300" style="left:28px;top:354px;width:156px;height:96px">
@@ -744,19 +741,16 @@
       <div class="ico"><svg viewBox="0 0 512 512" fill="none"><ellipse cx="256" cy="120" rx="160" ry="56" fill="#FF5F46"/><path d="M96 120V392C96 423 168 448 256 448C344 448 416 423 416 392V120C416 151 344 176 256 176C168 176 96 151 96 120Z" fill="#FABFBA"/><path d="M96 256C96 287 168 312 256 312C344 312 416 287 416 256" stroke="#FF5F46" stroke-width="24"/></svg></div><div><div class="name">expense_category</div><div class="desc">Silver, from Postgres</div></div></div>
     <div class="node sm db rev" data-t="5600" style="left:598px;top:224px;width:188px;height:92px">
       <span class="badge">per page</span>
-      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">page_expense_map</div><div class="desc">ai_query: page to the DA line</div></div></div>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">page_expense_map</div><div class="desc">ai_query: page to the DA line, and its amount</div></div></div>
     <div class="node sm db rev" data-t="5800" style="left:598px;top:356px;width:188px;height:92px">
       <span class="badge">no LLM</span>
       <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg></div><div><div class="name">pda_quote pages</div><div class="desc">Amounts already in Postgres</div></div></div>
     <div class="node sm db rev" data-t="6000" style="left:598px;top:496px;width:188px;height:92px">
-      <span class="badge">per page</span>
-      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">port_call_events</div><div class="desc">SOF: ai_query, timeline</div></div></div>
+      <span class="badge">per file</span>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">port_call_events</div><div class="desc">SOF: ai_query, whole timeline</div></div></div>
     <div class="node sm db rev" data-t="7900" style="left:830px;top:224px;width:188px;height:88px">
       <span class="badge">summary page</span>
       <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">doc_bank_details</div><div class="desc">ai_extract: bank details, ROE</div></div></div>
-    <div class="node sm db rev" data-t="8100" style="left:830px;top:356px;width:188px;height:92px">
-      <span class="badge">per page</span>
-      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">doc_line_items</div><div class="desc">ai_extract: amount per invoice page</div></div></div>
     <div class="node hero rev" data-t="9600" style="left:1056px;top:330px;width:184px;height:130px">
       <span class="badge on">needs Postgres</span>
       <div class="ico"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -869,7 +863,7 @@
       <div class="zh"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg>From silver documents<span class="tagsrc req">document</span></div>
       <div class="kv"><span>documents</span><b>final_da_pack, 1 per FDA</b></div>
       <div class="kv mk" data-t="12000"><span>page_expense_map</span><b>page 4: Pilotage</b></div>
-      <div class="kv mk" data-t="12200"><span>doc_line_items</span><b>page 4: 2,730.00 EUR</b></div>
+      <div class="kv mk" data-t="12200"><span>amount on page</span><b>page 4: 2,730.00 EUR</b></div>
     </div>
     <div class="ep tight rev" data-t="13500" style="left:410px;top:806px;width:380px;height:414px">
       <div class="bar"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1085,14 +1079,14 @@ const CAPS = {
       [1200, 'Auto Loader reads each new PDF once, <b>straight from the bucket</b>: no copy of the bytes in Delta'],
       [2600, 'Step 1: <b>ai_parse_document</b> returns the text of every page, with page numbers'],
       [4200, 'Steps 2 and 3: classify the document, then <b>map every page to an expense</b>'],
-      [5800, 'Step 4: <b>ai_extract</b> pulls line items, totals and bank details, with confidence'],
+      [5800, 'Step 4: <b>ai_extract</b> reads bank details and totals from the summary page, with confidence'],
       [7000, 'Step 5: the statement of facts becomes an <b>ordered event timeline</b>'],
       [8200, 'Every result lands once in <b>Delta</b>. Click the pipeline to see its <b>step graph</b>']],
   5: [[0, 'Inside the document pipeline: <b>every arrow is a dependency</b>'],
       [2000, 'Parse and classify <b>once per file</b>, then split into pages with no LLM call'],
       [3400, 'The expense list comes from <b>Postgres through Part 1</b>: categories are data, not prompt text'],
       [4800, 'Branches by document type <b>run in parallel</b>; proformas need no LLM, their amounts are already in Postgres'],
-      [7000, 'Final packs: page map first, then <b>bank details and line items in parallel</b>'],
+      [7000, 'Final packs: <b>one call per page</b> maps it to its line and reads the amount; bank details from the summary page'],
       [9000, 'Gold joins the results with the <b>structured tables</b>, so the job runs platform data first']],
   6: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
       [600, 'Platform data brings the <b>quoted and final lines and the analyst checks</b>'],
@@ -1261,17 +1255,16 @@ const OBJ = {
   'verification': [ST, S + 'expense_evaluation_verification', 'discrepancy_type'],
   'verifications': [ST, S + 'expense_evaluation_verification'],
   'expense_benchmarks': [MV, G + 'expense_benchmarks', 'median_eur'],
-  'documents': [ST, S + 'documents', 'doc_type'],
+  'documents': [ST, S + 'documents', 'doc_type, pages'],
   'document type': [ST, S + 'documents', 'doc_type'],
   'document_pages': [ST, S + 'document_pages', 'page_number, page_text'],
-  'page_expense_map': [ST, S + 'page_expense_map', 'page_number, expense_category'],
+  'page_expense_map': [ST, S + 'page_expense_map', 'page_number, expense_category, amount'],
   'page 4': [ST, S + 'page_expense_map', 'expense_category, confidence'],
-  'doc_line_items': [ST, S + 'doc_line_items', 'page_number, amount'],
-  'amount on page': [ST, S + 'doc_line_items', 'amount'],
+  'amount on page': [ST, S + 'page_expense_map', 'amount, currency'],
   'doc_bank_details': [ST, S + 'doc_bank_details', 'account_number, swift, rate_of_exchange'],
   'IBAN on the pack': [ST, S + 'doc_bank_details', 'account_number'],
   'bank account, masked': [MV, G + 'payment_validation', 'platform_iban_masked'],
-  'port_call_events': [ST, S + 'port_call_events', 'event, event_time'],
+  'port_call_events': [ST, S + 'port_call_events', 'event, event_time, page_number'],
   'expense_reconciliation': [MV, G + 'expense_reconciliation'],
   'payment_validation': [MV, G + 'payment_validation'],
   'appointment': [ST, S + 'appointment'], 'port_call': [ST, S + 'port_call'],

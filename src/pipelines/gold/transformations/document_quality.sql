@@ -7,9 +7,10 @@ WITH pages AS (
          COUNT(*) FILTER (WHERE llm_error IS NOT NULL) AS llm_errors
   FROM ${catalog}.${silver_schema}.page_expense_map GROUP BY ALL
 ),
-lines AS (
+lines AS (   -- invoice pages with an amount read
   SELECT file_item_id, COUNT(*) AS lines_extracted, AVG(confidence) AS mean_extract_confidence
-  FROM ${catalog}.${silver_schema}.doc_line_items GROUP BY ALL
+  FROM ${catalog}.${silver_schema}.page_expense_map WHERE page_role = 'supporting_invoice' AND amount IS NOT NULL
+  GROUP BY ALL
 ),
 sof AS (SELECT DISTINCT file_item_id FROM ${catalog}.${silver_schema}.proforma_statement_of_facts)
 SELECT

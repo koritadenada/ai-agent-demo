@@ -1,13 +1,15 @@
 """Silver page map: every page of a final DA pack mapped to the expense line of that DA it evidences.
 
 The model gets the DA's own final lines (from expense_evaluation, joined in per page) and returns the line id, a
-confidence and an explanation. The id is then checked against the DA's lines, so a made-up id never reaches gold.
+confidence and an explanation, and for an invoice page the amount and currency printed on it: one call per page.
+The id is then checked against the DA's lines, so a made-up id never reaches gold.
 The prompt and the model come from the prompt registry (page_map), so both change without a deploy.
 """
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from utilities.settings import AI_TABLE_PROPERTIES, CATALOG, SILVER, expense_categories, json_literal, prompt, sql_str
+from utilities.settings import (AI_TABLE_PROPERTIES, CATALOG, CURRENCIES, SILVER, expense_categories, json_literal,
+                                prompt, sql_str)
 
 CATEGORIES = expense_categories()
 PROMPT = prompt("page_map")
@@ -21,18 +23,22 @@ RESPONSE_FORMAT = {
         "schema": {
             "type": "object",
             "additionalProperties": False,
-            "required": ["page_role", "expense_line_id", "expense_category", "confidence", "explanation"],
+            "required": ["page_role", "expense_line_id", "expense_category", "amount", "currency", "confidence",
+                         "explanation"],
             "properties": {
                 "page_role": {"type": "string", "enum": ["summary", "supporting_invoice", "other"]},
                 "expense_line_id": {"type": "integer"},
                 "expense_category": {"type": "string", "enum": [*CATEGORIES, "none"]},
+                "amount": {"type": "number", "description": "Invoice pages: total amount due as printed, else 0"},
+                "currency": {"type": "string", "enum": [*CURRENCIES, "none"]},
                 "confidence": {"type": "number"},
                 "explanation": {"type": "string"},
             },
         },
     },
 }
-ANSWER = "STRUCT<page_role: STRING, expense_line_id: BIGINT, expense_category: STRING, confidence: DOUBLE, explanation: STRING>"
+ANSWER = ("STRUCT<page_role: STRING, expense_line_id: BIGINT, expense_category: STRING, amount: DECIMAL(18,2), "
+          "currency: STRING, confidence: DOUBLE, explanation: STRING>")
 
 
 def da_expense_lines():
@@ -58,7 +64,7 @@ def da_expense_lines():
 @dp.table(
     name=f"{CATALOG}.{SILVER}.page_expense_map",
     comment="Per page of a final DA pack: summary, supporting invoice or other; the DA expense line it evidences, "
-            "with confidence and the model's explanation",
+            "the amount and currency printed on an invoice page, with confidence and the model's explanation",
     cluster_by=["file_item_id"],
     table_properties=AI_TABLE_PROPERTIES,
 )
@@ -74,6 +80,7 @@ def page_expense_map():
                     f"responseFormat => {json_literal(RESPONSE_FORMAT)}, failOnError => false)")
     m = F.from_json("answer.result", ANSWER)
     line = F.element_at("line_info", F.col("m.expense_line_id"))
+    invoice = F.col("m.page_role") == "supporting_invoice"
     return (
         pages.withColumn("answer", answer).withColumn("m", m)
         .select(
@@ -83,6 +90,8 @@ def page_expense_map():
             F.when(line.isNotNull(), F.col("m.expense_line_id")).alias("expense_evaluation_id"),
             line["name"].alias("expense_name"),
             F.coalesce(line["category"], F.nullif(F.col("m.expense_category"), F.lit("none"))).alias("expense_category"),
+            F.when(invoice, F.col("m.amount")).alias("amount"),
+            F.when(invoice, F.nullif(F.col("m.currency"), F.lit("none"))).alias("currency"),
             F.col("m.confidence").alias("confidence"),
             F.col("m.explanation").alias("explanation"),
             F.col("answer.errorMessage").alias("llm_error"),
