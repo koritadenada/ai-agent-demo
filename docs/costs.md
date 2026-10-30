@@ -29,7 +29,7 @@ price): there is no separate markup to add, and contract discounts apply on top.
 | Function | Used for | Share of AI spend |
 |---|---|---|
 | `ai_parse_document` | Text of every page | 47% |
-| `ai_extract` | Amount on each invoice page, bank details on the summary page | 44% |
+| `ai_extract` | Amount on each invoice page, bank details on the summary page (since then, invoice amounts come from the page map call) | 44% |
 | `ai_query` (`databricks-gpt-5-mini`) | Page to expense map, statement of facts timeline | 7% |
 | `ai_classify` | Document type, first page only | 2% |
 
@@ -49,7 +49,7 @@ Parsing and extraction dominate; the model choice for `ai_query` matters least.
 | Documents | No bronze copy of the PDFs: Auto Loader reads the bucket directly | The PDFs are not stored twice and streams do not move their bytes |
 | `ai_parse_document` | Figure descriptions off | No generated text that nothing uses |
 | `ai_classify` | First page only | One cheap call per document to decide which branch runs |
-| Page map and extraction | Final DA packs only; one call per page; bank details from the summary page only | Proformas need no LLM: their amounts are already in `proforma_expense` |
+| Page map and extraction | Final DA packs only; one call per page that also reads the invoice amount (no second `ai_extract` pass, about 40% of AI spend); bank details from the summary page only | Proformas need no LLM: their amounts are already in `proforma_expense` |
 | Gold rules | Plain SQL and UC functions | No model calls in the checks or in the metric views |
 | Everything | `tags` (`project`, `layer` / `workload`) | Labels every job and pipeline; for billing attribution of serverless spend use a budget policy |
 
@@ -59,9 +59,6 @@ Parsing and extraction dominate; the model choice for `ai_query` matters least.
   pipeline, everything else daily.
 - **Trigger on data, not on the clock**: a file-arrival trigger on the documents location runs the document
   pipeline only when PDFs land (nights and weekends cost nothing).
-- **One call per invoice page instead of two**: the page map `ai_query` already reads the page, so it can return
-  the amount as well and `ai_extract` drops out for invoice pages (about 40% of AI spend), at the cost of the
-  per-field confidence score. Accept it only if `Agreement with analysts` in `expense_reconciliation_metrics` holds.
 - **A smaller model** for `ai_query` (`llm_endpoint`): small saving, same acceptance check.
 - **A budget policy** (`budget_policy_id` on jobs and pipelines) to cap and alert on serverless spend.
 

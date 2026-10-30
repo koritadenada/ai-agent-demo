@@ -19,7 +19,7 @@ DEFAULTS = {
             "expense; a statement of facts lists the times of arrival, operations and departure."
         ),
     },
-    # ai_query: which expense line of this DA a page evidences
+    # ai_query: which expense line of this DA a page evidences, and the amount on an invoice page
     "page_map": {
         "model": "databricks-gpt-5-mini",
         "template": (
@@ -28,18 +28,12 @@ DEFAULTS = {
             "ONE expense, or something else. For a supporting invoice, pick the expense line of this DA it "
             "evidences, by its id. Agencies name expenses differently, so match on meaning, not on wording. A line "
             "invoiced in parts (for example pilotage in and pilotage out) maps every part to the same line. If no "
-            "line fits, use 0. Also give the expense category. Confidence is between 0 and 1.\n\n"
+            "line fits, use 0. Also give the expense category. For a supporting invoice, read the total amount due and "
+            "its currency exactly as printed, without converting; for any other page use 0 and none. Confidence is "
+            "between 0 and 1 and covers both the line and the amount.\n\n"
             "Expense lines of this DA (id: name, category, section):\n{{expense_lines}}\n\n"
             "Expense categories:\n{{categories}}\n\n"
             "Page text:\n{{page_text}}"
-        ),
-    },
-    # ai_extract: the amount on one supporting invoice
-    "invoice_amount": {
-        "model": None,
-        "template": (
-            "This is one supplier invoice for a port call expense. Read the total amount due on this invoice and "
-            "its currency, exactly as printed. Do not convert currencies."
         ),
     },
     # ai_extract: bank details, totals, date and rate of exchange from the summary page
@@ -59,7 +53,8 @@ DEFAULTS = {
         "model": "databricks-gpt-5-mini",
         "template": (
             "List every timed event in this statement of facts, in the order they happened, with the date and time "
-            "as printed. Use short event names such as Pilot on board or All fast. Do not invent events.\n\n"
+            "as printed and the page it is on. The document can run over several pages: keep one order for the whole "
+            "port call. Use short event names such as Pilot on board or All fast. Do not invent events.\n\n"
             "Text:\n{{document_text}}"
         ),
     },

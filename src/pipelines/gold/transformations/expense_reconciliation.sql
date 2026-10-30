@@ -33,8 +33,9 @@ evidence AS (   -- all pages mapped to the same DA line, summed (an expense invo
          ARRAY_SORT(COLLECT_LIST(li.page_number)) AS evidence_pages, MIN(li.confidence) AS evidence_confidence,
          FIRST(li.file_item_id) AS file_item_id,
          IF(BOOL_AND(li.expense_evaluation_id IS NOT NULL), 'model', 'category fallback') AS line_match
-  FROM ${catalog}.${silver_schema}.doc_line_items li
+  FROM ${catalog}.${silver_schema}.page_expense_map li
   LEFT JOIN category_lines cl ON cl.proforma_id = li.proforma_id AND cl.expense_category = li.expense_category
+  WHERE li.page_role = 'supporting_invoice'
   GROUP BY 1
   HAVING expense_evaluation_id IS NOT NULL
 ),

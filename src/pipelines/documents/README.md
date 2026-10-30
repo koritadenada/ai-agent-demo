@@ -5,12 +5,18 @@ which DA expense line each page evidences, the amounts, bank details, date and r
 the timeline of the port call.
 
 ```
-documents bucket -> documents -> document_pages -> page_expense_map -> doc_line_items      -> gold checks
-(raw layer, S3)     parse, type  one row per page  page to DA line     amount per page
+documents bucket -> documents -> document_pages -> page_expense_map -> gold checks
+(raw layer, S3)     parse, type  one row per page  page to DA line,
+                                                   amount on the page
                                                                    -> expense_page_evidence (pages per line)
                                                                    -> doc_bank_details      (summary page)
-                                    document_pages -> port_call_events (statement of facts timeline)
+                    documents -> port_call_events (statement of facts timeline, one call per document)
 ```
+
+**One model call per invoice page.** The page map reads the amount in the same call, so invoice pages do not go to
+`ai_extract` a second time (about 40% less AI spend). `ai_extract` stays for bank details, where its per-field
+confidence feeds the 0.8 floor. A statement of facts is read in one call for the whole document, so a timeline over
+several pages keeps one order; each event keeps its page.
 
 There is no bronze copy of the PDFs: they never change, so the bucket is the raw layer and Auto Loader reads it
 directly. Every model result is stored once, so nothing downstream calls a model again.
@@ -19,7 +25,7 @@ directly. Every model result is stored once, so nothing downstream calls a model
 
 Every model call loads its prompt from the MLflow Prompt Registry (silver schema, alias `production`) when a run
 starts. For `ai_query` steps the model is the `model` tag of the prompt version. Browse them in the MLflow
-experiment `portcall-prompts`, **Prompts** tab: `document_type`, `page_map`, `invoice_amount`, `bank_details`,
+experiment `portcall-prompts`, **Prompts** tab: `document_type`, `page_map`, `bank_details`,
 `sof_events`.
 
 [`utilities/prompts.py`](utilities/prompts.py) only seeds version 1 on the first deploy (setup job); after that the
@@ -74,7 +80,7 @@ The seven AI services of the current platform (from the AI Services Map) and whe
 
 | Requirement | Implemented in | Status |
 |---|---|---|
-| A coherent chronological account of the port call | [`port_call_events.py`](transformations/port_call_events.py): one row per event, in order, from the statement of facts | by design: structured events that Genie and the agents query; a narrative is written on demand by HAL-9000, not stored |
+| A coherent chronological account of the port call | [`port_call_events.py`](transformations/port_call_events.py): one row per event, in order, one call per statement of facts, each event with its page | by design: structured events that Genie and the agents query; a narrative is written on demand by HAL-9000, not stored |
 | Prompt and model change without a deploy | Prompt registry (`sof_events`) | met |
 | Retry on transient failures | `failOnError => false`: a failed call is stored with its error and never fails the run | gap: failed rows are not retried automatically yet |
 | Request and response tracing | `prompt_version` per row | gap: AI Gateway inference tables for full request logs |
