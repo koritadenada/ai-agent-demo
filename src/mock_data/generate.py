@@ -301,7 +301,7 @@ def add_documents(db, calls, seed):
                     key=lambda c: c["fda_submitted"], reverse=True)[: N_DOCUMENT_CALLS - 1]
     doc_calls = [calls[SHOWCASE["port_call_id"]]] + recent
     anomalies = ["none", "invoice_differs", "invoice_differs", "invoice_differs", "missing_invoice", "missing_invoice",
-                 "wrong_iban", "wrong_iban", "domestic_account", "swift_8_vs_11"]
+                 "wrong_iban", "wrong_iban", "domestic_account", "swift_8_vs_11", "split_in_out"]
     eur = next(c for c in recent if c["currency"] == "EUR")
     for n, call in enumerate(doc_calls):
         call["anomaly"] = "currency_mismatch" if call is eur else anomalies[n] if n < len(anomalies) else "none"

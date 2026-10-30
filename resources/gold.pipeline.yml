@@ -20,3 +20,5 @@ resources:
         gold_schema: ${resources.schemas.gold.name}
         match_tolerance_pct: ${var.match_tolerance_pct}
         dispute_threshold_pct: ${var.dispute_threshold_pct}
+        min_benchmark_sample: ${var.min_benchmark_sample}
+        quote_flag_pct: ${var.quote_flag_pct}

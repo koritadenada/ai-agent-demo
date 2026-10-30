@@ -1,8 +1,10 @@
-"""Silver events: ai_query turns each statement of facts into an ordered timeline of port-call events."""
+"""Silver events: ai_query turns each statement of facts into an ordered timeline of port-call events.
+Structured on purpose: Genie and the agents query the events; a narrative is written on demand, not stored.
+The prompt and the model come from the prompt registry (sof_events)."""
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from utilities.settings import AI_TABLE_PROPERTIES, CATALOG, LLM_ENDPOINT, SILVER, json_literal, sql_str
+from utilities.settings import AI_TABLE_PROPERTIES, CATALOG, SILVER, json_literal, prompt, sql_str
 
 RESPONSE_FORMAT = {
     "type": "json_schema",
@@ -20,7 +22,7 @@ RESPONSE_FORMAT = {
         },
     },
 }
-PROMPT = "List every timed event in this statement of facts, in the order they happened. Text:\n"
+PROMPT = prompt("sof_events")
 EVENTS = "STRUCT<events: ARRAY<STRUCT<event: STRING, event_time: STRING>>>"
 
 
@@ -36,7 +38,7 @@ def port_call_events():
         .filter("doc_type = 'statement_of_facts' AND page_error IS NULL")
     )
     answer = F.expr(
-        f"ai_query({sql_str(LLM_ENDPOINT)}, concat({sql_str(PROMPT)}, page_text), "
+        f"ai_query({sql_str(PROMPT.model)}, replace({sql_str(PROMPT.template)}, '{{{{document_text}}}}', page_text), "
         f"responseFormat => {json_literal(RESPONSE_FORMAT)}, failOnError => false)"
     )
     return (
@@ -44,5 +46,6 @@ def port_call_events():
         .select("file_item_id", "proforma_id", "page_number",
                 F.posexplode(F.from_json("answer.result", EVENTS).events).alias("event_order", "e"))
         .select("file_item_id", "proforma_id", "page_number", (F.col("event_order") + 1).alias("event_order"),
-                F.col("e.event").alias("event"), F.expr("try_to_timestamp(e.event_time)").alias("event_time"))
+                F.col("e.event").alias("event"), F.expr("try_to_timestamp(e.event_time)").alias("event_time"),
+                F.lit(PROMPT.version).alias("prompt_version"))
     )
