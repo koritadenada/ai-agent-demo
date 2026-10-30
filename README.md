@@ -34,7 +34,7 @@ src/
   deploy/apply_sql_objects.py  applies the UC functions and metric views (no bundle resource type for them)
   mock_data/                   generator: the DA tables as DMS Parquet (full load or a CDC batch) and PDFs
 infra/terraform/               the AWS side: IAM role for Unity Catalog and the storage credential
-docs/                          architecture page, source schema notes (docs/schema.md), costs (docs/costs.md)
+docs/                          architecture page, costs (docs/costs.md)
 ```
 
 ## How the pieces fit
@@ -60,7 +60,8 @@ Design choices worth knowing:
   (replicated from Postgres), so a new expense type is a new row, not a prompt change. That is also why the
   documents pipeline runs after the platform pipeline.
 - **Gold never stores a full account number** (`mask_account`); full values stay in silver.
-- **Neutral names.** Vendor-named source columns are renamed in silver (`column_renames`), see docs/schema.md.
+- **Neutral names.** Vendor-named source columns are renamed in silver (`column_renames`), see the
+  [platform pipeline README](src/pipelines/platform/README.md).
 - **Built with cost in mind**: standard serverless mode, incremental everywhere, LLM results paid once and
   protected from resets, measured numbers and levers in [docs/costs.md](docs/costs.md).
 - **Thresholds are variables** (`match_tolerance_pct`, `dispute_threshold_pct`); the defaults are an example policy.
@@ -113,8 +114,9 @@ The demo target creates `portcall_landing`, `portcall_bronze`, `portcall_silver`
    The prod target creates the catalog, the two external locations (read only) and external volumes on the
    buckets, so the pipelines read your files in place with the same code as the demo. The hourly refresh job
    is unpaused.
-3. Confirm the assumed lookup tables in [docs/schema.md](docs/schema.md) and set `column_renames`. If your bronze
-   already exists with the same envelope, add `--var bronze_mode=existing --var bronze_source=<catalog>.<schema>`.
+3. Confirm the assumed lookup tables in the [platform pipeline README](src/pipelines/platform/README.md) and set
+   `column_renames`. If your bronze already exists with the same envelope, add
+   `--var bronze_mode=existing --var bronze_source=<catalog>.<schema>`.
 
 For the near real time tables later, switch the platform pipeline to `continuous: true` and enable file events
 on the external location.
