@@ -46,6 +46,7 @@ Parsing and extraction dominate; the model choice for `ai_query` matters least.
 | Platform pipeline | A table gets bronze and silver only when its DMS folder exists | The full table list costs nothing until DMS lands it |
 | Silver and AI tables | `delta.enableRowTracking` | Lets the gold materialized views refresh incrementally instead of recomputing |
 | Bronze and AI tables | `pipelines.reset.allowed` from `allow_reset` (false in prod) | A full refresh cannot re-run every LLM call or drop the DMS change log |
+| Documents | No bronze copy of the PDFs: Auto Loader reads the bucket directly | The PDFs are not stored twice and streams do not move their bytes |
 | `ai_parse_document` | Figure descriptions off | No generated text that nothing uses |
 | `ai_classify` | First page only | One cheap call per document to decide which branch runs |
 | Page map and extraction | Final DA packs only; one call per page; bank details from the summary page only | Proformas need no LLM: their amounts are already in `proforma_expense` |

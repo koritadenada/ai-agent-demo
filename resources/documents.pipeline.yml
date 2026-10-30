@@ -17,7 +17,6 @@ resources:
       configuration:
         allow_reset: ${var.allow_reset}
         catalog: ${var.catalog}
-        bronze_schema: ${resources.schemas.bronze.name}
         silver_schema: ${resources.schemas.silver.name}
         documents_path: /Volumes/${var.catalog}/${resources.schemas.landing.name}/${resources.volumes.documents_volume.name}
         llm_endpoint: ${var.llm_endpoint}
