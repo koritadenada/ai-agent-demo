@@ -7,6 +7,9 @@ resources:
       serverless: true
       continuous: false
       channel: CURRENT
+      tags:
+        project: ${bundle.name}
+        layer: gold
       root_path: ../src/pipelines/gold
       libraries:
         - glob:

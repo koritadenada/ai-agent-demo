@@ -6,7 +6,7 @@ Skipped when the pipeline runs on an existing bronze (bronze_mode = existing).
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from utilities.settings import BRONZE_MODE, DMS_PATH, SOURCE_SCHEMA, bronze_name, present_tables
+from utilities.settings import BRONZE_MODE, BRONZE_PROPERTIES, DMS_PATH, SOURCE_SCHEMA, bronze_name, present_tables
 from utilities.tables import COMMIT_TS, OP
 
 
@@ -15,6 +15,7 @@ def define_bronze(table):
         name=bronze_name(table.name),
         comment=f"DMS change log of {SOURCE_SCHEMA}.{table.name}: one row per change, not current state. {table.comment}",
         cluster_by_auto=True,
+        table_properties=BRONZE_PROPERTIES,
     )
     @dp.expect_all({"valid_op": f"{OP} IN ('I', 'U', 'D')", "has_commit_ts": f"{COMMIT_TS} IS NOT NULL"})
     @dp.expect_all_or_drop({f"{k}_not_null": f"{k} IS NOT NULL" for k in table.keys})

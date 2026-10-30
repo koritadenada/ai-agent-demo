@@ -3,6 +3,10 @@ resources:
     mock_data:
       name: portcall-mock-data
       description: Writes DMS-style Parquet (full load or one CDC batch) and PDF documents into the landing volumes
+      performance_target: STANDARD
+      tags:
+        project: ${bundle.name}
+        workload: mock_data
       environments:
         - environment_key: default
           spec:

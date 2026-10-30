@@ -2,13 +2,14 @@
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from utilities.settings import CATALOG, SILVER
+from utilities.settings import AI_TABLE_PROPERTIES, CATALOG, SILVER
 
 
 @dp.table(
     name=f"{CATALOG}.{SILVER}.document_pages",
     comment="One row per page (page_number starts at 1); a page that failed to parse keeps its error, the document still flows",
     cluster_by=["file_item_id"],
+    table_properties=AI_TABLE_PROPERTIES,
 )
 def document_pages():
     docs = spark.readStream.table(f"{CATALOG}.{SILVER}.documents")

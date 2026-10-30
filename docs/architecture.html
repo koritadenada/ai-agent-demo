@@ -509,7 +509,7 @@
 <path fill-rule="evenodd" clip-rule="evenodd" d="M1.75 1C1.33579 1 1 1.33579 1 1.75V14.25C1 14.6642 1.33579 15 1.75 15H6.5V7H9.5V8H11V7H13.5V8H15V1.75C15 1.33579 14.6642 1 14.25 1H1.75ZM5 7V13.5H2.5V7H5ZM13.5 5.5V2.5H2.5V5.5H13.5Z" fill="#FF3621"/>
 <path d="M9.02387 10.9205C9.5085 10.3147 10.4345 10.3292 10.9 10.9498C11.9538 12.3549 14.0502 12.3876 15.1473 11.0161L15.5856 10.4683L14.4143 9.53128L13.976 10.0791C13.4914 10.6849 12.5654 10.6704 12.1 10.0498C11.0462 8.64474 8.94974 8.61199 7.85257 9.98345L7.41431 10.5313L8.58561 11.4683L9.02387 10.9205Z" fill="#FF3621"/>
 <path d="M9.02387 13.9205C9.5085 13.3147 10.4345 13.3292 10.9 13.9498C11.9538 15.3549 14.0502 15.3876 15.1473 14.0161L15.5856 13.4683L14.4143 12.5313L13.976 13.0791C13.4914 13.6849 12.5654 13.6704 12.1 13.0498C11.0462 11.6447 8.94974 11.612 7.85257 12.9834L7.41431 13.5313L8.58561 14.4683L9.02387 13.9205Z" fill="#FF3621"/>
-</svg></div><div><div class="name">Silver</div><div class="desc">Ordered by version, then commit time; SCD 1 or 2</div></div></div>
+</svg></div><div><div class="name">Silver</div><div class="desc">Full load first, then version and commit time; SCD 1 or 2</div></div></div>
     <div class="zc rev" data-t="4800" style="left:960px;top:200px;width:276px;height:388px;border-top-color:var(--navy)">
       <div class="zh"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
@@ -540,7 +540,7 @@
       <div class="kv mk2" data-t="7000"><span>history row</span><b>IN_PROCESS &middot; from the full load</b></div>
       <div class="kv mk" data-t="7400"><span>current row</span><b>CANCELLED &middot; from the CDC batch</b></div>
       <div class="kv" style="margin-top:10px"><span>Op = D</span><b>deletes the row, or the link pair</b></div>
-      <div class="kv"><span>_dms_commit_ts</span><b>a string: cast before ordering</b></div>
+      <div class="kv"><span>changed during the load</span><b>full load first, so the change wins</b></div>
     </div>
     <div class="nocall rev" data-t="8300" style="left:850px;top:112px;border-color:var(--navy);color:var(--navy)"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M125.97 93.0402C131.97 89.5402 136.01 83.0302 136.01 75.5702C136.01 64.4102 126.96 55.3602 115.8 55.3602H108.64C107.69 37.6002 93 23.4902 75 23.4902C57 23.4902 42.31 37.6002 41.36 55.3602H34.2C23.04 55.3602 13.99 64.4102 13.99 75.5702C13.99 86.7302 23.04 95.7802 34.2 95.7802H114.42" stroke="#FF5F46" stroke-width="3" stroke-miterlimit="3" stroke-linecap="square"/>
@@ -690,14 +690,12 @@
       <path id="r1" class="wire" pathLength="1" d="M 184 402 L 208 402" data-t="700"/>
       <path id="r2" class="wire" pathLength="1" d="M 380 402 L 400 402" data-t="2200"/>
       <path id="r6" class="wire dep" pathLength="1" d="M 384 230 L 596 230" data-t="3800"/>
-      <path id="r7" class="wire dep" pathLength="1" d="M 384 262 L 394 262 C 575 262, 570 384, 586 384 L 596 384" data-t="3900"/>
       <text class="wlabel" x="488" y="221" text-anchor="middle" data-t="4000">expense vocabulary</text>
       <path id="r3" class="wire" pathLength="1" d="M 562 402 L 565 402 C 572 402, 572 252, 579 252 L 596 252" data-t="5200"/>
       <path id="r4" class="wire" pathLength="1" d="M 562 402 L 596 402" data-t="5300"/>
       <path id="r5" class="wire" pathLength="1" d="M 562 402 L 565 402 C 572 402, 572 546, 579 546 L 596 546" data-t="5400"/>
       <path id="r8" class="wire hot" pathLength="1" d="M 786 236 L 828 236" data-t="7400"/>
       <path id="r9" class="wire hot" pathLength="1" d="M 786 266 L 796 266 C 808 266, 806 386, 818 386 L 828 386" data-t="7500"/>
-      <path id="r10" class="wire" pathLength="1" d="M 786 414 L 828 414" data-t="7600"/>
       <path id="r11" class="wire" pathLength="1" d="M 1018 242 L 1031 242 Q 1036 242 1036 247 L 1036 355 Q 1036 360 1041 360 L 1054 360" data-t="9300"/>
       <path id="r12" class="wire" pathLength="1" d="M 1018 402 L 1054 402" data-t="9400"/>
       <path id="r13" class="wire" pathLength="1" d="M 786 546 L 796 546 C 1000 546, 1030 444, 1044 444 L 1054 444" data-t="9500"/>
@@ -739,8 +737,8 @@
       <span class="badge">per page</span>
       <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">page_expense_map</div><div class="desc">Final packs: ai_query, page to expense</div></div></div>
     <div class="node sm db rev" data-t="5800" style="left:598px;top:352px;width:188px;height:100px">
-      <span class="badge">per page</span>
-      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">quote lines</div><div class="desc">Proformas: ai_extract, all quoted lines</div></div></div>
+      <span class="badge">no LLM</span>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg></div><div><div class="name">pda_quote pages</div><div class="desc">Stay in document_pages: amounts already in Postgres</div></div></div>
     <div class="node sm db rev" data-t="6000" style="left:598px;top:500px;width:188px;height:92px">
       <span class="badge">per page</span>
       <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">port_call_events</div><div class="desc">SOF: ai_query, timeline</div></div></div>
@@ -748,8 +746,8 @@
       <span class="badge">summary page</span>
       <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">doc_bank_details</div><div class="desc">ai_extract v2.1, confidence</div></div></div>
     <div class="node sm db rev" data-t="8100" style="left:830px;top:352px;width:188px;height:100px">
-      <span class="badge">2 append flows</span>
-      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">doc_line_items</div><div class="desc">Invoice pages: ai_extract amount; plus quote lines</div></div></div>
+      <span class="badge">per page</span>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg></div><div><div class="name">doc_line_items</div><div class="desc">Invoice pages: ai_extract amount, confidence</div></div></div>
     <div class="node hero rev" data-t="9600" style="left:1056px;top:300px;width:184px;height:190px">
       <span class="badge on">needs Postgres</span>
       <div class="ico"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1063,7 +1061,7 @@ const CAPS = {
   2: [[0, 'Your platform data already lands in S3 through <b>DMS: full load plus CDC</b>'],
       [1400, 'DMS writes Parquet per table; every row starts with <b>Op and _dms_commit_ts</b>'],
       [2600, 'Auto Loader picks up only the new files into <b>bronze</b>: a change log, nothing lost'],
-      [4000, 'AUTO CDC applies the changes in order: <b>version, then commit time</b>, SCD 1 or 2'],
+      [4000, 'AUTO CDC applies the changes in order: <b>full load first, then version and commit time</b>'],
       [6000, 'Your example: an appointment goes from IN_PROCESS to <b>CANCELLED</b>, history kept'],
       [8200, 'One serverless pipeline, <b>hourly today</b>, continuous later for the near real time tables']],
   3: [[0, 'The DA database as it lands in bronze: <b>13 core tables</b>, link tables and 49 child tables'],
@@ -1083,7 +1081,7 @@ const CAPS = {
   5: [[0, 'Inside the document pipeline: <b>every box is a table</b>, every arrow a dependency'],
       [2000, 'Parse and classify <b>once per file</b>, then split into pages with no LLM call'],
       [3400, 'The expense list comes from <b>Postgres through Part 1</b>: categories are data, not prompt text'],
-      [4800, 'Three branches by document type <b>run in parallel</b>: final packs, proformas, statements of facts'],
+      [4800, 'Branches by document type <b>run in parallel</b>; proformas need no LLM, their amounts are already in Postgres'],
       [7000, 'Final packs: page map first, then <b>bank details and line items in parallel</b>'],
       [9000, 'Gold joins the results with the <b>structured tables</b>, so the job runs platform data first']],
   6: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],

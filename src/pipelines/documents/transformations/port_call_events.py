@@ -2,7 +2,7 @@
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from utilities.settings import CATALOG, LLM_ENDPOINT, SILVER, json_literal, sql_str
+from utilities.settings import AI_TABLE_PROPERTIES, CATALOG, LLM_ENDPOINT, SILVER, json_literal, sql_str
 
 RESPONSE_FORMAT = {
     "type": "json_schema",
@@ -28,6 +28,7 @@ EVENTS = "STRUCT<events: ARRAY<STRUCT<event: STRING, event_time: STRING>>>"
     name=f"{CATALOG}.{SILVER}.port_call_events",
     comment="Timeline of each port call read from its statement of facts, one row per event",
     cluster_by=["proforma_id"],
+    table_properties=AI_TABLE_PROPERTIES,
 )
 def port_call_events():
     pages = (

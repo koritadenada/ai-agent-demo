@@ -2,7 +2,7 @@
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from utilities.settings import CATALOG, LLM_ENDPOINT, SILVER, expense_categories, json_literal, sql_str
+from utilities.settings import AI_TABLE_PROPERTIES, CATALOG, LLM_ENDPOINT, SILVER, expense_categories, json_literal, sql_str
 
 CATEGORIES = expense_categories()
 
@@ -42,6 +42,7 @@ MAP_SCHEMA = "STRUCT<page_role: STRING, expense_category: STRING, confidence: DO
     name=f"{CATALOG}.{SILVER}.page_expense_map",
     comment="Page to expense category for final DA packs, with confidence and the model's explanation",
     cluster_by=["file_item_id"],
+    table_properties=AI_TABLE_PROPERTIES,
 )
 def page_expense_map():
     pages = (

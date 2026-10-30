@@ -18,9 +18,16 @@ Every bronze table starts with the two DMS columns and ends with three ingestion
 | last - 1 | `_source_file` | string | DMS file the row came from |
 | last | `_ingested_at` | timestamp | Bronze load time |
 
-Bronze is a change log. Silver keeps one row per key (or per version for SCD 2): changes are ordered by
-`(version, commit time)` where the table has a `version` column, else by commit time; `Op = 'D'` deletes the row,
-and for link tables (no `id`, keyed by the pair of foreign keys) it means the pair was removed.
+Bronze is a change log. Silver keeps one row per key (or per version for SCD 2), with one ordering rule for every
+table: full-load rows first, then `version` (when the table has one), then commit time. Full load must come first
+because DMS stamps full-load rows with the time it copied them but CDC rows with the source commit time, so a
+change committed while the load was running can carry an earlier timestamp than the copy it replaces.
+`Op = 'D'` deletes the row; for link tables (no `id`, keyed by the pair of foreign keys) it means the pair was
+removed. For SCD 2 tables `__START_AT` / `__END_AT` hold the ordering struct: the time is `__START_AT._commit_ts`.
+
+A second full load later (a DMS reload) upserts every row but cannot remove rows deleted in between, because a
+snapshot has no `D` rows. If reloads are part of the process, compare consecutive snapshots instead
+(AUTO CDC from snapshot).
 
 If a bronze with this envelope already exists, set `bronze_mode: existing` and `bronze_source: <catalog>.<schema>`:
 silver reads it directly and this bundle does not ingest the files again.

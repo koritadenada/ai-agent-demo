@@ -3,7 +3,7 @@ The match against the platform is NOT done here: gold applies deterministic rule
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from utilities.settings import CATALOG, CURRENCIES, SILVER, json_literal
+from utilities.settings import AI_TABLE_PROPERTIES, CATALOG, CURRENCIES, SILVER, json_literal
 
 SCHEMA = {
     "beneficiary_name": {"type": "string"},
@@ -20,6 +20,7 @@ SCHEMA = {
     name=f"{CATALOG}.{SILVER}.doc_bank_details",
     comment="Bank details and totals printed on each final DA pack, with per-field confidence",
     cluster_by=["proforma_id"],
+    table_properties=AI_TABLE_PROPERTIES,
 )
 def doc_bank_details():
     pages = spark.readStream.table(f"{CATALOG}.{SILVER}.page_expense_map").filter("page_role = 'summary'")

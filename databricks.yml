@@ -32,8 +32,16 @@ variables:
     description: Foundation model endpoint used by ai_query in the document pipeline
     default: databricks-gpt-5-mini
   refresh_schedule_status:
-    description: PAUSED or UNPAUSED for the hourly refresh job
+    description: PAUSED or UNPAUSED for the refresh job
     default: PAUSED
+  refresh_cron:
+    description: Quartz cron of the refresh job. Hourly matches today's freshness; most dashboards only need daily
+    default: "0 0 * * * ?"
+  allow_reset:
+    description: >-
+      Whether a full refresh may rebuild bronze and the AI tables. Keep false in production: a reset re-runs every
+      LLM call and DMS files may no longer be there to replay
+    default: "false"
   match_tolerance_pct:
     description: Final vs quote difference still considered a match (percent)
     default: "2"
@@ -61,6 +69,7 @@ targets:
     variables:
       catalog: main
       schema_prefix: portcall_
+      allow_reset: "true"
 
   # Your AWS account: the volumes point at the real DMS and documents buckets.
   prod:

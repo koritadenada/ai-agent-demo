@@ -11,6 +11,10 @@ SILVER = spark.conf.get("silver_schema")
 DOCUMENTS_PATH = spark.conf.get("documents_path")
 LLM_ENDPOINT = spark.conf.get("llm_endpoint")
 
+# Every LLM result is paid for once. In production a full refresh must not reset these tables (it would call
+# the models again for every page); row tracking lets the gold materialized views refresh incrementally.
+AI_TABLE_PROPERTIES = {"pipelines.reset.allowed": spark.conf.get("allow_reset", "false"), "delta.enableRowTracking": "true"}
+
 CURRENCIES = ["EUR", "USD", "GBP", "SGD", "AED", "CNY", "KRW", "BRL", "ZAR", "RON"]
 
 # The vocabulary is data: it comes from the expense_category table replicated from Postgres,
