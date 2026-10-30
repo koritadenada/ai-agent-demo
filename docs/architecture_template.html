@@ -271,6 +271,13 @@
   .agent .au span { display:block; font-family:"DM Sans",sans-serif; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
   .agent .ao { margin-top:10px; padding:7px 10px; border-radius:8px; background:#FFE3DE; color:#C42A16; font-size:12.5px; font-weight:700; }
   .badge.ok { border-color:var(--green); color:var(--green); }
+  .svc { position:absolute; width:276px; background:#fff; border:1px solid var(--line); border-top:4px solid var(--lava);
+    border-radius:12px; box-shadow:0 2px 10px rgba(27,49,57,.07); padding:9px 12px; display:flex; flex-direction:column; }
+  .svc .sn { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:700; }
+  .svc .sn svg { width:22px; height:22px; flex:0 0 22px; }
+  .svc .sd { font-size:11.5px; color:var(--navy); line-height:1.35; margin-top:3px; }
+  .svc .sh { font-family:ui-monospace,Menlo,monospace; font-size:10.5px; color:var(--muted); line-height:1.35; margin-top:auto; padding-top:4px; }
+  .badge.part { border-color:#C98A12; color:#9A6A0A; }
   .uclegend { position:absolute; right:40px; top:94px; display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--muted); }
   .uclegend .badge { position:static; margin-left:10px; }
   .decide { position:absolute; height:60px; display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-top:4px solid var(--green);
@@ -330,7 +337,7 @@
         <div><span>Refresh</span><b>one Job, after both pipelines</b></div></div>
     </div>
     <div class="blk rev" data-t="3100" data-go="7" style="left:880px">
-      <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later a supervisor agent, query</div>
+      <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later HAL-9000, query</div>
       <div class="icons">{{I_METRIC}}{{I_GENIE}}{{I_AGENT}}</div>
       <div class="run"><div class="lbl">What runs</div>
         <div><span>Metric views</span><b>7</b></div>
@@ -340,56 +347,48 @@
   </section>
 
   <!-- ============ USE CASE ============ -->
-  <section class="scene" data-scene="1" data-dur="12000">
-    <div class="stitle rev" data-t="0"><div class="k">The agent use case</div><div class="h">Check every DA before money moves</div></div>
-    <div class="uclegend rev" data-t="0"><span class="badge ok">running in the demo</span>pipelines and gold tables, scheduled, results in tables
-      <span class="badge on">next phase</span>agents the analyst talks to</div>
+  <section class="scene" data-scene="1" data-dur="13000">
+    <div class="stitle rev" data-t="0"><div class="k">The agent use case</div><div class="h">The seven AI services, rebuilt on Databricks</div></div>
+    <div class="uclegend rev" data-t="0"><span class="badge ok">running in the demo</span>built and verified<span class="badge part">partly running</span><span class="badge on">next phase</span>agents</div>
     <div class="persona rev" data-t="200" style="left:40px;top:180px;width:1200px">
       <div><span>Who</span><b>DA analysts at the buyer</b></div>
-      <div><span>Today</span><b>Every page, line and IBAN checked by hand</b></div>
-      <div><span>With the agents</span><b>The checks are done, the analyst reviews exceptions</b></div>
+      <div><span>Today</span><b>Seven services on Lambda, Step Functions and S3</b></div>
+      <div><span>On Databricks</span><b>Pipelines write the facts once; agents read them</b></div>
     </div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="u1" class="wire" pathLength="1" d="M 318 262 L 344 262" data-t="2700"/>
-      <path id="u2" class="wire" pathLength="1" d="M 626 262 L 652 262" data-t="5200"/>
-      <path id="u3" class="wire" pathLength="1" d="M 934 262 L 960 262" data-t="7400"/>
+      <path id="u2" class="wire" pathLength="1" d="M 626 262 L 652 262" data-t="6400"/>
+      <path id="u3" class="wire" pathLength="1" d="M 934 262 L 960 262" data-t="9400"/>
     </svg>
     <div class="stage rev" data-t="1000" style="left:40px"><b>1</b>Before the call: quotes and PDA</div>
-    <div class="stage rev" data-t="2800" style="left:348px"><b>2</b>The FDA arrives as a PDF</div>
-    <div class="stage rev" data-t="5300" style="left:656px"><b>3</b>Before money moves</div>
-    <div class="stage rev" data-t="7500" style="left:964px"><b>4</b>Any time</div>
-    <div class="agent rev" data-t="1300" style="left:40px">
-      <span class="badge on">next phase</span>
-      <div class="ah">{{I_AGENT}}Quote advisor</div>
-      <div class="ad">Compares the quotes and the PDA with past final costs, then drafts the pushback email</div>
-      <div class="au"><span>will use</span>rfq_quote_metrics, benchmark_savings_metrics</div>
-      <div class="ao">Lines to renegotiate and an email to review</div>
-    </div>
-    <div class="agent rev" data-t="3100" style="left:348px">
-      <span class="badge ok">running in the demo</span>
-      <div class="ah">{{I_DOC}}DA auditor</div>
-      <div class="ad">Reads the FDA PDF once (a summary page, then one supplier invoice per line) and checks each line against its quote, its invoice and the benchmark</div>
-      <div class="au"><span>runs as</span>document pipeline, expense_reconciliation</div>
-      <div class="ao">A review list with cited pages</div>
-    </div>
-    <div class="agent rev" data-t="5600" style="left:656px">
-      <span class="badge ok">running in the demo</span>
-      <div class="ah">{{I_CHECK}}Payment check</div>
-      <div class="ad">Compares the bank details and total printed on the FDA PDF with the bank account on the platform</div>
-      <div class="au"><span>runs as</span>payment_validation, UC functions</div>
-      <div class="ao">Payments on hold when they do not match</div>
-    </div>
-    <div class="agent rev" data-t="7800" style="left:964px">
-      <span class="badge on">next phase</span>
-      <div class="ah">{{I_GENIE}}Chat assistant</div>
-      <div class="ad">Answers questions in plain language: a supervisor routes them to the right Genie agent or to document search</div>
-      <div class="au"><span>will use</span>3 Genie agents, 7 metric views</div>
-      <div class="ao">Answers with numbers and cited pages</div>
-    </div>
-    <div class="decide rev" data-t="9800" style="left:40px;top:540px;width:1200px">
+    <div class="stage rev" data-t="2800" style="left:348px"><b>2</b>The FDA PDF arrives</div>
+    <div class="stage rev" data-t="6500" style="left:656px"><b>3</b>Before money moves</div>
+    <div class="stage rev" data-t="9500" style="left:964px"><b>4</b>Any time</div>
+    <div class="svc rev" data-t="1300" style="left:40px;top:292px;height:232px"><span class="badge part">partly running</span>
+      <div class="sn">{{I_AGENT}}AI Negotiator</div><div class="sd">Flags quoted expenses above past costs for the port and drafts the pushback email</div><div class="sh">quote_benchmark_flags: rule cascade, regional and local port minimum. The email: next phase</div></div>
+
+    <div class="svc rev" data-t="3100" style="left:348px;top:292px;height:70px"><span class="badge ok">running in the demo</span>
+      <div class="sn">{{I_DOC}}AI Extractor</div><div class="sd">Text of every page, page numbers kept</div><div class="sh">ai_parse_document: document_pages</div></div>
+
+    <div class="svc rev" data-t="4100" style="left:348px;top:373px;height:70px"><span class="badge ok">running in the demo</span>
+      <div class="sn">{{I_MODEL}}DA Helper</div><div class="sd">Each page to the DA line it proves</div><div class="sh">ai_query: page_expense_map</div></div>
+
+    <div class="svc rev" data-t="5100" style="left:348px;top:454px;height:70px"><span class="badge ok">running in the demo</span>
+      <div class="sn">{{I_STREAMING_TABLE}}DA Event Summarizer</div><div class="sd">Statement of facts to a timeline</div><div class="sh">ai_query: port_call_events</div></div>
+
+    <div class="svc rev" data-t="6800" style="left:656px;top:292px;height:112px"><span class="badge ok">running in the demo</span>
+      <div class="sn">{{I_DBSQL}}SOF Port Bill Analysis</div><div class="sd">Quote vs final bill per line, currency and rate of exchange, cited pages</div><div class="sh">expense_reconciliation, port_bill_analysis: SQL rules</div></div>
+
+    <div class="svc rev" data-t="7800" style="left:656px;top:412px;height:112px"><span class="badge ok">running in the demo</span>
+      <div class="sn">{{I_CHECK}}PDA/FDA Validator</div><div class="sd">Bank details, amount and date against the platform before payment</div><div class="sh">doc_bank_details: ai_extract; payment_validation: UC functions</div></div>
+
+    <div class="svc rev" data-t="9700" style="left:964px;top:292px;height:232px"><span class="badge on">next phase</span>
+      <div class="sn">{{I_GENIE}}HAL-9000</div><div class="sd">Answers DA analysts in plain language, with their own permissions</div><div class="sh">A supervisor agent over 3 Genie agents and 7 metric views, plus document search</div></div>
+
+    <div class="decide rev" data-t="11200" style="left:40px;top:540px;width:1200px">
       <div class="dl">{{I_INSIGHTS}}The analyst decides</div>
       <i class="dk ok">accept</i><i class="dk rv">dispute, with the draft email</i><i class="dk hd">hold the payment</i>
-      <div class="gr"><span>own permissions</span><span>every answer cites a table or page</span><span>no LLM in the math</span></div>
+      <div class="gr"><span>own permissions</span><span>every finding cites a table or page</span><span>no LLM in the math</span></div>
     </div>
   </section>
 
@@ -709,7 +708,7 @@
       <div class="ico">{{I_GENIE}}</div><div><div class="name">DA operations</div></div></div>
     <div class="node hero rev" data-t="6900" style="left:1046px;top:330px;width:196px;height:156px">
       <span class="badge on">next phase</span>
-      <div class="ico">{{I_AGENT}}</div><div><div class="name">Supervisor agent</div><div class="desc">Routes each question to the right Genie agent, adds document search</div></div></div>
+      <div class="ico">{{I_AGENT}}</div><div><div class="name">HAL-9000</div><div class="desc">Supervisor agent: routes each question to the right Genie agent, adds document search</div></div></div>
   </section>
 
   <!-- ============ PART 5: ONE EXPENSE LINE ============ -->
@@ -796,12 +795,12 @@
 <script>
 const CAPS = {
   0: [[0, 'Platform data and documents land in S3, meet in <b>one gold layer</b>, and Genie agents query it through <b>metric views</b>']],
-  1: [[0, 'The agent use case: <b>help DA analysts check every DA</b> before money moves'],
-      [900, 'Before the call: the <b>quote advisor</b> compares quotes with past costs and drafts the pushback'],
-      [2600, 'When the FDA PDF lands: the <b>DA auditor</b> reads every page and checks every line'],
-      [5100, 'Before payment: the <b>payment check</b> holds anything whose bank details do not match'],
-      [7300, 'Any time: the <b>chat assistant</b> answers questions through the right Genie agent'],
-      [9600, 'The analyst <b>always decides</b>, with the evidence in front of them']],
+  1: [[0, 'Their <b>seven AI services</b>, in the order a DA goes through them'],
+      [900, 'Before the call: the <b>AI Negotiator</b> compares quotes with past costs'],
+      [2600, 'When the FDA PDF lands: <b>AI Extractor, DA Helper and DA Event Summarizer</b> turn it into facts'],
+      [6300, 'Before payment: <b>SOF Port Bill Analysis</b> reconciles every line, the <b>PDA/FDA Validator</b> checks the bank details'],
+      [9300, 'Any time: <b>HAL-9000</b> answers questions, now on Genie agents'],
+      [11000, 'The analyst <b>always decides</b>, with the evidence in front of them']],
   2: [[0, 'Your platform data already lands in S3 through <b>DMS: full load plus CDC</b>'],
       [1400, 'DMS writes Parquet per table; every row starts with <b>Op and _dms_commit_ts</b>'],
       [2600, 'Auto Loader picks up only the new files into <b>bronze</b>: a change log, nothing lost'],
@@ -843,7 +842,7 @@ const CAPS = {
   7: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
       [1000, 'Each metric view holds <b>measures</b> (what you count) and <b>dimensions</b> (what you slice by)'],
       [4200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
-      [6400, 'Next phase: a <b>supervisor agent</b> routes every chat question to the right one']],
+      [6400, 'Next phase: <b>HAL-9000</b> becomes a supervisor agent that routes every question to the right one']],
   8: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
       [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],

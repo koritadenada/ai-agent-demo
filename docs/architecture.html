@@ -271,6 +271,13 @@
   .agent .au span { display:block; font-family:"DM Sans",sans-serif; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
   .agent .ao { margin-top:10px; padding:7px 10px; border-radius:8px; background:#FFE3DE; color:#C42A16; font-size:12.5px; font-weight:700; }
   .badge.ok { border-color:var(--green); color:var(--green); }
+  .svc { position:absolute; width:276px; background:#fff; border:1px solid var(--line); border-top:4px solid var(--lava);
+    border-radius:12px; box-shadow:0 2px 10px rgba(27,49,57,.07); padding:9px 12px; display:flex; flex-direction:column; }
+  .svc .sn { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:700; }
+  .svc .sn svg { width:22px; height:22px; flex:0 0 22px; }
+  .svc .sd { font-size:11.5px; color:var(--navy); line-height:1.35; margin-top:3px; }
+  .svc .sh { font-family:ui-monospace,Menlo,monospace; font-size:10.5px; color:var(--muted); line-height:1.35; margin-top:auto; padding-top:4px; }
+  .badge.part { border-color:#C98A12; color:#9A6A0A; }
   .uclegend { position:absolute; right:40px; top:94px; display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--muted); }
   .uclegend .badge { position:static; margin-left:10px; }
   .decide { position:absolute; height:60px; display:flex; align-items:center; gap:10px; border:1px solid var(--line); border-top:4px solid var(--green);
@@ -390,7 +397,7 @@
         <div><span>Refresh</span><b>one Job, after both pipelines</b></div></div>
     </div>
     <div class="blk rev" data-t="3100" data-go="7" style="left:880px">
-      <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later a supervisor agent, query</div>
+      <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later HAL-9000, query</div>
       <div class="icons"><svg viewBox="0 0 512 512" fill="none"><rect x="48" y="64" width="416" height="384" rx="36" fill="#FABFBA"/><rect x="112" y="272" width="64" height="112" rx="10" fill="#FF5F46"/><rect x="224" y="192" width="64" height="192" rx="10" fill="#FF5F46"/><rect x="336" y="128" width="64" height="256" rx="10" fill="#FF5F46"/><path d="M96 400H416" stroke="#fff" stroke-width="22" stroke-linecap="round"/></svg><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
 <path d="M459.812 206.815C428.864 256.533 382.402 324.948 361.655 342.503C340.909 360.058 310.141 391.703 238.824 391.703C188.862 391.703 145.885 359.614 126.81 313.595C126.811 313.648 126.811 313.703 126.812 313.756C124.109 307.041 117.538 302.298 109.855 302.297C99.7606 302.297 91.5767 310.481 91.5767 320.576C91.5769 322.945 92.0279 325.113 92.8485 327.047C97.2392 337.39 108.92 337.83 108.92 370.096C108.92 374.793 108.92 366.343 108.92 370.096C78.5784 370.096 53.9815 345.498 53.9809 315.157C53.9809 284.815 78.5781 260.218 108.92 260.218H116.288V260.208H203.559C210.079 260.208 216.337 262.969 220.41 268.059C227.547 276.978 233.017 285.281 237.048 292.133C240.783 298.481 251.969 298.543 255.667 292.173C259.566 285.456 264.744 277.343 271.309 268.619C275.386 263.201 281.863 260.208 288.644 260.208H321.094C368.515 260.208 394.508 237.472 407.78 221.085C414.648 212.606 424.403 206.815 435.315 206.815H459.812Z" fill="#FABFBA"/>
@@ -404,63 +411,62 @@
   </section>
 
   <!-- ============ USE CASE ============ -->
-  <section class="scene" data-scene="1" data-dur="12000">
-    <div class="stitle rev" data-t="0"><div class="k">The agent use case</div><div class="h">Check every DA before money moves</div></div>
-    <div class="uclegend rev" data-t="0"><span class="badge ok">running in the demo</span>pipelines and gold tables, scheduled, results in tables
-      <span class="badge on">next phase</span>agents the analyst talks to</div>
+  <section class="scene" data-scene="1" data-dur="13000">
+    <div class="stitle rev" data-t="0"><div class="k">The agent use case</div><div class="h">The seven AI services, rebuilt on Databricks</div></div>
+    <div class="uclegend rev" data-t="0"><span class="badge ok">running in the demo</span>built and verified<span class="badge part">partly running</span><span class="badge on">next phase</span>agents</div>
     <div class="persona rev" data-t="200" style="left:40px;top:180px;width:1200px">
       <div><span>Who</span><b>DA analysts at the buyer</b></div>
-      <div><span>Today</span><b>Every page, line and IBAN checked by hand</b></div>
-      <div><span>With the agents</span><b>The checks are done, the analyst reviews exceptions</b></div>
+      <div><span>Today</span><b>Seven services on Lambda, Step Functions and S3</b></div>
+      <div><span>On Databricks</span><b>Pipelines write the facts once; agents read them</b></div>
     </div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="u1" class="wire" pathLength="1" d="M 318 262 L 344 262" data-t="2700"/>
-      <path id="u2" class="wire" pathLength="1" d="M 626 262 L 652 262" data-t="5200"/>
-      <path id="u3" class="wire" pathLength="1" d="M 934 262 L 960 262" data-t="7400"/>
+      <path id="u2" class="wire" pathLength="1" d="M 626 262 L 652 262" data-t="6400"/>
+      <path id="u3" class="wire" pathLength="1" d="M 934 262 L 960 262" data-t="9400"/>
     </svg>
     <div class="stage rev" data-t="1000" style="left:40px"><b>1</b>Before the call: quotes and PDA</div>
-    <div class="stage rev" data-t="2800" style="left:348px"><b>2</b>The FDA arrives as a PDF</div>
-    <div class="stage rev" data-t="5300" style="left:656px"><b>3</b>Before money moves</div>
-    <div class="stage rev" data-t="7500" style="left:964px"><b>4</b>Any time</div>
-    <div class="agent rev" data-t="1300" style="left:40px">
-      <span class="badge on">next phase</span>
-      <div class="ah"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg>Quote advisor</div>
-      <div class="ad">Compares the quotes and the PDA with past final costs, then drafts the pushback email</div>
-      <div class="au"><span>will use</span>rfq_quote_metrics, benchmark_savings_metrics</div>
-      <div class="ao">Lines to renegotiate and an email to review</div>
-    </div>
-    <div class="agent rev" data-t="3100" style="left:348px">
-      <span class="badge ok">running in the demo</span>
-      <div class="ah"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg>DA auditor</div>
-      <div class="ad">Reads the FDA PDF once (a summary page, then one supplier invoice per line) and checks each line against its quote, its invoice and the benchmark</div>
-      <div class="au"><span>runs as</span>document pipeline, expense_reconciliation</div>
-      <div class="ao">A review list with cited pages</div>
-    </div>
-    <div class="agent rev" data-t="5600" style="left:656px">
-      <span class="badge ok">running in the demo</span>
-      <div class="ah"><svg viewBox="0 0 512 512" fill="none"><rect x="96" y="56" width="320" height="400" rx="32" fill="#FABFBA"/><path d="M150 170L190 210L262 138" stroke="#FF5F46" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/><rect x="290" y="160" width="80" height="26" rx="13" fill="#fff"/><path d="M160 300L220 360M220 300L160 360" stroke="#FF5F46" stroke-width="30" stroke-linecap="round"/><rect x="290" y="318" width="80" height="26" rx="13" fill="#fff"/></svg>Payment check</div>
-      <div class="ad">Compares the bank details and total printed on the FDA PDF with the bank account on the platform</div>
-      <div class="au"><span>runs as</span>payment_validation, UC functions</div>
-      <div class="ao">Payments on hold when they do not match</div>
-    </div>
-    <div class="agent rev" data-t="7800" style="left:964px">
-      <span class="badge on">next phase</span>
-      <div class="ah"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="stage rev" data-t="2800" style="left:348px"><b>2</b>The FDA PDF arrives</div>
+    <div class="stage rev" data-t="6500" style="left:656px"><b>3</b>Before money moves</div>
+    <div class="stage rev" data-t="9500" style="left:964px"><b>4</b>Any time</div>
+    <div class="svc rev" data-t="1300" style="left:40px;top:292px;height:232px"><span class="badge part">partly running</span>
+      <div class="sn"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg>AI Negotiator</div><div class="sd">Flags quoted expenses above past costs for the port and drafts the pushback email</div><div class="sh">quote_benchmark_flags: rule cascade, regional and local port minimum. The email: next phase</div></div>
+
+    <div class="svc rev" data-t="3100" style="left:348px;top:292px;height:70px"><span class="badge ok">running in the demo</span>
+      <div class="sn"><svg viewBox="0 0 512 512" fill="none"><path d="M112 48H320L400 128V440C400 454 390 464 376 464H112C98 464 88 454 88 440V72C88 58 98 48 112 48Z" fill="#FABFBA"/><path d="M320 48V128H400Z" fill="#FF5F46"/><rect x="144" y="200" width="200" height="26" rx="13" fill="#FF5F46"/><rect x="144" y="262" width="160" height="26" rx="13" fill="#fff"/><rect x="144" y="324" width="200" height="26" rx="13" fill="#fff"/><rect x="144" y="386" width="120" height="26" rx="13" fill="#fff"/></svg>AI Extractor</div><div class="sd">Text of every page, page numbers kept</div><div class="sh">ai_parse_document: document_pages</div></div>
+
+    <div class="svc rev" data-t="4100" style="left:348px;top:373px;height:70px"><span class="badge ok">running in the demo</span>
+      <div class="sn"><svg viewBox="0 0 512 512" fill="none"><path d="M136 136L256 256M376 136L256 256M256 256L136 376M256 256L376 376" stroke="#FABFBA" stroke-width="28"/><circle cx="256" cy="256" r="62" fill="#FF5F46"/><circle cx="120" cy="120" r="46" fill="#FABFBA"/><circle cx="392" cy="120" r="46" fill="#FABFBA"/><circle cx="120" cy="392" r="46" fill="#FF5F46"/><circle cx="392" cy="392" r="46" fill="#FF5F46"/></svg>DA Helper</div><div class="sd">Each page to the DA line it proves</div><div class="sh">ai_query: page_expense_map</div></div>
+
+    <div class="svc rev" data-t="5100" style="left:348px;top:454px;height:70px"><span class="badge ok">running in the demo</span>
+      <div class="sn"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M1.75 1C1.33579 1 1 1.33579 1 1.75V14.25C1 14.6642 1.33579 15 1.75 15H6.5V7H9.5V8H11V7H13.5V8H15V1.75C15 1.33579 14.6642 1 14.25 1H1.75ZM5 7V13.5H2.5V7H5ZM13.5 5.5V2.5H2.5V5.5H13.5Z" fill="#FF3621"/>
+<path d="M9.02387 10.9205C9.5085 10.3147 10.4345 10.3292 10.9 10.9498C11.9538 12.3549 14.0502 12.3876 15.1473 11.0161L15.5856 10.4683L14.4143 9.53128L13.976 10.0791C13.4914 10.6849 12.5654 10.6704 12.1 10.0498C11.0462 8.64474 8.94974 8.61199 7.85257 9.98345L7.41431 10.5313L8.58561 11.4683L9.02387 10.9205Z" fill="#FF3621"/>
+<path d="M9.02387 13.9205C9.5085 13.3147 10.4345 13.3292 10.9 13.9498C11.9538 15.3549 14.0502 15.3876 15.1473 14.0161L15.5856 13.4683L14.4143 12.5313L13.976 13.0791C13.4914 13.6849 12.5654 13.6704 12.1 13.0498C11.0462 11.6447 8.94974 11.612 7.85257 12.9834L7.41431 13.5313L8.58561 14.4683L9.02387 13.9205Z" fill="#FF3621"/>
+</svg>DA Event Summarizer</div><div class="sd">Statement of facts to a timeline</div><div class="sh">ai_query: port_call_events</div></div>
+
+    <div class="svc rev" data-t="6800" style="left:656px;top:292px;height:112px"><span class="badge ok">running in the demo</span>
+      <div class="sn"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M152 448L448 448V272L152 272C103.399 272 64 311.399 64 360C64 408.601 103.399 448 152 448ZM152 400C174.091 400 192 382.091 192 360C192 337.909 174.091 320 152 320C129.909 320 112 337.909 112 360C112 382.091 129.909 400 152 400Z" fill="#FF5F46"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M360 240C408.601 240 448 200.601 448 152C448 103.399 408.601 64 360 64L64 64V240L360 240ZM360 192C382.091 192 400 174.091 400 152C400 129.909 382.091 112 360 112C337.909 112 320 129.909 320 152C320 174.091 337.909 192 360 192Z" fill="#FABFBA"/>
+</svg>SOF Port Bill Analysis</div><div class="sd">Quote vs final bill per line, currency and rate of exchange, cited pages</div><div class="sh">expense_reconciliation, port_bill_analysis: SQL rules</div></div>
+
+    <div class="svc rev" data-t="7800" style="left:656px;top:412px;height:112px"><span class="badge ok">running in the demo</span>
+      <div class="sn"><svg viewBox="0 0 512 512" fill="none"><rect x="96" y="56" width="320" height="400" rx="32" fill="#FABFBA"/><path d="M150 170L190 210L262 138" stroke="#FF5F46" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/><rect x="290" y="160" width="80" height="26" rx="13" fill="#fff"/><path d="M160 300L220 360M220 300L160 360" stroke="#FF5F46" stroke-width="30" stroke-linecap="round"/><rect x="290" y="318" width="80" height="26" rx="13" fill="#fff"/></svg>PDA/FDA Validator</div><div class="sd">Bank details, amount and date against the platform before payment</div><div class="sh">doc_bank_details: ai_extract; payment_validation: UC functions</div></div>
+
+    <div class="svc rev" data-t="9700" style="left:964px;top:292px;height:232px"><span class="badge on">next phase</span>
+      <div class="sn"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
 <path d="M459.812 206.815C428.864 256.533 382.402 324.948 361.655 342.503C340.909 360.058 310.141 391.703 238.824 391.703C188.862 391.703 145.885 359.614 126.81 313.595C126.811 313.648 126.811 313.703 126.812 313.756C124.109 307.041 117.538 302.298 109.855 302.297C99.7606 302.297 91.5767 310.481 91.5767 320.576C91.5769 322.945 92.0279 325.113 92.8485 327.047C97.2392 337.39 108.92 337.83 108.92 370.096C108.92 374.793 108.92 366.343 108.92 370.096C78.5784 370.096 53.9815 345.498 53.9809 315.157C53.9809 284.815 78.5781 260.218 108.92 260.218H116.288V260.208H203.559C210.079 260.208 216.337 262.969 220.41 268.059C227.547 276.978 233.017 285.281 237.048 292.133C240.783 298.481 251.969 298.543 255.667 292.173C259.566 285.456 264.744 277.343 271.309 268.619C275.386 263.201 281.863 260.208 288.644 260.208H321.094C368.515 260.208 394.508 237.472 407.78 221.085C414.648 212.606 424.403 206.815 435.315 206.815H459.812Z" fill="#FABFBA"/>
 <path d="M246.744 286.125C246.743 224.929 197.938 175.293 137.646 175.064C197.938 174.835 246.744 125.196 246.744 64C246.744 64 246.744 64 246.744 64C246.744 125.338 295.778 175.063 356.263 175.063C295.778 175.063 246.744 224.787 246.744 286.125Z" fill="#FF5F46"/>
-</svg>Chat assistant</div>
-      <div class="ad">Answers questions in plain language: a supervisor routes them to the right Genie agent or to document search</div>
-      <div class="au"><span>will use</span>3 Genie agents, 7 metric views</div>
-      <div class="ao">Answers with numbers and cited pages</div>
-    </div>
-    <div class="decide rev" data-t="9800" style="left:40px;top:540px;width:1200px">
+</svg>HAL-9000</div><div class="sd">Answers DA analysts in plain language, with their own permissions</div><div class="sh">A supervisor agent over 3 Genie agents and 7 metric views, plus document search</div></div>
+
+    <div class="decide rev" data-t="11200" style="left:40px;top:540px;width:1200px">
       <div class="dl"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M127.11 120.78L118.32 111.99V41.24L92.15 15.16H88.96V39.11C88.96 43.47 92.51 47.02 96.87 47.02H109.21V44.02H96.88C94.17 44.02 91.97 41.82 91.97 39.11V19.21L115.33 42.49V113.24L125 122.91C125.98 123.89 126.53 125.21 126.53 126.61C126.53 128.01 125.99 129.33 125.01 130.31C122.96 132.35 119.64 132.35 117.6 130.31L108.37 121.08L102 114.71L111.53 105.18L102.78 96.43L97.95 101.26L92.38 95.69C96.27 91.31 98.4 85.74 98.4 79.84C98.4 66.69 87.7 56 74.55 56C61.4 56 50.68 66.71 50.68 79.86C50.68 93.01 61.38 103.71 74.53 103.71C78.33 103.71 81.96 102.84 85.31 101.13L83.95 98.46C81.02 99.95 77.86 100.71 74.53 100.71C63.03 100.71 53.68 91.36 53.68 79.86C53.68 68.37 63.03 59.02 74.53 59.02C86.03 59.02 95.38 68.37 95.38 79.86C95.38 85.45 93.19 90.71 89.21 94.67L88.14 95.73L95.81 103.39L92.17 107.03L91.11 108.1L97.73 114.72L91.8 120.65H38.39C35.68 120.65 33.48 118.45 33.48 115.74V23.07C33.48 20.36 35.68 18.16 38.39 18.16H83.19V15.16H38.39C34.03 15.16 30.48 18.71 30.48 23.07V115.73C30.48 120.09 34.03 123.64 38.39 123.64H93.05L99.86 116.83L106.23 123.2L115.46 132.43C117.06 134.03 119.17 134.83 121.28 134.83C123.39 134.83 125.5 134.03 127.11 132.43C128.66 130.88 129.52 128.81 129.52 126.6C129.52 124.4 128.67 122.33 127.11 120.78ZM95.36 108.09L102.77 100.68L107.27 105.18L99.86 112.59L95.36 108.09Z" fill="#FF5F46"/>
 <path d="M61.4399 79.86C61.4399 87.08 67.3099 92.96 74.5299 92.96C81.7499 92.96 87.6299 87.09 87.6299 79.86C87.6299 72.63 81.7499 66.76 74.5299 66.76C67.3099 66.76 61.4399 72.64 61.4399 79.86ZM84.6299 79.86C84.6299 85.43 80.0999 89.96 74.5299 89.96C68.9599 89.96 64.4399 85.43 64.4399 79.86C64.4399 74.29 68.9699 69.76 74.5299 69.76C80.0899 69.76 84.6299 74.29 84.6299 79.86Z" fill="#FF5F46"/>
 </svg>The analyst decides</div>
       <i class="dk ok">accept</i><i class="dk rv">dispute, with the draft email</i><i class="dk hd">hold the payment</i>
-      <div class="gr"><span>own permissions</span><span>every answer cites a table or page</span><span>no LLM in the math</span></div>
+      <div class="gr"><span>own permissions</span><span>every finding cites a table or page</span><span>no LLM in the math</span></div>
     </div>
   </section>
 
@@ -946,7 +952,7 @@
 </svg></div><div><div class="name">DA operations</div></div></div>
     <div class="node hero rev" data-t="6900" style="left:1046px;top:330px;width:196px;height:156px">
       <span class="badge on">next phase</span>
-      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg></div><div><div class="name">Supervisor agent</div><div class="desc">Routes each question to the right Genie agent, adds document search</div></div></div>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg></div><div><div class="name">HAL-9000</div><div class="desc">Supervisor agent: routes each question to the right Genie agent, adds document search</div></div></div>
   </section>
 
   <!-- ============ PART 5: ONE EXPENSE LINE ============ -->
@@ -1053,12 +1059,12 @@
 <script>
 const CAPS = {
   0: [[0, 'Platform data and documents land in S3, meet in <b>one gold layer</b>, and Genie agents query it through <b>metric views</b>']],
-  1: [[0, 'The agent use case: <b>help DA analysts check every DA</b> before money moves'],
-      [900, 'Before the call: the <b>quote advisor</b> compares quotes with past costs and drafts the pushback'],
-      [2600, 'When the FDA PDF lands: the <b>DA auditor</b> reads every page and checks every line'],
-      [5100, 'Before payment: the <b>payment check</b> holds anything whose bank details do not match'],
-      [7300, 'Any time: the <b>chat assistant</b> answers questions through the right Genie agent'],
-      [9600, 'The analyst <b>always decides</b>, with the evidence in front of them']],
+  1: [[0, 'Their <b>seven AI services</b>, in the order a DA goes through them'],
+      [900, 'Before the call: the <b>AI Negotiator</b> compares quotes with past costs'],
+      [2600, 'When the FDA PDF lands: <b>AI Extractor, DA Helper and DA Event Summarizer</b> turn it into facts'],
+      [6300, 'Before payment: <b>SOF Port Bill Analysis</b> reconciles every line, the <b>PDA/FDA Validator</b> checks the bank details'],
+      [9300, 'Any time: <b>HAL-9000</b> answers questions, now on Genie agents'],
+      [11000, 'The analyst <b>always decides</b>, with the evidence in front of them']],
   2: [[0, 'Your platform data already lands in S3 through <b>DMS: full load plus CDC</b>'],
       [1400, 'DMS writes Parquet per table; every row starts with <b>Op and _dms_commit_ts</b>'],
       [2600, 'Auto Loader picks up only the new files into <b>bronze</b>: a change log, nothing lost'],
@@ -1100,7 +1106,7 @@ const CAPS = {
   7: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
       [1000, 'Each metric view holds <b>measures</b> (what you count) and <b>dimensions</b> (what you slice by)'],
       [4200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
-      [6400, 'Next phase: a <b>supervisor agent</b> routes every chat question to the right one']],
+      [6400, 'Next phase: <b>HAL-9000</b> becomes a supervisor agent that routes every question to the right one']],
   8: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
       [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],
