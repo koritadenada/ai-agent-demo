@@ -38,7 +38,7 @@ SELECT *,
        quoted_amount_eur > benchmark_median_eur * (1 + ${quote_flag_pct} / 100) AS flagged,
        ROUND(GREATEST(quoted_amount_eur - benchmark_median_eur, 0), 2) AS potential_saving_eur,
        CASE WHEN benchmark_median_eur IS NULL THEN 'Not enough history for this port and expense'
-            ELSE FORMAT_STRING('Quoted %s EUR is %+.1f%% against the %s median of %s EUR (%d past calls); regional minimum %s EUR, lowest at this port %s EUR',
+            ELSE FORMAT_STRING('Quoted %s EUR is %+.1f%% against the %s median of %s EUR (%d past calls); cheapest port median in the region (any vessel size) %s EUR, lowest paid at this port %s EUR',
                                FORMAT_NUMBER(quoted_amount_eur, 2), CAST((quoted_amount_eur / benchmark_median_eur - 1) * 100 AS DOUBLE),
                                benchmark_level, FORMAT_NUMBER(benchmark_median_eur, 2), benchmark_sample_size,
                                FORMAT_NUMBER(region_min_median_eur, 2), FORMAT_NUMBER(local_port_min_eur, 2))

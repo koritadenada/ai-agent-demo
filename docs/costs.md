@@ -35,6 +35,17 @@ price): there is no separate markup to add, and contract discounts apply on top.
 
 Parsing and extraction dominate; the model choice for `ai_query` matters least.
 
+## The agents
+
+Not measured yet on the demo. What drives the cost:
+
+- **The agents app** bills compute while it runs, whether or not anyone uses it: stop it (`databricks apps stop
+  portcall-agents`) outside demo hours.
+- **HAL-9000** (supervisor agent) and the **Genie agents** pay per question: model tokens plus the SQL warehouse
+  time of each query.
+- **AI Negotiator** and **DA Event Summarizer** pay per click: one tool-calling run per drafted email, one model call
+  per written account. Nothing runs on a schedule.
+
 ## Built in
 
 | Where | What | Why |
