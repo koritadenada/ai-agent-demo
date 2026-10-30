@@ -85,7 +85,8 @@ def final_pack(call) -> bytes:
     anomaly, currency = call["anomaly"], call["currency"]
     agent = call["agent"]
     invoice_currency = "USD" if anomaly == "currency_mismatch" else currency
-    rate = Decimal(str(ROE_TO_USD[currency])) if invoice_currency != currency else Decimal(1)
+    # invoice-currency units per one DA-currency unit (1 EUR = 1.08 USD), printed on the summary page when they differ
+    rate = Decimal(str(ROE_TO_USD[currency])) / Decimal(str(ROE_TO_USD[invoice_currency]))
     finals = call["finals"]
     differs, missing = call["differs"], call["missing"]
 
@@ -111,21 +112,30 @@ def final_pack(call) -> bytes:
     for k, v in [("Beneficiary", call["agency"]), ("Bank", agent["bank_name"]), (label, account), ("SWIFT / BIC", swift)]:
         doc.cell(42, 6, k)
         doc.cell(0, 6, v, new_x="LMARGIN", new_y="NEXT")
+    if invoice_currency != currency:
+        doc.ln(3)
+        doc.cell(0, 6, f"Supplier invoices in {invoice_currency}. Rate of exchange: 1 {currency} = {rate:.4f} {invoice_currency}",
+                 new_x="LMARGIN", new_y="NEXT")
 
     for n, c in enumerate(call["lines"], start=1):
         name = c[1]
         if name == missing:
             continue
-        amount = (finals[name] * (Decimal("1.04") if name == differs else 1) / rate).quantize(Decimal("0.01"))
+        amount = (finals[name] * (Decimal("1.04") if name == differs else 1) * rate).quantize(Decimal("0.01"))
         supplier = call["agency"] if SUPPLIERS[name] == "agency" else f"{call['port'][2]} {SUPPLIERS[name]}"
-        doc.issuer = supplier  # the header of the next page shows the supplier
-        doc.add_page()
-        doc.title_block("INVOICE", [
-            ("Invoice no.", f"{call['port'][1]}-{call['fda_id']}-{n:02d}"),
-            ("Date", (call["etd"] + timedelta(days=1)).strftime("%d %b %Y")),
-            ("Bill to", f"{call['agency']} as agents for MV {call['vessel']['vessel_name']}"),
-            ("Port call", f"{call['port'][2]}, {call['eta']:%d %b %Y}")])
-        doc.table([(names[name], amount)], invoice_currency, amount)
+        parts = [(names[name], amount)]
+        if anomaly == "split_in_out" and name == "Pilotage":   # invoiced in two parts for one DA line
+            half = (amount / 2).quantize(Decimal("0.01"))
+            parts = [("Pilotage inbound", half), ("Pilotage outbound", amount - half)]
+        for k, (label_text, part) in enumerate(parts):
+            doc.issuer = supplier  # the header of the next page shows the supplier
+            doc.add_page()
+            doc.title_block("INVOICE", [
+                ("Invoice no.", f"{call['port'][1]}-{call['fda_id']}-{n:02d}{'ab'[k] if len(parts) > 1 else ''}"),
+                ("Date", (call["etd"] + timedelta(days=1)).strftime("%d %b %Y")),
+                ("Bill to", f"{call['agency']} as agents for MV {call['vessel']['vessel_name']}"),
+                ("Port call", f"{call['port'][2]}, {call['eta']:%d %b %Y}")])
+            doc.table([(label_text, part)], invoice_currency, part)
     return bytes(doc.output())
 
 

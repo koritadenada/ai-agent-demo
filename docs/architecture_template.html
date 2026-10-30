@@ -503,11 +503,12 @@
       <span class="badge">Auto Loader</span>
       <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">No bronze copy</div><div class="desc">Reads new PDFs from the bucket; keys from the path</div></div></div>
     <div class="nocall rev" data-t="8900" style="left:344px;top:452px;width:210px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Errors kept per page: one bad page never fails the file</div>
+    <div class="nocall rev" data-t="9100" style="left:344px;top:528px;width:210px;white-space:normal;line-height:1.3;border-color:var(--navy);color:var(--navy)">{{I_UC}}Prompts and models from the registry: change without a deploy</div>
     <div class="ep rev golink" data-t="2700" data-go="5" style="left:590px;top:192px;width:380px;height:402px">
       <div class="bar">{{I_SERVERLESS_W}}Document pipeline<span class="tag">Open the graph &#8599;</span></div>
       <div class="step rev" data-t="3000"><div class="n">1</div><div class="tx">ai_parse_document<span>Text per page, page numbers kept</span></div><div class="si">{{I_DOC}}</div></div>
       <div class="step rev" data-t="4300"><div class="n">2</div><div class="tx">ai_classify the document<span>PDA quote, final DA pack or SOF</span></div><div class="si">{{I_MODEL}}</div></div>
-      <div class="step rev" data-t="4900"><div class="n">3</div><div class="tx">ai_query, JSON schema<span>Page to expense, with confidence</span></div><div class="si">{{I_MODEL}}</div></div>
+      <div class="step rev" data-t="4900"><div class="n">3</div><div class="tx">ai_query, JSON schema<span>Page to the DA&#39;s own expense line</span></div><div class="si">{{I_MODEL}}</div></div>
       <div class="step rev" data-t="5900"><div class="n">4</div><div class="tx">ai_extract<span>Lines, totals, bank details, confidence</span></div><div class="si">{{I_MODEL}}</div></div>
       <div class="step rev" data-t="7100"><div class="n">5</div><div class="tx">ai_query<span>Statement of facts to event timeline</span></div><div class="si">{{I_MODEL}}</div></div>
     </div>
@@ -557,7 +558,7 @@
       <div class="ico">{{I_DB}}</div><div><div class="name">expense_category</div><div class="desc">Silver, from Postgres</div></div></div>
     <div class="node sm db rev" data-t="5600" style="left:598px;top:196px;width:188px;height:100px">
       <span class="badge">per page</span>
-      <div class="ico">{{I_MODEL}}</div><div><div class="name">page_expense_map</div><div class="desc">Final packs: ai_query, page to expense</div></div></div>
+      <div class="ico">{{I_MODEL}}</div><div><div class="name">page_expense_map</div><div class="desc">Final packs: ai_query, page to the DA line</div></div></div>
     <div class="node sm db rev" data-t="5800" style="left:598px;top:352px;width:188px;height:100px">
       <span class="badge">no LLM</span>
       <div class="ico">{{I_DOC}}</div><div><div class="name">pda_quote pages</div><div class="desc">Amounts already in Postgres</div></div></div>
@@ -606,7 +607,7 @@
     <div class="node db rev" data-t="5500" style="left:680px;top:396px;width:320px;height:84px">
       <div class="ico">{{I_DELTA}}</div><div><div class="name">expense_benchmarks</div><div class="desc">Port, expense, vessel size: median, regional min</div></div></div>
     <div class="node db rev" data-t="5700" style="left:680px;top:496px;width:320px;height:84px">
-      <div class="ico">{{I_DELTA}}</div><div><div class="name">port_call_costs</div><div class="desc">Plus rfq_comparison, da_workflow, document_quality</div></div></div>
+      <div class="ico">{{I_DELTA}}</div><div><div class="name">port_call_costs</div><div class="desc">Plus port_bill_analysis, quote_benchmark_flags and 3 more</div></div></div>
     <div class="zc rev" data-t="7000" style="left:1040px;top:196px;width:196px;height:262px;border-top-color:var(--lava)">
       <div class="zh">{{I_CHECK}}Verdicts</div>
       <div class="kv mk2" data-t="7200"><span>MATCH</span></div>

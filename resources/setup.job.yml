@@ -2,7 +2,7 @@ resources:
   jobs:
     setup:
       name: portcall-setup
-      description: Run after each deploy. Applies the UC functions, refreshes the data once, then applies the metric views.
+      description: Run after each deploy. Applies the UC functions, seeds missing prompts, refreshes the data once, then applies the metric views.
       performance_target: STANDARD
       max_concurrent_runs: 1
       tags:
@@ -14,6 +14,7 @@ resources:
             environment_version: "4"
             dependencies:
               - pyyaml
+              - mlflow>=3.1
       parameters:
         - name: catalog
           default: ${var.catalog}
@@ -28,9 +29,16 @@ resources:
             python_file: ../src/deploy/apply_sql_objects.py
             parameters: ["--kind", "functions", "--catalog", "{{job.parameters.catalog}}",
                          "--gold-schema", "{{job.parameters.gold_schema}}", "--silver-schema", "{{job.parameters.silver_schema}}"]
+        - task_key: prompts
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/deploy/apply_sql_objects.py
+            parameters: ["--kind", "prompts", "--catalog", "{{job.parameters.catalog}}",
+                         "--gold-schema", "{{job.parameters.gold_schema}}", "--silver-schema", "{{job.parameters.silver_schema}}"]
         - task_key: refresh
           depends_on:
             - task_key: uc_functions   # gold calls the bank-check functions
+            - task_key: prompts        # the document pipeline loads its prompts
           run_job_task:
             job_id: ${resources.jobs.refresh.id}
         - task_key: metric_views

@@ -29,8 +29,13 @@ variables:
     description: 'JSON map of source columns to neutral silver names, {"table": {"source_column": "silver_column"}}'
     default: "{}"
   llm_endpoint:
-    description: Foundation model endpoint used by ai_query in the document pipeline
+    description: Default model for ai_query when a prompt version does not name one
     default: databricks-gpt-5-mini
+  prompt_alias:
+    description: >-
+      Alias of the prompt versions the document pipeline uses (MLflow Prompt Registry). Move the alias to a new
+      version to change a prompt or its model without a deploy; use another alias (for example challenger) to compare
+    default: production
   refresh_schedule_status:
     description: PAUSED or UNPAUSED for the refresh job
     default: PAUSED
@@ -47,6 +52,12 @@ variables:
     default: "2"
   dispute_threshold_pct:
     description: Final vs quote difference above which a line is disputed (percent)
+    default: "10"
+  min_benchmark_sample:
+    description: Past lines a benchmark level needs before it is used (the cascade falls back to the next level)
+    default: "3"
+  quote_flag_pct:
+    description: Quote above the benchmark median by more than this (percent) is flagged for negotiation
     default: "10"
   # Only used by the prod target (external storage in your AWS account)
   storage_credential_name:

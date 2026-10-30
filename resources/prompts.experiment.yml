@@ -1,0 +1,9 @@
+resources:
+  experiments:
+    prompts:
+      # The Prompts tab of this experiment shows the prompt registry of the silver schema: every prompt the document
+      # pipeline uses, its versions and aliases. Edit, compare and promote versions there, without a deploy.
+      name: ${workspace.root_path}/portcall-prompts
+      tags:
+        - key: mlflow.promptRegistryLocation
+          value: ${var.catalog}.${resources.schemas.silver.name}

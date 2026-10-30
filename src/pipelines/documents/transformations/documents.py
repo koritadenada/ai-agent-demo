@@ -5,7 +5,7 @@ are read from it and only the keys, the parse result and the type are stored."""
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from utilities.settings import AI_TABLE_PROPERTIES, CATALOG, DOCUMENTS_PATH, SILVER, json_literal
+from utilities.settings import AI_TABLE_PROPERTIES, CATALOG, DOCUMENTS_PATH, SILVER, json_literal, prompt, sql_str
 
 DOC_TYPES = {
     "pda_quote": "Proforma disbursement account: the agent's quote before the port call",
@@ -19,6 +19,11 @@ KEY_PATTERN = r"/([a-z_]+)/(\d+)/(\d+)\.pdf$"
 
 ELEMENTS = "ARRAY<STRUCT<type: STRING, content: STRING, bbox: ARRAY<STRUCT<page_id: INT>>>>"
 ERRORS = "ARRAY<STRUCT<error_message: STRING, page_id: INT>>"
+TYPE_PROMPT = prompt("document_type")  # instructions for ai_classify, from the prompt registry
+# The page text of every page, in the stable shape downstream consumers rely on: [{page_number, extracted_text}]
+PAGES = ("IF(page_count > 0, transform(sequence(0, page_count - 1), p -> named_struct('page_number', p + 1, "
+         "'extracted_text', concat_ws('\\n', transform(filter(elements, e -> e.bbox[0].page_id = p), e -> e.content)))), "
+         "array())")
 
 
 @dp.table(
@@ -56,10 +61,13 @@ def documents():
         .withColumn("first_page_text", F.expr(
             "concat_ws('\\n', transform(filter(elements, e -> e.bbox[0].page_id = 0), e -> e.content))"))
     )
+    classify = (f"ai_classify(first_page_text, {json_literal(DOC_TYPES)}, "
+                f"map('version', '2.0', 'instructions', {sql_str(TYPE_PROMPT.template)})):response[0]::STRING")
     return parsed.select(
         "file_item_id", "proforma_id", "entity", "entity_id", "path", "size_bytes", "landed_at",
         "parsed", "elements", "page_count", "parse_errors",
-        F.expr(f"ai_classify(first_page_text, {json_literal(DOC_TYPES)}, map('version', '2.0'))"
-               ":response[0]::STRING").alias("doc_type"),
+        F.expr(PAGES).alias("pages"),
+        F.expr(classify).alias("doc_type"),
+        F.lit(TYPE_PROMPT.version).alias("prompt_version"),
         F.current_timestamp().alias("processed_at"),
     )
