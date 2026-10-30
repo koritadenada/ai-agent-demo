@@ -10,7 +10,8 @@ are exposed through Unity Catalog metric views to Genie agents.
 
 **Architecture (animated):** https://koritadenada.github.io/ai-agent-demo/architecture.html
 Click or use the arrow keys; `?mode=auto` loops it. Tabs: the agent use case, the platform pipeline and the source
-schema, the document pipeline and its step graph, gold with a worked example, Genie, one line end to end, a glossary.
+schema, the document pipeline and its step graph, gold followed by one row worked through, Genie, one line end to
+end, a glossary.
 
 ## What is in the repo
 

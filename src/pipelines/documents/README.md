@@ -17,55 +17,28 @@ directly. Every model result is stored once, so nothing downstream calls a model
 
 ## Prompts: where they live and how to change them
 
-Every model call takes its prompt from the MLflow Prompt Registry in Unity Catalog, in the silver schema, by alias
-(`prompt_alias`, default `production`). For `ai_query` steps the model is a tag on the prompt version
-(`model`); `ai_classify` and `ai_extract` use their built-in model, so for them the prompt is the instructions.
+Every model call loads its prompt from the MLflow Prompt Registry (silver schema, alias `production`) when a run
+starts. For `ai_query` steps the model is the `model` tag of the prompt version. Browse them in the MLflow
+experiment `portcall-prompts`, **Prompts** tab: `document_type`, `page_map`, `invoice_amount`, `bank_details`,
+`sof_events`.
 
-| Prompt | Used by | Step |
-|---|---|---|
-| `document_type` | `ai_classify` | Type of each document, from its first page |
-| `page_map` | `ai_query` + model tag | Page of a final DA pack to the DA's expense line |
-| `invoice_amount` | `ai_extract` | Amount and currency on a supporting invoice |
-| `bank_details` | `ai_extract` | Bank details, total, date, rate of exchange; the field vocabulary (IBAN, Account no., BIC) |
-| `sof_events` | `ai_query` + model tag | Timeline of a statement of facts |
+[`utilities/prompts.py`](utilities/prompts.py) only seeds version 1 on the first deploy (setup job); after that the
+registry is the source of truth.
 
-To browse them: the MLflow experiment `portcall-prompts` (created by the bundle), **Prompts** tab.
-
-**First deploy.** [`utilities/prompts.py`](utilities/prompts.py) holds the starting text of each prompt. The
-`prompts` task of the setup job registers it as version 1 and points `production` at it, only when the prompt does
-not exist yet. After that the registry is the source of truth: later deploys never overwrite a version, and the
-file is only read again if the registry cannot be reached (rows then show `@repo-default`).
-
-**Changing a prompt or its model.** Create a new version and move the `production` alias to it, in the Prompts tab
-or in code. The model of an `ai_query` step is the `model` tag of the version, so a model change is a new version
-with a different tag (in code, as below):
+**To change a prompt or its model:** register a new version and move `production` to it.
 
 ```python
 import mlflow
 mlflow.set_registry_uri("databricks-uc")
 name = "<catalog>.<silver schema>.page_map"
-v = mlflow.genai.register_prompt(name=name, template="...new text, same {{placeholders}}...",
-                                 tags={"model": "databricks-claude-sonnet-4-5"}, commit_message="Clearer split rule")
+v = mlflow.genai.register_prompt(name=name, template="...", tags={"model": "databricks-claude-sonnet-4-5"})
 mlflow.genai.set_prompt_alias(name=name, alias="production", version=v.version)
 ```
 
-What happens next:
-
-- **No deploy.** The next pipeline run loads the new version when it starts and uses it for that whole run.
-- **New documents only.** Each page is processed once, so pages already done keep the result of the version that
-  produced them. To re-run older documents with the new prompt, refresh that table on purpose (model calls are paid
-  again; in production `allow_reset` keeps this from happening by accident).
-- **Traceable.** Every row records the version that produced it (`prompt_version`, for example
-  `page_map@production v2`); the version holds the text and the model, so results of different versions can be told
-  apart and compared.
-- **Measured.** `Agreement with analysts` in `expense_reconciliation_metrics` shows whether the new version agrees
-  with the DA analysts as well as the old one.
-- **Rollback.** Move `production` back to the previous version; the next run uses it again.
-- **Try before switching.** Point a `challenger` alias at the new version and run a copy of the pipeline with
-  `prompt_alias: challenger` on the same documents, then compare before moving `production`.
-- **Keep the placeholders.** `page_map` needs `{{expense_lines}}`, `{{categories}}` and `{{page_text}}`;
-  `sof_events` needs `{{document_text}}`. The JSON output schema is in the code, so a prompt change cannot break the
-  table columns.
+- No deploy: the next run uses it. Roll back by moving the alias back.
+- New documents only: pages already processed keep their result.
+- Every row records the version that produced it (`prompt_version`); compare versions with `Agreement with analysts`.
+- Keep the placeholders (`{{expense_lines}}`, `{{categories}}`, `{{page_text}}`, `{{document_text}}`).
 
 ## The AI services, requirement by requirement
 

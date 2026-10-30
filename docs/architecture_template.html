@@ -223,6 +223,8 @@
     font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--navy); border:1px solid #9FB2BA; }
   .wire.dep { stroke:var(--lava); stroke-dasharray:.018 .014; stroke-dashoffset:0; opacity:0; transition:opacity .6s; }
   .wire.dep.on { opacity:1; }
+  .phase { position:absolute; inset:0; transition:opacity .5s ease; }
+  .phase.off { opacity:0; pointer-events:none; }
   .golink { cursor:pointer; }
   .golink:hover { box-shadow:0 6px 22px rgba(27,49,57,.18); }
 
@@ -296,10 +298,9 @@
       <div class="pill" data-p="4"><b>2</b>Documents</div>
       <div class="pill sub" data-p="5" data-name="Doc graph" title="Document pipeline graph"><b>2b</b>Graph</div>
       <div class="pill" data-p="6"><b>3</b>Gold</div>
-      <div class="pill sub" data-p="7" data-name="Gold example" title="Gold worked example"><b>3b</b>Example</div>
-      <div class="pill" data-p="8"><b>4</b>Genie</div>
-      <div class="pill" data-p="9"><b>5</b>One line</div>
-      <div class="pill" data-p="10"><b>?</b>Glossary</div>
+      <div class="pill" data-p="7"><b>4</b>Genie</div>
+      <div class="pill" data-p="8"><b>5</b>One line</div>
+      <div class="pill" data-p="9"><b>?</b>Glossary</div>
     </div>
   </div>
 
@@ -328,7 +329,7 @@
         <div><span>Business rules</span><b>plain SQL</b></div>
         <div><span>Refresh</span><b>one Job, after both pipelines</b></div></div>
     </div>
-    <div class="blk rev" data-t="3100" data-go="8" style="left:880px">
+    <div class="blk rev" data-t="3100" data-go="7" style="left:880px">
       <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later a supervisor agent, query</div>
       <div class="icons">{{I_METRIC}}{{I_GENIE}}{{I_AGENT}}</div>
       <div class="run"><div class="lbl">What runs</div>
@@ -577,8 +578,10 @@
     <div class="nocall rev" data-t="10200" style="left:1056px;top:508px;width:184px;white-space:normal;line-height:1.3;border-color:var(--navy);color:var(--navy)">{{I_JOBS}}Job order: platform data, documents, then gold</div>
   </section>
 
-  <!-- ============ PART 3: GOLD ============ -->
-  <section class="scene" data-scene="6" data-dur="9500">
+  <!-- ============ PART 3: GOLD, THEN ONE ROW WORKED THROUGH ============ -->
+  <section class="scene" data-scene="6" data-dur="21500">
+    <div class="phase" data-off="9600">
+
     <div class="stitle rev" data-t="0"><div class="k">Part 3</div><div class="h">Gold: both sources meet on the expense line</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; one Job, after both pipelines</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
@@ -597,8 +600,8 @@
     <div class="node db rev" data-t="1900" style="left:54px;top:446px;width:250px;height:120px">
       <span class="badge on">documents</span>
       <div class="ico">{{I_DOC}}</div><div><div class="name">Silver documents</div><div class="desc">Invoice pages per expense, extracted amounts, bank details</div></div></div>
-    <div class="node hero rev golink" data-t="3400" data-go="7" style="left:360px;top:318px;width:250px;height:140px">
-      <span class="badge">plain SQL &middot; example &#8599;</span>
+    <div class="node hero rev" data-t="3400" style="left:360px;top:318px;width:250px;height:140px">
+      <span class="badge">plain SQL</span>
       <div class="ico">{{I_DBSQL}}</div><div><div class="name">Join and rules</div><div class="desc">Final line to its quote, to its invoice page, to the analyst check</div></div></div>
     <div class="node db rev" data-t="5100" style="left:680px;top:196px;width:320px;height:84px">
       <div class="ico">{{I_DELTA}}</div><div><div class="name">expense_reconciliation</div><div class="desc">Per final line: quote, final, invoice page, verdict</div></div></div>
@@ -618,60 +621,60 @@
       <div class="kv"><span>NO_EVIDENCE</span></div>
     </div>
     <div class="nocall rev" data-t="7700" style="left:1040px;top:474px;width:196px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Scored against the analyst's own verdict</div>
-  </section>
+    </div>
+    <div class="phase">
 
-  <!-- ============ PART 3b: GOLD WORKED EXAMPLE ============ -->
-  <section class="scene" data-scene="7" data-dur="12000">
-    <div class="stitle rev" data-t="0"><div class="k">Part 3 &middot; worked example, mock data</div><div class="h">How one gold row is built</div></div>
+    <div class="stitle rev" data-t="9600"><div class="k">Part 3 &middot; worked example, mock data</div><div class="h">How one gold row is built</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
-      <path id="x1" class="wire" pathLength="1" d="M 380 300 L 408 300" data-t="3700"/>
-      <path id="x2" class="wire hot" pathLength="1" d="M 380 518 L 389 518 Q 394 518 394 513 L 394 425 Q 394 420 399 420 L 408 420" data-t="3800"/>
-      <path id="x3" class="wire" pathLength="1" d="M 790 300 L 818 300" data-t="6200"/>
-      <path id="x4" class="wire" pathLength="1" d="M 1028 404 L 1028 417" data-t="8200"/>
+      <path id="x1" class="wire" pathLength="1" d="M 380 300 L 408 300" data-t="13300"/>
+      <path id="x2" class="wire hot" pathLength="1" d="M 380 518 L 389 518 Q 394 518 394 513 L 394 425 Q 394 420 399 420 L 408 420" data-t="13400"/>
+      <path id="x3" class="wire" pathLength="1" d="M 790 300 L 818 300" data-t="15800"/>
+      <path id="x4" class="wire" pathLength="1" d="M 1028 404 L 1028 417" data-t="17800"/>
     </svg>
-    <div class="zc rev" data-t="500" style="left:40px;top:186px;width:340px;height:232px;border-top-color:var(--navy)">
+    <div class="zc rev" data-t="10100" style="left:40px;top:186px;width:340px;height:232px;border-top-color:var(--navy)">
       <div class="zh">{{I_STREAMING_TABLE}}From silver platform<span class="tagsrc lk">platform</span></div>
-      <div class="kv mk2" data-t="800"><span>expense_evaluation</span><b>final 2,730.00 EUR</b></div>
-      <div class="kv mk2" data-t="1000"><span>proforma_expense</span><b>quote 2,500.00 EUR</b></div>
+      <div class="kv mk2" data-t="10400"><span>expense_evaluation</span><b>final 2,730.00 EUR</b></div>
+      <div class="kv mk2" data-t="10600"><span>proforma_expense</span><b>quote 2,500.00 EUR</b></div>
       <div class="kv"><span>expense_category</span><b>Pilotage</b></div>
       <div class="kv"><span>port_call_costs</span><b>Rotterdam, 25-50k GT</b></div>
-      <div class="kv mk2" data-t="1200"><span>verification</span><b>analyst: OVERCHARGE</b></div>
+      <div class="kv mk2" data-t="10800"><span>verification</span><b>analyst: OVERCHARGE</b></div>
       <div class="kv"><span>expense_benchmarks</span><b>median 2,506.43 EUR</b></div>
     </div>
-    <div class="zc rev" data-t="2100" style="left:40px;top:434px;width:340px;height:166px;border-top-color:var(--lava)">
+    <div class="zc rev" data-t="11700" style="left:40px;top:434px;width:340px;height:166px;border-top-color:var(--lava)">
       <div class="zh">{{I_DOC}}From silver documents<span class="tagsrc req">document</span></div>
       <div class="kv"><span>documents</span><b>final_da_pack, 1 per FDA</b></div>
-      <div class="kv mk" data-t="2400"><span>page_expense_map</span><b>page 4: Pilotage</b></div>
-      <div class="kv mk" data-t="2600"><span>doc_line_items</span><b>page 4: 2,730.00 EUR</b></div>
+      <div class="kv mk" data-t="12000"><span>page_expense_map</span><b>page 4: Pilotage</b></div>
+      <div class="kv mk" data-t="12200"><span>doc_line_items</span><b>page 4: 2,730.00 EUR</b></div>
     </div>
-    <div class="ep tight rev" data-t="3900" style="left:410px;top:186px;width:380px;height:414px">
-      <div class="bar">{{I_DBSQL}}Joins<span class="tag">one row per final line</span></div>
-      <div class="step rev" data-t="4100"><div class="n">1</div><div class="tx">Final line to its quote<span>proforma_expense_id = proforma_expense.id</span></div></div>
-      <div class="step rev" data-t="4400"><div class="n">2</div><div class="tx">Line to category<span>category_id = expense_category.id</span></div></div>
-      <div class="step rev" data-t="4700"><div class="n">3</div><div class="tx">Line to invoice page<span>proforma_id + category, in doc_line_items</span></div></div>
-      <div class="step rev" data-t="5000"><div class="n">4</div><div class="tx">Line to analyst check<span>expense_evaluation_id, latest version</span></div></div>
-      <div class="step rev" data-t="5300"><div class="n">5</div><div class="tx">Line to benchmark<span>port + vessel type + size band + category</span></div></div>
+    <div class="ep tight rev" data-t="13500" style="left:410px;top:186px;width:380px;height:414px">
+      <div class="bar">{{I_DBSQL}}Five questions<span class="tag">about one final line</span></div>
+      <div class="step rev" data-t="13700"><div class="n">1</div><div class="tx">What was quoted for it?<span>Its quoted line in the PDA: 2,500.00 EUR</span></div></div>
+      <div class="step rev" data-t="14000"><div class="n">2</div><div class="tx">What kind of expense is it?<span>The expense categories: Pilotage</span></div></div>
+      <div class="step rev" data-t="14300"><div class="n">3</div><div class="tx">What does the invoice say?<span>The page matched to it: page 4, 2,730.00 EUR</span></div></div>
+      <div class="step rev" data-t="14600"><div class="n">4</div><div class="tx">What did the analyst decide?<span>The analyst&#39;s check of this line: OVERCHARGE</span></div></div>
+      <div class="step rev" data-t="14900"><div class="n">5</div><div class="tx">What does it usually cost?<span>Past calls, same port and ship size: 2,506.43 EUR</span></div></div>
     </div>
-    <div class="zc rev" data-t="6300" style="left:820px;top:186px;width:416px;height:218px;border-top-color:var(--navy)">
+    <div class="zc rev" data-t="15900" style="left:820px;top:186px;width:416px;height:218px;border-top-color:var(--navy)">
       <div class="zh">{{I_CHECK}}Rules, top to bottom: first match wins</div>
       <div class="kv"><span>invoice currency differs</span><b>CURRENCY_MISMATCH</b></div>
       <div class="kv"><span>pack received, no page</span><b>NO_EVIDENCE</b></div>
       <div class="kv"><span>invoice vs final &gt; 0.01</span><b>INVOICE_MISMATCH</b></div>
-      <div class="kv mk" data-t="7000"><span>final &gt; quote + 2%</span><b>OVER_QUOTE</b></div>
+      <div class="kv mk" data-t="16600"><span>final &gt; quote + 2%</span><b>OVER_QUOTE</b></div>
       <div class="kv"><span>final &lt; quote - 2%</span><b>UNDER_QUOTE</b></div>
       <div class="kv"><span>otherwise</span><b>MATCH</b></div>
     </div>
-    <div class="zc rev" data-t="8400" style="left:820px;top:420px;width:416px;height:180px;border-top-color:var(--lava)">
+    <div class="zc rev" data-t="18000" style="left:820px;top:420px;width:416px;height:180px;border-top-color:var(--lava)">
       <div class="zh">{{I_DELTA}}gold.expense_reconciliation, this row</div>
-      <div class="kv mk" data-t="8600"><span>verdict / review_action</span><b>OVER_QUOTE / review</b></div>
+      <div class="kv mk" data-t="18200"><span>verdict / review_action</span><b>OVER_QUOTE / review</b></div>
       <div class="kv"><span>variance_vs_quote_pct</span><b>9.20</b></div>
       <div class="kv"><span>evidence_pages</span><b>[4]</b></div>
-      <div class="kv mk2" data-t="8900"><span>analyst_verdict / agrees</span><b>OVER_QUOTE / true</b></div>
+      <div class="kv mk2" data-t="18500"><span>analyst_verdict / agrees</span><b>OVER_QUOTE / true</b></div>
+    </div>
     </div>
   </section>
 
   <!-- ============ PART 4: METRIC VIEWS AND GENIE ============ -->
-  <section class="scene" data-scene="8" data-dur="9500">
+  <section class="scene" data-scene="7" data-dur="9500">
     <div class="stitle rev" data-t="0"><div class="k">Part 4</div><div class="h">Metric views power the Genie agents</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; governed in Unity Catalog</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
@@ -710,7 +713,7 @@
   </section>
 
   <!-- ============ PART 5: ONE EXPENSE LINE ============ -->
-  <section class="scene" data-scene="9" data-dur="11000">
+  <section class="scene" data-scene="8" data-dur="11000">
     <div class="stitle rev" data-t="0"><div class="k">Zoom in &middot; mock data</div><div class="h">One expense line, end to end</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="z1" class="wire" pathLength="1" d="M 394 290 L 428 290" data-t="3700"/>
@@ -755,7 +758,7 @@
   </section>
 
   <!-- ============ GLOSSARY ============ -->
-  <section class="scene" data-scene="10" data-dur="9000">
+  <section class="scene" data-scene="9" data-dur="9000">
     <div class="stitle rev" data-t="0"><div class="k">Glossary</div><div class="h">The words used on every tab</div></div>
     <div class="lane rev" data-t="600" style="left:28px;top:186px;width:400px;height:418px"><span class="ll">The port call</span></div>
     <div class="gt rev" data-t="800" style="left:38px;top:198px;width:380px"><b>Port call</b><span>One ship's visit to one port, from arrival to sailing</span></div>
@@ -828,26 +831,26 @@ const CAPS = {
   6: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],
       [600, 'Platform data brings the <b>quoted and final lines and the analyst checks</b>'],
       [1800, 'Documents bring <b>what the invoice page actually says</b>'],
-      [3000, 'They meet on the <b>expense line</b>. Click Join and rules for a worked example'],
+      [3000, 'They meet on the <b>expense line</b>; next, one row worked through'],
       [4600, 'Business rules run as <b>plain SQL</b>: tolerances, currency checks, bank matching'],
-      [6800, 'Every line gets a verdict, <b>scored against the analyst</b>']],
-  7: [[0, 'Worked example: <b>one Pilotage line</b> of one port call'],
-      [400, 'Silver platform gives the <b>final line, its quote, the category, the port call and the analyst check</b>'],
-      [2000, 'Silver documents give <b>what the invoice page says</b>'],
-      [3600, 'Five joins put everything on <b>one row per final line</b>'],
-      [6100, 'Rules run top to bottom; <b>the first that fires</b> sets the verdict'],
-      [8100, 'The gold row: verdict, action, cited page, and <b>agreement with the analyst</b>']],
-  8: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
+      [6800, 'Every line gets a verdict, <b>scored against the analyst</b>'],
+      [9600, 'Worked example: <b>one Pilotage line</b> of one port call'],
+      [10000, 'Silver platform gives the <b>final line, its quote, the category, the port call and the analyst check</b>'],
+      [11600, 'Silver documents give <b>what the invoice page says</b>'],
+      [13200, 'Five questions about the line, each answered by <b>one table</b>, all on one row'],
+      [15700, 'Rules run top to bottom; <b>the first that fires</b> sets the verdict'],
+      [17700, 'The gold row: verdict, action, cited page, and <b>agreement with the analyst</b>']],
+  7: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
       [1000, 'Each metric view holds <b>measures</b> (what you count) and <b>dimensions</b> (what you slice by)'],
       [4200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
       [6400, 'Next phase: a <b>supervisor agent</b> routes every chat question to the right one']],
-  9: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
+  8: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
       [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],
       [3600, 'Gold rules: <b>+9.2% over the quote</b>, evidence found, bank details match'],
       [6000, 'Against the benchmark the final is <b>+8.9%</b> versus the port median'],
       [7200, 'Verdict <b>review</b> under the example policy, with an answer the agent can cite']],
-  10: [[0, 'Glossary: <b>the words used on every tab</b>'],
+  9: [[0, 'Glossary: <b>the words used on every tab</b>'],
       [500, '<b>The port call</b>: who is involved and what they agree'],
       [2900, '<b>The money</b>: from the quote to the final bill'],
       [5300, '<b>The data</b>: how it moves through Databricks']]
@@ -870,7 +873,10 @@ function reveal(el){
 }
 function reset(sc){
   sc.querySelectorAll('.rev,.wire,.wlabel,.pulse,.mk,.mk2').forEach(e => { e.classList.remove('on'); if (e.tagName === 'path') e.removeAttribute('marker-end'); });
+  sc.querySelectorAll('[data-off]').forEach(e => e.classList.remove('off'));
 }
+// a part can hand over to a second view in the same tab: [data-off] hides its group from that time on
+function phases(sc, t){ sc.querySelectorAll('[data-off]').forEach(e => e.classList.toggle('off', t >= +e.dataset.off)); }
 function pills(i){
   document.querySelectorAll('.pill').forEach(p => {
     const n = +p.dataset.p; p.classList.toggle('cur', n === i); p.classList.toggle('done', n < i);
@@ -892,9 +898,10 @@ function stepEls(sc, i, k){
 function show(i, staticMode){
   const sc = enter(i);
   const els = [...sc.querySelectorAll('[data-t]')];
-  if (staticMode){ els.forEach(reveal); const c = CAPS[i]; capEl.innerHTML = c[c.length-1][1]; return; }
+  if (staticMode){ els.forEach(reveal); phases(sc, Infinity); const c = CAPS[i]; capEl.innerHTML = c[c.length-1][1]; return; }
   els.forEach(e => timers.push(setTimeout(() => reveal(e), +e.dataset.t + 200)));
   (CAPS[i] || []).forEach(([t, html]) => timers.push(setTimeout(() => setCap(html), t)));
+  sc.querySelectorAll('[data-off]').forEach(e => timers.push(setTimeout(() => e.classList.add('off'), +e.dataset.off)));
   timers.push(setTimeout(() => { if (!paused) show((i + 1) % scenes.length); }, +sc.dataset.dur));
 }
 
@@ -909,6 +916,7 @@ function present(i, k, animate){
     for (let j = 0; j < k; j++) stepEls(sc, i, j).forEach(([e]) => { if (!e.classList.contains('on')) reveal(e); });
     stepEls(sc, i, k).forEach(([e, d]) => timers.push(setTimeout(() => reveal(e), d + 150)));
   }
+  phases(sc, bounds(i)[k]);
   setCap(CAPS[i][k][1], !animate);
   progress();
 }
