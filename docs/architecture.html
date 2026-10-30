@@ -307,8 +307,8 @@
   <section class="scene" data-scene="0" data-dur="9000">
     <div class="stitle rev" data-t="0"><div class="k">From raw data to agent-ready gold</div><div class="h">Two sources in S3, one gold layer, Genie on top</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
-      <path id="o1" class="wire hot" pathLength="1" d="M 400 261 C 430 261, 430 320, 460 320" data-t="1600"/>
-      <path id="o2" class="wire hot" pathLength="1" d="M 400 429 C 430 429, 430 370, 460 370" data-t="1800"/>
+      <path id="o1" class="wire hot" pathLength="1" d="M 400 261 L 410 261 C 430 261, 430 320, 447 320 L 457 320" data-t="1600"/>
+      <path id="o2" class="wire hot" pathLength="1" d="M 400 429 L 410 429 C 430 429, 430 370, 447 370 L 457 370" data-t="1800"/>
       <path id="o3" class="wire" pathLength="1" d="M 820 345 L 876 345" data-t="2900"/>
       <circle class="pulse" r="5" data-t="1900"><animateMotion dur="1.2s" repeatCount="indefinite" begin="indefinite"><mpath href="#o1"/></animateMotion></circle><circle class="pulse" r="5" data-t="2100"><animateMotion dur="1.2s" repeatCount="indefinite" begin="indefinite"><mpath href="#o2"/></animateMotion></circle><circle class="pulse" r="5" data-t="3200"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#o3"/></animateMotion></circle>
     </svg>
@@ -570,8 +570,8 @@
     <div class="lane rev" data-t="6200" style="left:710px;top:186px;width:250px;height:412px"><span class="ll">FDA: evaluation</span></div>
     <div class="lane assumed rev" data-t="9200" style="left:970px;top:186px;width:282px;height:412px"><span class="ll">Lookups, assumed</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
-      <path id="s1" class="wire" pathLength="1" d="M 218 232 C 232 232, 232 312, 246 312" data-t="2900"/>
-      <path id="s2" class="wire" pathLength="1" d="M 450 392 C 464 392, 464 232, 478 232" data-t="4600"/>
+      <path id="s1" class="wire" pathLength="1" d="M 218 232 L 227 232 Q 232 232 232 237 L 232 307 Q 232 312 237 312 L 246 312" data-t="2900"/>
+      <path id="s2" class="wire" pathLength="1" d="M 450 392 L 459 392 Q 464 392 464 387 L 464 237 Q 464 232 469 232 L 478 232" data-t="4600"/>
       <path id="s3" class="wire" pathLength="1" d="M 690 232 L 718 232" data-t="6400"/>
       <path id="s4" class="wire hot" pathLength="1" d="M 690 312 L 718 312" data-t="7200"/>
     </svg>
@@ -680,23 +680,23 @@
   <section class="scene" data-scene="5" data-dur="12000">
     <div class="stitle rev" data-t="0"><div class="k">Part 2 &middot; inside the document pipeline</div><div class="h">What runs in parallel, what needs Postgres</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; documents pipeline, every box is a table</span></div>
-    <div class="lane rev" data-t="5000" style="left:586px;top:186px;width:212px;height:416px"><span class="ll">parallel, by document type</span></div>
+    <div class="lane rev" data-t="5000" style="left:590px;top:186px;width:208px;height:416px"><span class="ll">parallel, by document type</span></div>
     <div class="lane rev" data-t="7200" style="left:818px;top:186px;width:212px;height:280px"><span class="ll">parallel</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="r1" class="wire" pathLength="1" d="M 184 402 L 208 402" data-t="700"/>
       <path id="r2" class="wire" pathLength="1" d="M 380 402 L 400 402" data-t="2200"/>
       <path id="r6" class="wire dep" pathLength="1" d="M 384 230 L 596 230" data-t="3800"/>
-      <path id="r7" class="wire dep" pathLength="1" d="M 384 262 C 575 262, 570 384, 596 384" data-t="3900"/>
+      <path id="r7" class="wire dep" pathLength="1" d="M 384 262 L 394 262 C 575 262, 570 384, 586 384 L 596 384" data-t="3900"/>
       <text class="wlabel" x="488" y="221" text-anchor="middle" data-t="4000">expense vocabulary</text>
-      <path id="r3" class="wire" pathLength="1" d="M 562 402 C 580 402, 575 252, 596 252" data-t="5200"/>
+      <path id="r3" class="wire" pathLength="1" d="M 562 402 L 565 402 C 572 402, 572 252, 579 252 L 596 252" data-t="5200"/>
       <path id="r4" class="wire" pathLength="1" d="M 562 402 L 596 402" data-t="5300"/>
-      <path id="r5" class="wire" pathLength="1" d="M 562 402 C 580 402, 575 546, 596 546" data-t="5400"/>
+      <path id="r5" class="wire" pathLength="1" d="M 562 402 L 565 402 C 572 402, 572 546, 579 546 L 596 546" data-t="5400"/>
       <path id="r8" class="wire hot" pathLength="1" d="M 786 236 L 828 236" data-t="7400"/>
-      <path id="r9" class="wire hot" pathLength="1" d="M 786 266 C 808 266, 806 386, 828 386" data-t="7500"/>
+      <path id="r9" class="wire hot" pathLength="1" d="M 786 266 L 796 266 C 808 266, 806 386, 818 386 L 828 386" data-t="7500"/>
       <path id="r10" class="wire" pathLength="1" d="M 786 414 L 828 414" data-t="7600"/>
-      <path id="r11" class="wire" pathLength="1" d="M 1018 242 C 1040 242, 1036 360, 1054 360" data-t="9300"/>
+      <path id="r11" class="wire" pathLength="1" d="M 1018 242 L 1031 242 Q 1036 242 1036 247 L 1036 355 Q 1036 360 1041 360 L 1054 360" data-t="9300"/>
       <path id="r12" class="wire" pathLength="1" d="M 1018 402 L 1054 402" data-t="9400"/>
-      <path id="r13" class="wire" pathLength="1" d="M 786 546 C 1000 546, 1030 444, 1054 444" data-t="9500"/>
+      <path id="r13" class="wire" pathLength="1" d="M 786 546 L 796 546 C 1000 546, 1030 444, 1044 444 L 1054 444" data-t="9500"/>
       <circle class="pulse" r="5" data-t="5600"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#r3"/></animateMotion></circle><circle class="pulse" r="5" data-t="5600"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#r4"/></animateMotion></circle><circle class="pulse" r="5" data-t="5600"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#r5"/></animateMotion></circle><circle class="pulse" r="5" data-t="7800"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#r8"/></animateMotion></circle><circle class="pulse" r="5" data-t="7800"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#r9"/></animateMotion></circle>
     </svg>
     <div class="node sm db rev" data-t="300" style="left:28px;top:354px;width:156px;height:96px">
@@ -763,12 +763,12 @@
     <div class="stitle rev" data-t="0"><div class="k">Part 3</div><div class="h">Gold: both sources meet on the expense line</div></div>
     <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; one Job, after both pipelines</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
-      <path id="g1" class="wire" pathLength="1" d="M 304 270 C 334 270, 330 362, 358 362" data-t="3100"/>
-      <path id="g2" class="wire hot" pathLength="1" d="M 304 506 C 334 506, 330 414, 358 414" data-t="3200"/>
-      <path id="g3" class="wire" pathLength="1" d="M 610 388 C 645 388, 645 238, 678 238" data-t="4700"/>
-      <path id="g4" class="wire" pathLength="1" d="M 610 388 C 645 388, 645 338, 678 338" data-t="4800"/>
-      <path id="g5" class="wire" pathLength="1" d="M 610 388 C 645 388, 645 438, 678 438" data-t="4900"/>
-      <path id="g6" class="wire" pathLength="1" d="M 610 388 C 645 388, 645 538, 678 538" data-t="5000"/>
+      <path id="g1" class="wire" pathLength="1" d="M 304 270 L 314 270 C 334 270, 330 362, 348 362 L 358 362" data-t="3100"/>
+      <path id="g2" class="wire hot" pathLength="1" d="M 304 506 L 314 506 C 334 506, 330 414, 348 414 L 358 414" data-t="3200"/>
+      <path id="g3" class="wire" pathLength="1" d="M 610 388 L 620 388 C 645 388, 645 238, 668 238 L 678 238" data-t="4700"/>
+      <path id="g4" class="wire" pathLength="1" d="M 610 388 L 620 388 C 645 388, 645 338, 668 338 L 678 338" data-t="4800"/>
+      <path id="g5" class="wire" pathLength="1" d="M 610 388 L 620 388 C 645 388, 645 438, 668 438 L 678 438" data-t="4900"/>
+      <path id="g6" class="wire" pathLength="1" d="M 610 388 L 620 388 C 645 388, 645 538, 668 538 L 678 538" data-t="5000"/>
       <path id="g7" class="wire hot" pathLength="1" d="M 1000 238 L 1038 238" data-t="6900"/>
       <circle class="pulse" r="5" data-t="3400"><animateMotion dur="1.1s" repeatCount="indefinite" begin="indefinite"><mpath href="#g1"/></animateMotion></circle><circle class="pulse" r="5" data-t="3500"><animateMotion dur="1.1s" repeatCount="indefinite" begin="indefinite"><mpath href="#g2"/></animateMotion></circle>
     </svg>
@@ -837,9 +837,9 @@
     <div class="stitle rev" data-t="0"><div class="k">Part 3 &middot; worked example, mock data</div><div class="h">How one gold row is built</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="x1" class="wire" pathLength="1" d="M 380 300 L 408 300" data-t="3700"/>
-      <path id="x2" class="wire hot" pathLength="1" d="M 380 518 C 395 518, 395 420, 408 420" data-t="3800"/>
+      <path id="x2" class="wire hot" pathLength="1" d="M 380 518 L 389 518 Q 394 518 394 513 L 394 425 Q 394 420 399 420 L 408 420" data-t="3800"/>
       <path id="x3" class="wire" pathLength="1" d="M 790 300 L 818 300" data-t="6200"/>
-      <path id="x4" class="wire" pathLength="1" d="M 1028 404 L 1028 420" data-t="8200"/>
+      <path id="x4" class="wire" pathLength="1" d="M 1028 404 L 1028 417" data-t="8200"/>
     </svg>
     <div class="zc rev" data-t="500" style="left:40px;top:186px;width:340px;height:232px;border-top-color:var(--navy)">
       <div class="zh"><svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -903,9 +903,9 @@
       <path id="m2" class="wire" pathLength="1" d="M 712 306 L 768 306" data-t="4300"/>
       <path id="m3" class="wire" pathLength="1" d="M 712 450 L 768 450" data-t="4500"/>
       <path id="m4" class="wire" pathLength="1" d="M 712 556 L 768 556" data-t="4700"/>
-      <path id="m5" class="wire" pathLength="1" d="M 1010 306 C 1028 306, 1028 370, 1044 370" data-t="6600"/>
-      <path id="m6" class="wire" pathLength="1" d="M 1010 450 C 1028 450, 1028 410, 1044 410" data-t="6650"/>
-      <path id="m7" class="wire" pathLength="1" d="M 1010 556 C 1032 556, 1032 440, 1044 440" data-t="6700"/>
+      <path id="m5" class="wire" pathLength="1" d="M 1010 306 L 1022 306 Q 1027 306 1027 311 L 1027 365 Q 1027 370 1032 370 L 1044 370" data-t="6600"/>
+      <path id="m6" class="wire" pathLength="1" d="M 1010 450 L 1022 450 Q 1027 450 1027 445 L 1027 415 Q 1027 410 1032 410 L 1044 410" data-t="6650"/>
+      <path id="m7" class="wire" pathLength="1" d="M 1010 556 L 1022 556 Q 1027 556 1027 551 L 1027 445 Q 1027 440 1032 440 L 1044 440" data-t="6700"/>
     </svg>
     <div class="zc rev" data-t="300" style="left:40px;top:190px;width:672px;height:412px;border-top-color:var(--navy)">
       <div class="zh"><svg viewBox="0 0 512 512" fill="none"><rect x="48" y="64" width="416" height="384" rx="36" fill="#FABFBA"/><rect x="112" y="272" width="64" height="112" rx="10" fill="#FF5F46"/><rect x="224" y="192" width="64" height="192" rx="10" fill="#FF5F46"/><rect x="336" y="128" width="64" height="256" rx="10" fill="#FF5F46"/><path d="M96 400H416" stroke="#fff" stroke-width="22" stroke-linecap="round"/></svg>Metric views<span class="legend"><i class="chip-m">measure</i> what you count or sum <i class="chip-d">dimension</i> what you slice by</span></div>
@@ -1189,7 +1189,7 @@ function progress(){
 // arrow markers
 const svgns = 'http://www.w3.org/2000/svg';
 const defs = document.createElementNS(svgns, 'svg'); defs.setAttribute('width', 0); defs.setAttribute('height', 0); defs.style.position = 'absolute';
-defs.innerHTML = '<defs><marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#CDD5DB"/></marker><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#FF3621"/></marker></defs>';
+defs.innerHTML = '<defs><marker id="ag" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#CDD5DB"/></marker><marker id="ah" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#FF3621"/></marker></defs>';
 document.body.prepend(defs);
 
 function fit(){ const s = Math.min(innerWidth / 1280, innerHeight / 720); document.getElementById('stage').style.transform = 'scale(' + s + ')'; }
