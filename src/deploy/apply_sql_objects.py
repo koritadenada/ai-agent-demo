@@ -3,8 +3,9 @@
 Each file is idempotent (CREATE OR REPLACE), so the job can run on every refresh.
   --kind functions     src/uc_functions/*.sql
   --kind metric_views  src/metric_views/*.yaml, wrapped in CREATE OR REPLACE VIEW ... WITH METRICS
-  --kind prompts       registers the default prompts of the document pipeline in the MLflow Prompt Registry, only
-                       when a prompt has no version behind the alias yet (later versions are never overwritten)
+  --kind prompts       registers the default prompts of the document pipeline and of the app agents in the MLflow
+                       Prompt Registry, only when a prompt has no version behind the alias yet (later versions are
+                       never overwritten)
 """
 import argparse
 import inspect
@@ -28,12 +29,16 @@ def seed_prompts(args):
 
     import mlflow
 
-    spec = importlib.util.spec_from_file_location("prompts", SRC / "pipelines" / "documents" / "utilities" / "prompts.py")
-    defaults = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(defaults)
+    defaults = {}  # name -> (schema, default): pipeline prompts in silver, app agent prompts in the app schema
+    for path, schema in ((SRC / "pipelines" / "documents" / "utilities" / "prompts.py", args.silver_schema),
+                         (SRC / "app" / "prompts.py", args.app_schema)):
+        spec = importlib.util.spec_from_file_location(path.parent.name + "_prompts", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        defaults.update({name: (schema, p) for name, p in module.DEFAULTS.items()})
     mlflow.set_registry_uri("databricks-uc")
-    for name, p in defaults.DEFAULTS.items():
-        full = f"{args.catalog}.{args.silver_schema}.{name}"
+    for name, (schema, p) in defaults.items():
+        full = f"{args.catalog}.{schema}.{name}"
         try:
             found = mlflow.genai.load_prompt(f"prompts:/{full}@{args.alias}")
             print(f"prompt {full}@{args.alias} is v{found.version}, kept")
@@ -54,6 +59,7 @@ def main():
     ap.add_argument("--catalog", required=True)
     ap.add_argument("--gold-schema", required=True)
     ap.add_argument("--silver-schema", required=True)
+    ap.add_argument("--app-schema")
     args = ap.parse_args()
     spark = SparkSession.builder.getOrCreate()
 

@@ -16,6 +16,10 @@ resources:
       catalog_name: ${var.catalog}
       name: ${var.schema_prefix}gold
       comment: Joined business tables, UC functions and metric views for the Genie agents
+    app:
+      catalog_name: ${var.catalog}
+      name: ${var.schema_prefix}app
+      comment: What the agents app writes (analyst decisions, negotiation drafts) and where it finds each agent
 
   volumes:
     dms_volume:

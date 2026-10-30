@@ -80,7 +80,7 @@ The seven AI services of the current platform (from the AI Services Map) and whe
 
 | Requirement | Implemented in | Status |
 |---|---|---|
-| A coherent chronological account of the port call | [`port_call_events.py`](transformations/port_call_events.py): one row per event, in order, one call per statement of facts, each event with its page | by design: structured events that Genie and the agents query; a narrative is written on demand by HAL-9000, not stored |
+| A coherent chronological account of the port call | [`port_call_events.py`](transformations/port_call_events.py): one row per event, in order, one call per statement of facts, each event with its page; the account itself is written on demand in the agents app ([`story.py`](../../app/backend/story.py)), not stored | met |
 | Prompt and model change without a deploy | Prompt registry (`sof_events`) | met |
 | Retry on transient failures | `failOnError => false`: a failed call is stored with its error and never fails the run | gap: failed rows are not retried automatically yet |
 | Request and response tracing | `prompt_version` per row | gap: AI Gateway inference tables for full request logs |
@@ -116,14 +116,14 @@ The seven AI services of the current platform (from the AI Services Map) and whe
 | Deterministic rule cascade, no model in the math | [`../gold/transformations/expense_benchmarks.sql`](../gold/transformations/expense_benchmarks.sql): exact (port, vessel type, size), then nearby ports (region, same type and size), then the port with any vessel; each level needs `min_benchmark_sample` past lines | met |
 | Regional and local port minimum | `region_min_median_eur`, `local_port_min_eur` | met |
 | Reconcile expense names across agency templates | The platform's `category_id` on every quoted and final line; no model needed | by design |
-| Draft a citation-backed negotiation email | `reasoning` gives the facts to cite | gap: drafting the email is the agent part of the AI Negotiator (next phase) |
+| Draft a citation-backed negotiation email | Agent in the app ([`negotiator.py`](../../app/backend/negotiator.py)): reads the quote, the price history and competing quotes through tools, drafts the email; every amount is checked against the data before the analyst saves it | met |
 
 ### HAL-9000: questions in plain language
 
 | Requirement | Implemented in | Status |
 |---|---|---|
-| Answer with the user's own permissions | Genie agents on the metric views, governed by Unity Catalog | gap: next phase |
-| Never write without explicit confirmation | Agent tools with confirmation | gap: next phase |
+| Answer with the user's own permissions | Supervisor agent ([`apply_agents.py`](../../deploy/apply_agents.py)) over three Genie agents ([`agents.genie.yml`](../../../resources/agents.genie.yml)), document search and the port call timeline; the app calls it with the user's token | met |
+| Never write without explicit confirmation | HAL-9000 only reads; decisions and drafts are saved in the app after a confirm | met |
 
 Shared settings, the prompt loader and the expense vocabulary are in [`utilities/settings.py`](utilities/settings.py).
 Costs: [`docs/costs.md`](../../../docs/costs.md).

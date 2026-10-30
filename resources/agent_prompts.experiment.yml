@@ -1,0 +1,9 @@
+resources:
+  experiments:
+    agent_prompts:
+      # The Prompts tab of this experiment shows the prompts of the app agents (AI Negotiator, DA Event Summarizer),
+      # kept in the app schema. Edit, compare and promote versions there, without a deploy.
+      name: ${workspace.root_path}/portcall-agent-prompts
+      tags:
+        - key: mlflow.promptRegistryLocation
+          value: ${var.catalog}.${resources.schemas.app.name}

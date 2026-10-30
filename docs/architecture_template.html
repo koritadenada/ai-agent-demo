@@ -325,8 +325,9 @@
       <div class="pill sub" data-p="5" data-name="Doc graph" title="Document pipeline graph"><b>2b</b>Graph</div>
       <div class="pill" data-p="6"><b>3</b>Gold</div>
       <div class="pill" data-p="7"><b>4</b>Genie</div>
-      <div class="pill" data-p="8"><b>5</b>One line</div>
-      <div class="pill" data-p="9"><b>?</b>Glossary</div>
+      <div class="pill sub" data-p="8" data-name="Agents app" title="The agents app"><b>4b</b>Agents</div>
+      <div class="pill" data-p="9"><b>5</b>One line</div>
+      <div class="pill" data-p="10"><b>?</b>Glossary</div>
     </div>
   </div>
 
@@ -356,12 +357,13 @@
         <div><span>Refresh</span><b>one Job, after both pipelines</b></div></div>
     </div>
     <div class="blk rev" data-t="3100" data-go="7" style="left:880px">
-      <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents, and later HAL-9000, query</div>
+      <div class="num">4</div><div class="bt">Metric views and Genie</div><div class="bd">Governed KPIs that the Genie agents and HAL-9000 query; an app for the rest</div>
       <div class="icons">{{I_METRIC}}{{I_GENIE}}{{I_AGENT}}</div>
       <div class="run"><div class="lbl">What runs</div>
         <div><span>Metric views</span><b>7</b></div>
         <div><span>Genie agents</span><b>3</b></div>
-        <div><span>Supervisor agent</span><b class="always">next phase</b></div></div>
+        <div><span>Supervisor agent</span><b>HAL-9000</b></div>
+        <div><span>Agents app</span><b>4 screens</b></div></div>
     </div>
   </section>
 
@@ -377,8 +379,8 @@
     <div class="stage rev" data-t="2800" style="left:348px;top:190px"><b>2</b>The FDA PDF arrives</div>
     <div class="stage rev" data-t="6500" style="left:656px;top:190px"><b>3</b>Before money moves</div>
     <div class="stage rev" data-t="9500" style="left:964px;top:190px"><b>4</b>Any time</div>
-    <div class="svc rev" data-t="1300" style="left:40px;top:244px;height:96px"><span class="badge part">partly running</span>
-      <div class="sn">{{I_AGENT}}AI Negotiator</div><div class="sd">Flags overpriced quotes, drafts the email</div><div class="sh">quote_benchmark_flags</div></div>
+    <div class="svc rev" data-t="1300" style="left:40px;top:244px;height:96px"><span class="badge ok">running</span>
+      <div class="sn">{{I_AGENT}}AI Negotiator</div><div class="sd">Flags overpriced quotes, drafts the email</div><div class="sh">quote flags + agent in the app</div></div>
     <div class="svc rev" data-t="3100" style="left:348px;top:244px;height:96px"><span class="badge ok">running</span>
       <div class="sn">{{I_DOC}}AI Extractor</div><div class="sd">Text of every page</div><div class="sh">document_pages</div></div>
     <div class="svc rev" data-t="4100" style="left:348px;top:364px;height:96px"><span class="badge ok">running</span>
@@ -389,8 +391,8 @@
       <div class="sn">{{I_DBSQL}}SOF Port Bill Analysis</div><div class="sd">Quote vs final bill, per line</div><div class="sh">expense_reconciliation</div></div>
     <div class="svc rev" data-t="7800" style="left:656px;top:364px;height:96px"><span class="badge ok">running</span>
       <div class="sn">{{I_CHECK}}PDA/FDA Validator</div><div class="sd">Bank, amount and date before payment</div><div class="sh">payment_validation</div></div>
-    <div class="svc rev" data-t="9700" style="left:964px;top:244px;height:96px"><span class="badge on">next phase</span>
-      <div class="sn">{{I_GENIE}}HAL-9000</div><div class="sd">Questions in plain language</div><div class="sh">Genie agents + supervisor</div></div>
+    <div class="svc rev" data-t="9700" style="left:964px;top:244px;height:96px"><span class="badge ok">running</span>
+      <div class="sn">{{I_GENIE}}HAL-9000</div><div class="sd">Questions in plain language</div><div class="sh">supervisor + 3 Genie agents</div></div>
     <div class="decide rev" data-t="11000" style="left:656px;top:484px;width:584px;height:96px">
       <div class="dl">{{I_INSIGHTS}}The analyst decides</div>
       <i class="dk ok">accept</i><i class="dk rv">dispute</i><i class="dk hd">hold</i>
@@ -683,7 +685,7 @@
     </svg>
     <div class="zc rev" data-t="300" style="left:40px;top:190px;width:672px;height:412px;border-top-color:var(--navy)">
       <div class="zh">{{I_METRIC}}Metric views<span class="legend"><i class="chip-m">measure</i> what you count or sum <i class="chip-d">dimension</i> what you slice by</span></div>
-      <div class="mvg rev" data-t="1200" style="height:132px"><span class="gl">Port cost analyst</span>
+      <div class="mvg rev" data-t="1200" style="height:132px"><span class="gl">Port costs and benchmarks</span>
         <div class="mvr"><b>port_call_cost_metrics</b><i class="chip-m">Cost per call EUR</i><i class="chip-m">Final vs quote pct</i><i class="chip-d">Port</i><i class="chip-d">Vessel type</i></div>
         <div class="mvr"><b>benchmark_savings_metrics</b><i class="chip-m">Potential savings EUR</i><i class="chip-d">Expense category</i><i class="chip-d">Size band</i></div>
         <div class="mvr"><b>rfq_quote_metrics</b><i class="chip-m">Premium over lowest EUR</i><i class="chip-m">Quotes received</i><i class="chip-d">Port</i></div>
@@ -698,18 +700,62 @@
       </div>
     </div>
     <div class="node db rev" data-t="4500" style="left:770px;top:254px;width:240px;height:104px">
-      <div class="ico">{{I_GENIE}}</div><div><div class="name">Port cost analyst</div><div class="desc">Costs, benchmarks and competing quotes by port and vessel</div></div></div>
+      <div class="ico">{{I_GENIE}}</div><div><div class="name">Port costs and benchmarks</div><div class="desc">Costs, benchmarks and competing quotes by port and vessel</div></div></div>
     <div class="node db rev" data-t="4800" style="left:770px;top:398px;width:240px;height:104px">
       <div class="ico">{{I_GENIE}}</div><div><div class="name">DA audit</div><div class="desc">Verdicts, bank checks, agreement with analysts</div></div></div>
     <div class="node db rev" data-t="5100" style="left:770px;top:526px;width:240px;height:60px">
       <div class="ico">{{I_GENIE}}</div><div><div class="name">DA operations</div></div></div>
     <div class="node hero rev" data-t="6900" style="left:1046px;top:330px;width:196px;height:156px">
-      <span class="badge on">next phase</span>
+      <span class="badge ok">running</span>
       <div class="ico">{{I_AGENT}}</div><div><div class="name">HAL-9000</div><div class="desc">Supervisor agent: routes each question to the right Genie agent, adds document search</div></div></div>
   </section>
 
-  <!-- ============ PART 5: ONE EXPENSE LINE ============ -->
+  <!-- ============ PART 4b: THE AGENTS APP ============ -->
   <section class="scene" data-scene="8" data-dur="11000">
+    <div class="stitle rev" data-t="0"><div class="k">Part 4b</div><div class="h">The agents app: beyond the Genie agents</div></div>
+    <div class="zone dbx rev" data-t="0" style="left:212px;top:176px;width:1044px;height:432px"><span class="zl">Databricks &middot; every call as the signed-in user</span></div>
+    <svg class="wires" viewBox="0 0 1280 720">
+      <path id="a1" class="wire" pathLength="1" d="M 186 400 L 226 400" data-t="1000"/>
+      <path id="a2" class="wire hot" pathLength="1" d="M 526 300 L 574 300" data-t="3200"/>
+      <path id="a3" class="wire" pathLength="1" d="M 526 556 L 574 556" data-t="7200"/>
+      <path id="a4" class="wire" pathLength="1" d="M 906 268 L 946 268" data-t="5600"/>
+      <path id="a5" class="wire" pathLength="1" d="M 906 400 L 916 400 Q 921 400 921 405 L 921 413 Q 921 418 926 418 L 946 418" data-t="5900"/>
+      <path id="a6" class="wire" pathLength="1" d="M 906 556 L 946 556" data-t="8000"/>
+    </svg>
+    <div class="node rev" data-t="300" style="left:24px;top:352px;width:162px;height:96px">
+      <div class="ico">{{I_INSIGHTS}}</div><div><div class="name">Analyst</div><div class="desc">Signs in with their own account</div></div></div>
+    <div class="zc rev" data-t="1200" style="left:228px;top:196px;width:298px;height:404px;border-top-color:var(--lava)">
+      <div class="zh">{{I_DASH}}Agents app</div><div class="zs">Databricks Apps; one screen per AI service</div>
+      <div class="kv"><span>DA review</span><b>SOF Port Bill Analysis</b></div>
+      <div class="kv"><span></span><b>PDA/FDA Validator</b></div>
+      <div class="kv mk" data-t="2900"><span>Open quotes</span><b>AI Negotiator</b></div>
+      <div class="kv"><span>Port calls</span><b>DA Event Summarizer</b></div>
+      <div class="kv mk2" data-t="6900"><span>Ask</span><b>HAL-9000</b></div>
+      <div class="formula" style="margin-top:12px">Unity Catalog decides what each person sees: queries, model calls, Genie and PDFs run with their own permissions</div>
+    </div>
+    <div class="ep tight rev" data-t="3300" style="left:576px;top:196px;width:330px;height:300px">
+      <div class="bar">{{I_MODEL}}AI Negotiator agent<span class="tag">tool calls</span></div>
+      <div class="step rev" data-t="3600"><div class="n">1</div><div class="tx">get_quote<span>The open PDA and its benchmarks</span></div></div>
+      <div class="step rev" data-t="4000"><div class="n">2</div><div class="tx">get_price_history<span>What this port charged before</span></div></div>
+      <div class="step rev" data-t="4400"><div class="n">3</div><div class="tx">get_competing_quotes<span>Past quotes for the same expense</span></div></div>
+      <div class="step rev" data-t="4800"><div class="n">4</div><div class="tx">submit_draft<span>Every amount checked against the data</span></div></div>
+    </div>
+    <div class="node hero rev" data-t="7300" style="left:576px;top:512px;width:330px;height:88px">
+      <span class="badge ok">running</span>
+      <div class="ico">{{I_AGENT}}</div><div><div class="name">HAL-9000</div><div class="desc">Supervisor agent: picks the Genie agent or tool for each question</div></div></div>
+    <div class="zc rev" data-t="5700" style="left:948px;top:196px;width:292px;height:150px;border-top-color:var(--navy)">
+      <div class="zh">{{I_DELTA}}Saved after a confirm</div>
+      <div class="kv"><span>analyst_decisions</span><b>accept, dispute, hold</b></div>
+      <div class="kv"><span>negotiation_drafts</span><b>edited emails</b></div>
+    </div>
+    <div class="node db rev" data-t="6000" style="left:948px;top:368px;width:292px;height:100px">
+      <div class="ico">{{I_UC}}</div><div><div class="name">Prompt registry</div><div class="desc">negotiator, port_call_story: change them without a deploy</div></div></div>
+    <div class="node db rev" data-t="8100" style="left:948px;top:500px;width:292px;height:100px">
+      <div class="ico">{{I_GENIE}}</div><div><div class="name">3 Genie agents + 2 tools</div><div class="desc">Port costs, DA audit, DA operations; document search; port call timeline</div></div></div>
+  </section>
+
+  <!-- ============ PART 5: ONE EXPENSE LINE ============ -->
+  <section class="scene" data-scene="9" data-dur="11000">
     <div class="stitle rev" data-t="0"><div class="k">Zoom in &middot; mock data</div><div class="h">One expense line, end to end</div></div>
     <svg class="wires" viewBox="0 0 1280 720">
       <path id="z1" class="wire" pathLength="1" d="M 394 290 L 428 290" data-t="3700"/>
@@ -754,7 +800,7 @@
   </section>
 
   <!-- ============ GLOSSARY ============ -->
-  <section class="scene" data-scene="9" data-dur="9000">
+  <section class="scene" data-scene="10" data-dur="9000">
     <div class="stitle rev" data-t="0"><div class="k">Glossary</div><div class="h">The words used on every tab</div></div>
     <div class="lane rev" data-t="600" style="left:28px;top:186px;width:400px;height:418px"><span class="ll">The port call</span></div>
     <div class="gt rev" data-t="800" style="left:38px;top:198px;width:380px"><b>Port call</b><span>One ship's visit to one port, from arrival to sailing</span></div>
@@ -839,14 +885,20 @@ const CAPS = {
   7: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
       [1000, 'Each metric view holds <b>measures</b> (what you count) and <b>dimensions</b> (what you slice by)'],
       [4200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
-      [6400, 'Next phase: <b>HAL-9000</b> becomes a supervisor agent that routes every question to the right one']],
-  8: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
+      [6400, '<b>HAL-9000</b>, a supervisor agent, routes every question to the right one']],
+  8: [[0, 'Some services need <b>more than a Genie agent</b>: they read documents, draft and decide'],
+      [1000, 'One app, <b>one screen per AI service</b>, running as the signed-in user'],
+      [3100, 'The <b>AI Negotiator</b> is a tool-calling agent: it reads the quote, the history and past quotes'],
+      [4800, 'It drafts the email; <b>every amount is checked</b> against what the tools returned'],
+      [5600, 'Nothing is saved until the analyst <b>confirms</b>; prompts change in the registry, not in code'],
+      [7100, '<b>HAL-9000</b> answers the rest: it routes to the Genie agents, document search or the timeline']],
+  9: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
       [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],
       [3600, 'Gold rules: <b>+9.2% over the quote</b>, evidence found, bank details match'],
       [6000, 'Against the benchmark the final is <b>+8.9%</b> versus the port median'],
       [7200, 'Verdict <b>review</b> under the example policy, with an answer the agent can cite']],
-  9: [[0, 'Glossary: <b>the words used on every tab</b>'],
+  10: [[0, 'Glossary: <b>the words used on every tab</b>'],
       [500, '<b>The port call</b>: who is involved and what they agree'],
       [2900, '<b>The money</b>: from the quote to the final bill'],
       [5300, '<b>The data</b>: how it moves through Databricks']]

@@ -28,6 +28,12 @@ variables:
   column_renames:
     description: 'JSON map of source columns to neutral silver names, {"table": {"source_column": "silver_column"}}'
     default: "{}"
+  supervisor_name:
+    description: Display name of the HAL-9000 supervisor agent (unique in the workspace)
+    default: HAL-9000 port calls
+  agent_llm_endpoint:
+    description: Model behind the app agents (AI Negotiator, DA Event Summarizer), unless a prompt version sets its own
+    default: databricks-claude-sonnet-5-5
   llm_endpoint:
     description: Default model for ai_query when a prompt version does not name one
     default: databricks-gpt-5-mini

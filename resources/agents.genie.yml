@@ -1,0 +1,177 @@
+# The three Genie agents HAL-9000 routes to. Each one reads metric views (governed measures) and, for row-level
+# questions ("which lines", "which payments"), the gold table behind them. IDs only need to be unique and sorted.
+resources:
+  genie_spaces:
+    port_costs:
+      title: Port costs and benchmarks
+      description: >-
+        Port call costs, final vs quote, benchmarks per port, expense and vessel size, potential savings, competing
+        quotes and the open quotes flagged above the benchmark.
+      warehouse_id: ${var.warehouse_id}
+      parent_path: ${workspace.root_path}/agents
+      serialized_space:
+        version: 2
+        config:
+          sample_questions:
+            - id: "10000000000000000000000000000001"
+              question: ["Which ports have the highest cost per call?"]
+            - id: "10000000000000000000000000000002"
+              question: ["Where are the biggest potential savings against the benchmark, by expense category?"]
+            - id: "10000000000000000000000000000003"
+              question: ["Which open quotes are flagged above the benchmark?"]
+            - id: "10000000000000000000000000000004"
+              question: ["How much above the lowest quote did we accept, by port?"]
+        data_sources:
+          tables:
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.quote_benchmark_flags
+              column_configs:
+                - column_name: expense_category
+                  enable_entity_matching: true
+                  enable_format_assistance: true
+                - column_name: port_name
+                  enable_entity_matching: true
+                  enable_format_assistance: true
+                - column_name: proforma_state
+                  description: ["SUBMITTED = open quote not yet approved; APPROVED = accepted quote"]
+                  enable_format_assistance: true
+          metric_views:
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.benchmark_savings_metrics
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.port_call_cost_metrics
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.rfq_quote_metrics
+        instructions:
+          text_instructions:
+            - id: "30000000000000000000000000000001"
+              content:
+                - "Amounts are in EUR unless the user asks for the DA currency. Round money to 2 decimals."
+                - "Costs per call, final vs quote and approval times: port_call_cost_metrics."
+                - "Benchmarks and savings on final lines: benchmark_savings_metrics. The benchmark is the median of past final amounts for the same port, vessel type and size band, then nearby ports, then the port with any vessel; it needs at least 3 past lines."
+                - "Competing quotes per request: rfq_quote_metrics."
+                - "Open or flagged quotes, line by line: quote_benchmark_flags. Open quotes have proforma_state = 'SUBMITTED'. flagged = true means the quote is above the benchmark by more than the policy; reasoning explains it with the numbers."
+                - "Always say how many past calls a benchmark is based on (benchmark_sample_size) when you quote one."
+          example_question_sqls:
+            - id: "20000000000000000000000000000001"
+              question: ["Cost per call by port"]
+              sql:
+                - "SELECT `Port`, MEASURE(`Port calls`) AS port_calls, MEASURE(`Cost per call EUR`) AS cost_per_call_eur FROM ${var.catalog}.${resources.schemas.gold.name}.port_call_cost_metrics GROUP BY ALL ORDER BY cost_per_call_eur DESC"
+            - id: "20000000000000000000000000000002"
+              question: ["Open quotes flagged above the benchmark"]
+              sql:
+                - "SELECT port_name, agent_name, proforma_id, expense_name, quoted_amount_eur, benchmark_median_eur, benchmark_sample_size, ROUND(gap_to_benchmark_pct, 1) AS gap_pct, reasoning FROM ${var.catalog}.${resources.schemas.gold.name}.quote_benchmark_flags WHERE proforma_state = 'SUBMITTED' AND flagged ORDER BY potential_saving_eur DESC"
+
+    da_audit:
+      title: DA audit
+      description: >-
+        Final DA audit: every final line against its quote and its invoice page, verdicts and the analyst's own check,
+        bank detail validation and payments on hold, and how well the documents were read.
+      warehouse_id: ${var.warehouse_id}
+      parent_path: ${workspace.root_path}/agents
+      serialized_space:
+        version: 2
+        config:
+          sample_questions:
+            - id: "11000000000000000000000000000001"
+              question: ["Which final lines were invoiced above the quote, with the invoice page?"]
+            - id: "11000000000000000000000000000002"
+              question: ["Which payments are on hold and why?"]
+            - id: "11000000000000000000000000000003"
+              question: ["What is the agreement with analysts by expense category?"]
+            - id: "11000000000000000000000000000004"
+              question: ["How much was over-invoiced, by agent?"]
+        data_sources:
+          tables:
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.expense_reconciliation
+              column_configs:
+                - column_name: expense_category
+                  enable_entity_matching: true
+                  enable_format_assistance: true
+                - column_name: port_name
+                  enable_entity_matching: true
+                  enable_format_assistance: true
+                - column_name: verdict
+                  description: ["MATCH, OVER_QUOTE, UNDER_QUOTE, INVOICE_MISMATCH (invoice page differs from the final line), CURRENCY_MISMATCH, NO_EVIDENCE (no invoice page for the line)"]
+                  enable_format_assistance: true
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.payment_validation
+              column_configs:
+                - column_name: overall_status
+                  enable_format_assistance: true
+          metric_views:
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.document_quality_metrics
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.expense_reconciliation_metrics
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.payment_validation_metrics
+        instructions:
+          text_instructions:
+            - id: "31000000000000000000000000000001"
+              content:
+                - "Counts, rates and totals: use the metric views with MEASURE(). Which lines, which payments, explanations and page numbers: use expense_reconciliation and payment_validation."
+                - "When you list a line, include the port call, the expense, the verdict, the evidence page numbers (evidence_pages) and the explanation, so the analyst can check the page."
+                - "Bank account numbers are masked; never try to unmask them. A payment on hold has hold_payment = true; field_checks says which field failed and why."
+                - "Agreement with analysts compares the automated verdict with the DA analyst's own verification; only lines with an analyst verification count."
+                - "Amounts in EUR use the _eur columns; the DA currency is in currency."
+          example_question_sqls:
+            - id: "21000000000000000000000000000001"
+              question: ["Lines invoiced above the quote with their invoice page"]
+              sql:
+                - "SELECT port_call_id, port_name, agent_name, line_name, quoted_amount, final_amount, currency, variance_vs_quote_pct, evidence_pages, explanation FROM ${var.catalog}.${resources.schemas.gold.name}.expense_reconciliation WHERE verdict = 'OVER_QUOTE' AND has_documents ORDER BY over_invoiced_amount_eur DESC"
+            - id: "21000000000000000000000000000002"
+              question: ["Payments on hold and why"]
+              sql:
+                - "SELECT port_call_id, port_name, agent_name, platform_iban_masked, document_account_masked, account_status, swift_status, amount_status, date_status FROM ${var.catalog}.${resources.schemas.gold.name}.payment_validation WHERE hold_payment"
+
+    da_operations:
+      title: DA operations
+      description: >-
+        How port calls and DAs move: appointments, cancellations, quotes received, time from appointment to PDA,
+        sailing to FDA and FDA to approval, and the timeline of events read from each statement of facts.
+      warehouse_id: ${var.warehouse_id}
+      parent_path: ${workspace.root_path}/agents
+      serialized_space:
+        version: 2
+        config:
+          sample_questions:
+            - id: "12000000000000000000000000000001"
+              question: ["How long does FDA approval take, by port?"]
+            - id: "12000000000000000000000000000002"
+              question: ["How many appointments were cancelled, and why?"]
+            - id: "12000000000000000000000000000003"
+              question: ["Which port calls waited longest between all fast and the start of operations?"]
+        data_sources:
+          tables:
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.da_workflow
+              column_configs:
+                - column_name: port_name
+                  enable_entity_matching: true
+                  enable_format_assistance: true
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.port_call_costs
+              column_configs:
+                - column_name: vessel_name
+                  enable_entity_matching: true
+            - identifier: ${var.catalog}.${resources.schemas.silver.name}.port_call_events
+              column_configs:
+                - column_name: event
+                  description: ["Event read from the statement of facts, for example Arrived at anchorage, Pilot on board (inbound), All fast, Commenced operations, Completed operations, Vessel sailed"]
+                  enable_entity_matching: true
+          metric_views:
+            - identifier: ${var.catalog}.${resources.schemas.gold.name}.da_workflow_metrics
+        instructions:
+          text_instructions:
+            - id: "32000000000000000000000000000001"
+              content:
+                - "Durations and counts: da_workflow_metrics with MEASURE(). One port call: da_workflow."
+                - "Events of a port call: port_call_events, ordered by event_order. It has proforma_id; to find it from a port call, vessel or port, join port_call_costs on proforma_id."
+                - "Time between two events: difference of event_time in hours. Cite the page_number of the statement of facts."
+          join_specs:
+            - id: "42000000000000000000000000000001"
+              left:
+                identifier: ${var.catalog}.${resources.schemas.silver.name}.port_call_events
+                alias: port_call_events
+              right:
+                identifier: ${var.catalog}.${resources.schemas.gold.name}.port_call_costs
+                alias: port_call_costs
+              sql:
+                - "`port_call_events`.`proforma_id` = `port_call_costs`.`proforma_id`"
+                - "--rt=FROM_RELATIONSHIP_TYPE_MANY_TO_ONE--"
+          example_question_sqls:
+            - id: "22000000000000000000000000000001"
+              question: ["Hours from FDA to approval by port"]
+              sql:
+                - "SELECT `Port`, MEASURE(`Port calls`) AS port_calls, MEASURE(`Hours FDA to approval`) AS hours_fda_to_approval FROM ${var.catalog}.${resources.schemas.gold.name}.da_workflow_metrics GROUP BY ALL ORDER BY hours_fda_to_approval DESC"

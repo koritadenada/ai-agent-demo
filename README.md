@@ -6,12 +6,15 @@ A reference implementation of a port-call data platform that AI agents can work 
 - **Documents**: PDFs (PDA quotes, final DA packs with supplier invoices, statements of facts) in a second bucket.
 
 Both go through Lakeflow Spark Declarative Pipelines into silver, meet in one gold layer on the expense line, and
-are exposed through Unity Catalog metric views to Genie agents.
+are exposed through Unity Catalog metric views to three Genie agents. HAL-9000, a supervisor agent, routes questions
+to them, and an agents app gives each AI service its own screen (DA review, AI Negotiator, port call timelines).
+
+**Agents app:** deployed as `portcall-agents` (Databricks Apps); see [src/app/README.md](src/app/README.md).
 
 **Architecture (animated):** https://koritadenada.github.io/ai-agent-demo/architecture.html
 Click or use the arrow keys; `?mode=auto` loops it. Tabs: the agent use case, the platform pipeline and the source
-schema, the document pipeline and its step graph, gold followed by one row worked through, Genie, one line end to
-end, a glossary.
+schema, the document pipeline and its step graph, gold followed by one row worked through, Genie, the agents app,
+one line end to end, a glossary.
 
 ## What is in the repo
 
@@ -23,9 +26,12 @@ resources/                     everything the bundle deploys
   documents.pipeline.yml       PDFs -> silver (AI Functions, prompts from the MLflow Prompt Registry)
   gold.pipeline.yml            joined gold tables (materialized views, plain SQL)
   refresh.job.yml              scheduled refresh: platform, documents, gold, in that order
-  setup.job.yml                run after a deploy: UC functions, prompt seeding, one refresh, metric views
+  setup.job.yml                run after a deploy: UC functions, prompts, one refresh, metric views, HAL-9000
   mock_data.job.yml            writes mock DMS files and PDFs into the landing volumes (demo)
-  prompts.experiment.yml       MLflow experiment whose Prompts tab shows the prompt registry
+  agents.genie.yml             the three Genie agents (port costs, DA audit, DA operations)
+  app.yml                      the agents app (runs as the signed-in user)
+  prompts.experiment.yml       MLflow experiment whose Prompts tab shows the pipeline prompts
+  agent_prompts.experiment.yml the same for the app agent prompts
 src/
   pipelines/platform/          bronze + silver for every DMS table, driven by utilities/tables.py   (README)
   pipelines/documents/         parse, pages, page map, amounts, bank details, events; prompt loader   (README)
@@ -34,9 +40,13 @@ src/
   uc_functions/                deterministic bank checks (IBAN or domestic tail, SWIFT 8 vs 11) and masking
   metric_views/                seven metric views (YAML), one per KPI group
   deploy/apply_sql_objects.py  applies UC functions and metric views, seeds the prompts (no bundle resource for them)
+  deploy/apply_agents.py       HAL-9000 supervisor agent, its tools and the app tables (no bundle resource either)
+  agents/                      HAL-9000 tools as UC functions (document search, port call timeline), app tables
+  app/                         the agents app: FastAPI + one static page; AI Negotiator and DA Event Summarizer (README)
   mock_data/                   generator: the DA tables as DMS Parquet (full load or a CDC batch) and the PDFs
 infra/terraform/               the AWS side: IAM role for Unity Catalog and the storage credential
 docs/                          architecture page and costs
+tests/                         end-to-end test of the deployed app, Genie agent check
 ```
 
 Each pipeline has its own README: the [platform pipeline](src/pipelines/platform/README.md) (why the view, full load
@@ -52,11 +62,12 @@ vs CDC, how it runs, adapting it to your schema) and the [document pipeline](src
 | Silver | AUTO CDC: full load first, then version, then commit time; deletes on `Op = 'D'`; SCD 2 where history matters | `ai_parse_document` per file, `ai_classify` the type, `ai_query` page to the DA's expense line and its amount, `ai_extract` bank details and rate of exchange, `ai_query` statement of facts timeline |
 | Gold | Joined on the expense line: final line to its quote (`proforma_expense_id`), to its invoice pages, to the analyst's verification; bank checks, benchmarks, quote flags, costs, workflow | |
 | Semantic | Metric views per KPI group, for the Genie agents | |
+| Agents | Three Genie agents, HAL-9000 (supervisor), the AI Negotiator and DA Event Summarizer in the agents app | |
 
 | Job | When | What |
 |---|---|---|
 | `portcall-refresh` | Schedule (`refresh_cron`, hourly; paused in the demo) | Platform, then documents (they need the expense vocabulary), then gold |
-| `portcall-setup` | After a deploy, by hand or as the CI step after `bundle deploy` | UC functions, seeds missing prompts, one refresh, metric views |
+| `portcall-setup` | After a deploy, by hand or as the CI step after `bundle deploy` | UC functions, seeds missing prompts, one refresh, metric views, HAL-9000 and its tools |
 | `portcall-mock-data` | Demo only | Full load and PDFs, or one CDC batch (`mode=cdc`) |
 
 Design choices worth knowing:
@@ -92,26 +103,41 @@ Design choices worth knowing:
 | `document_quality_metrics` | `document_quality` | Parse error rate, Mean extraction confidence | DA audit |
 | `da_workflow_metrics` | `da_workflow` | Hours FDA to approval, Cancelled appointments | DA operations |
 
-Each view has comments and synonyms so Genie maps business phrasing to the right measure. The Genie agents and
-the supervisor agent are the next phase.
+Each view has comments and synonyms so Genie maps business phrasing to the right measure. The Genie agents
+(`resources/agents.genie.yml`) also read the gold table behind their views for row-level questions (which lines,
+which payments), with instructions and example SQL.
+
+### Agents
+
+| Agent | Built as | Answers or does |
+|---|---|---|
+| Port costs and benchmarks | Genie agent | Cost per call, savings against the benchmark, competing quotes, flagged open quotes |
+| DA audit | Genie agent | Lines vs quote and invoice page, analyst agreement, payments on hold |
+| DA operations | Genie agent | Workflow durations, cancellations, statement of facts events |
+| HAL-9000 | Supervisor agent (Agent Bricks) | Routes each question to one of the above, document search or the port call timeline |
+| AI Negotiator | Tool-calling agent in the app | Drafts the negotiation email for an open quote; every amount checked against the data |
+| DA Event Summarizer | Model call in the app | Writes the account of a port call from its events, with pages |
+
+All of them answer with the user's own permissions and never write without a confirm.
 
 ## Run the demo (no AWS needed)
 
 Managed volumes stand in for the two buckets and the generator fills them.
 
 ```bash
-V="--profile <profile> --var catalog=<catalog>"
-databricks bundle deploy -t demo $V
-databricks bundle run mock_data -t demo $V                       # full load + 72 PDFs
-databricks bundle run setup -t demo $V                           # UC functions, prompts, pipelines, metric views
+V=(--profile <profile> --var catalog=<catalog>)    # an array: works in bash and zsh
+databricks bundle deploy -t demo "${V[@]}"
+databricks bundle run mock_data -t demo "${V[@]}"                       # full load + 72 PDFs
+databricks bundle run setup -t demo "${V[@]}"                           # UC functions, prompts, pipelines, metric views, HAL-9000
+databricks bundle run agents_app -t demo "${V[@]}"                      # deploys the agents app
 # then simulate DMS CDC: cancels appointment 88213, approves 3 FDAs, changes a bank account, deletes a quoted line,
 # and replays a change committed while the full load was running
-databricks bundle run mock_data -t demo $V --params mode=cdc
-databricks bundle run refresh -t demo $V                         # pipelines only
+databricks bundle run mock_data -t demo "${V[@]}" --params mode=cdc
+databricks bundle run refresh -t demo "${V[@]}"                         # pipelines only
 ```
 
-The demo target creates `portcall_landing`, `portcall_bronze`, `portcall_silver` and `portcall_gold` in `<catalog>`,
-and the prompts in `portcall_silver`. The `ai_query` steps default to `databricks-gpt-5-mini` (the `model` tag of
+The demo target creates `portcall_landing`, `portcall_bronze`, `portcall_silver`, `portcall_gold` and `portcall_app`
+in `<catalog>`, the pipeline prompts in `portcall_silver` and the app agent prompts in `portcall_app`. The `ai_query` steps default to `databricks-gpt-5-mini` (the `model` tag of
 each prompt version; `llm_endpoint` when a version has none).
 
 ## Run it on your AWS account
@@ -125,6 +151,7 @@ each prompt version; `llm_endpoint` when a version has none).
      --var storage_credential_name=<output> --var dms_bucket_url=s3://<dms-bucket>/ \
      --var documents_bucket_url=s3://<documents-bucket>/
    databricks bundle run setup -t prod --profile <profile>
+   databricks bundle run agents_app -t prod --profile <profile>
    ```
 
    The prod target creates the catalog, the two external locations (read only) and external volumes on the

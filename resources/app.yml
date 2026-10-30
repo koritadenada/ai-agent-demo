@@ -1,0 +1,54 @@
+# The agents app. It runs as the signed-in user (user_api_scopes): queries, model calls, Genie and documents are
+# governed by Unity Catalog with the user's own permissions. Its service principal only reads the prompt registry.
+resources:
+  apps:
+    agents_app:
+      name: portcall-agents
+      description: DA review, AI Negotiator, port call timelines and HAL-9000
+      source_code_path: ../src/app
+      user_api_scopes:
+        - sql
+        - model-serving
+        - genie
+        - files
+      config:
+        command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+        env:
+          - name: CATALOG
+            value: ${var.catalog}
+          - name: GOLD_SCHEMA
+            value: ${resources.schemas.gold.name}
+          - name: SILVER_SCHEMA
+            value: ${resources.schemas.silver.name}
+          - name: APP_SCHEMA
+            value: ${resources.schemas.app.name}
+          - name: PROMPT_ALIAS
+            value: ${var.prompt_alias}
+          - name: AGENT_LLM_ENDPOINT
+            value: ${var.agent_llm_endpoint}
+          - name: DATABRICKS_WAREHOUSE_ID
+            value_from: warehouse
+      resources:
+        - name: warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        - name: agent-llm
+          serving_endpoint:
+            name: ${var.agent_llm_endpoint}
+            permission: CAN_QUERY
+        - name: port-costs-agent
+          genie_space:
+            name: ${resources.genie_spaces.port_costs.title}
+            space_id: ${resources.genie_spaces.port_costs.id}
+            permission: CAN_RUN
+        - name: da-audit-agent
+          genie_space:
+            name: ${resources.genie_spaces.da_audit.title}
+            space_id: ${resources.genie_spaces.da_audit.id}
+            permission: CAN_RUN
+        - name: da-operations-agent
+          genie_space:
+            name: ${resources.genie_spaces.da_operations.title}
+            space_id: ${resources.genie_spaces.da_operations.id}
+            permission: CAN_RUN
