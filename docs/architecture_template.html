@@ -417,7 +417,7 @@
       <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">Bronze</div><div class="desc">Change log: one row per change, plus source file and load time</div></div></div>
     <div class="node db rev" data-t="4300" style="left:710px;top:476px;width:220px;height:112px">
       <span class="badge">AUTO CDC</span>
-      <div class="ico">{{I_STREAMING_TABLE}}</div><div><div class="name">Silver</div><div class="desc">Ordered by version, then commit time; SCD 1 or 2</div></div></div>
+      <div class="ico">{{I_STREAMING_TABLE}}</div><div><div class="name">Silver</div><div class="desc">Full load first, then version and commit time; SCD 1 or 2</div></div></div>
     <div class="zc rev" data-t="4800" style="left:960px;top:200px;width:276px;height:388px;border-top-color:var(--navy)">
       <div class="zh">{{I_DELTA}}Silver tables</div><div class="zs">Current state of every DMS table</div>
       <div class="kv"><span>request_case, quotes</span><b>SCD 1</b></div>
@@ -438,7 +438,7 @@
       <div class="kv mk2" data-t="7000"><span>history row</span><b>IN_PROCESS &middot; from the full load</b></div>
       <div class="kv mk" data-t="7400"><span>current row</span><b>CANCELLED &middot; from the CDC batch</b></div>
       <div class="kv" style="margin-top:10px"><span>Op = D</span><b>deletes the row, or the link pair</b></div>
-      <div class="kv"><span>_dms_commit_ts</span><b>a string: cast before ordering</b></div>
+      <div class="kv"><span>changed during the load</span><b>full load first, so the change wins</b></div>
     </div>
     <div class="nocall rev" data-t="8300" style="left:850px;top:112px;border-color:var(--navy);color:var(--navy)">{{I_SERVERLESS}}Serverless Job: hourly today, continuous later</div>
   </section>
@@ -533,14 +533,12 @@
       <path id="r1" class="wire" pathLength="1" d="M 184 402 L 208 402" data-t="700"/>
       <path id="r2" class="wire" pathLength="1" d="M 380 402 L 400 402" data-t="2200"/>
       <path id="r6" class="wire dep" pathLength="1" d="M 384 230 L 596 230" data-t="3800"/>
-      <path id="r7" class="wire dep" pathLength="1" d="M 384 262 L 394 262 C 575 262, 570 384, 586 384 L 596 384" data-t="3900"/>
       <text class="wlabel" x="488" y="221" text-anchor="middle" data-t="4000">expense vocabulary</text>
       <path id="r3" class="wire" pathLength="1" d="M 562 402 L 565 402 C 572 402, 572 252, 579 252 L 596 252" data-t="5200"/>
       <path id="r4" class="wire" pathLength="1" d="M 562 402 L 596 402" data-t="5300"/>
       <path id="r5" class="wire" pathLength="1" d="M 562 402 L 565 402 C 572 402, 572 546, 579 546 L 596 546" data-t="5400"/>
       <path id="r8" class="wire hot" pathLength="1" d="M 786 236 L 828 236" data-t="7400"/>
       <path id="r9" class="wire hot" pathLength="1" d="M 786 266 L 796 266 C 808 266, 806 386, 818 386 L 828 386" data-t="7500"/>
-      <path id="r10" class="wire" pathLength="1" d="M 786 414 L 828 414" data-t="7600"/>
       <path id="r11" class="wire" pathLength="1" d="M 1018 242 L 1031 242 Q 1036 242 1036 247 L 1036 355 Q 1036 360 1041 360 L 1054 360" data-t="9300"/>
       <path id="r12" class="wire" pathLength="1" d="M 1018 402 L 1054 402" data-t="9400"/>
       <path id="r13" class="wire" pathLength="1" d="M 786 546 L 796 546 C 1000 546, 1030 444, 1044 444 L 1054 444" data-t="9500"/>
@@ -561,8 +559,8 @@
       <span class="badge">per page</span>
       <div class="ico">{{I_MODEL}}</div><div><div class="name">page_expense_map</div><div class="desc">Final packs: ai_query, page to expense</div></div></div>
     <div class="node sm db rev" data-t="5800" style="left:598px;top:352px;width:188px;height:100px">
-      <span class="badge">per page</span>
-      <div class="ico">{{I_MODEL}}</div><div><div class="name">quote lines</div><div class="desc">Proformas: ai_extract, all quoted lines</div></div></div>
+      <span class="badge">no LLM</span>
+      <div class="ico">{{I_DOC}}</div><div><div class="name">pda_quote pages</div><div class="desc">Stay in document_pages: amounts already in Postgres</div></div></div>
     <div class="node sm db rev" data-t="6000" style="left:598px;top:500px;width:188px;height:92px">
       <span class="badge">per page</span>
       <div class="ico">{{I_MODEL}}</div><div><div class="name">port_call_events</div><div class="desc">SOF: ai_query, timeline</div></div></div>
@@ -570,8 +568,8 @@
       <span class="badge">summary page</span>
       <div class="ico">{{I_MODEL}}</div><div><div class="name">doc_bank_details</div><div class="desc">ai_extract v2.1, confidence</div></div></div>
     <div class="node sm db rev" data-t="8100" style="left:830px;top:352px;width:188px;height:100px">
-      <span class="badge">2 append flows</span>
-      <div class="ico">{{I_MODEL}}</div><div><div class="name">doc_line_items</div><div class="desc">Invoice pages: ai_extract amount; plus quote lines</div></div></div>
+      <span class="badge">per page</span>
+      <div class="ico">{{I_MODEL}}</div><div><div class="name">doc_line_items</div><div class="desc">Invoice pages: ai_extract amount, confidence</div></div></div>
     <div class="node hero rev" data-t="9600" style="left:1056px;top:300px;width:184px;height:190px">
       <span class="badge on">needs Postgres</span>
       <div class="ico">{{I_DBSQL}}</div><div><div class="name">Gold joins</div><div class="desc">With quoted and final lines, analyst checks and bank accounts (Part 3)</div></div></div>
@@ -803,7 +801,7 @@ const CAPS = {
   2: [[0, 'Your platform data already lands in S3 through <b>DMS: full load plus CDC</b>'],
       [1400, 'DMS writes Parquet per table; every row starts with <b>Op and _dms_commit_ts</b>'],
       [2600, 'Auto Loader picks up only the new files into <b>bronze</b>: a change log, nothing lost'],
-      [4000, 'AUTO CDC applies the changes in order: <b>version, then commit time</b>, SCD 1 or 2'],
+      [4000, 'AUTO CDC applies the changes in order: <b>full load first, then version and commit time</b>'],
       [6000, 'Your example: an appointment goes from IN_PROCESS to <b>CANCELLED</b>, history kept'],
       [8200, 'One serverless pipeline, <b>hourly today</b>, continuous later for the near real time tables']],
   3: [[0, 'The DA database as it lands in bronze: <b>13 core tables</b>, link tables and 49 child tables'],
@@ -823,7 +821,7 @@ const CAPS = {
   5: [[0, 'Inside the document pipeline: <b>every box is a table</b>, every arrow a dependency'],
       [2000, 'Parse and classify <b>once per file</b>, then split into pages with no LLM call'],
       [3400, 'The expense list comes from <b>Postgres through Part 1</b>: categories are data, not prompt text'],
-      [4800, 'Three branches by document type <b>run in parallel</b>: final packs, proformas, statements of facts'],
+      [4800, 'Branches by document type <b>run in parallel</b>; proformas need no LLM, their amounts are already in Postgres'],
       [7000, 'Final packs: page map first, then <b>bank details and line items in parallel</b>'],
       [9000, 'Gold joins the results with the <b>structured tables</b>, so the job runs platform data first']],
   6: [[0, 'The agents need both sources: <b>gold is where they meet</b>'],

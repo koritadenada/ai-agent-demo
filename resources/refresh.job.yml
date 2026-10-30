@@ -2,51 +2,28 @@ resources:
   jobs:
     refresh:
       name: portcall-refresh
-      description: Platform data and documents to silver, joined gold, then UC functions and metric views
+      description: Hourly data refresh, pipelines only. UC functions and metric views are applied by the setup job.
+      # Batch freshness is enough here: standard mode trades a few minutes of start-up for fewer DBUs
+      performance_target: STANDARD
       schedule:
-        quartz_cron_expression: "0 0 * * * ?"
+        quartz_cron_expression: ${var.refresh_cron}
         timezone_id: UTC
         pause_status: ${var.refresh_schedule_status}
       max_concurrent_runs: 1
-      environments:
-        - environment_key: default
-          spec:
-            environment_version: "4"
-            dependencies:
-              - pyyaml
-      parameters:
-        - name: catalog
-          default: ${var.catalog}
-        - name: gold_schema
-          default: ${resources.schemas.gold.name}
-        - name: silver_schema
-          default: ${resources.schemas.silver.name}
+      tags:
+        project: ${bundle.name}
+        workload: refresh
       tasks:
-        - task_key: uc_functions
-          environment_key: default
-          spark_python_task:
-            python_file: ../src/deploy/apply_sql_objects.py
-            parameters: ["--kind", "functions", "--catalog", "{{job.parameters.catalog}}",
-                         "--gold-schema", "{{job.parameters.gold_schema}}", "--silver-schema", "{{job.parameters.silver_schema}}"]
         - task_key: platform_data
           pipeline_task:
             pipeline_id: ${resources.pipelines.platform_pipeline.id}
         - task_key: documents
           depends_on:
-            - task_key: platform_data
+            - task_key: platform_data   # needs the expense vocabulary from silver
           pipeline_task:
             pipeline_id: ${resources.pipelines.documents_pipeline.id}
         - task_key: gold
           depends_on:
             - task_key: documents
-            - task_key: uc_functions
           pipeline_task:
             pipeline_id: ${resources.pipelines.gold_pipeline.id}
-        - task_key: metric_views
-          depends_on:
-            - task_key: gold
-          environment_key: default
-          spark_python_task:
-            python_file: ../src/deploy/apply_sql_objects.py
-            parameters: ["--kind", "metric_views", "--catalog", "{{job.parameters.catalog}}",
-                         "--gold-schema", "{{job.parameters.gold_schema}}", "--silver-schema", "{{job.parameters.silver_schema}}"]

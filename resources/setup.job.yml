@@ -1,0 +1,43 @@
+resources:
+  jobs:
+    setup:
+      name: portcall-setup
+      description: Run after each deploy. Applies the UC functions, refreshes the data once, then applies the metric views.
+      performance_target: STANDARD
+      max_concurrent_runs: 1
+      tags:
+        project: ${bundle.name}
+        workload: setup
+      environments:
+        - environment_key: default
+          spec:
+            environment_version: "4"
+            dependencies:
+              - pyyaml
+      parameters:
+        - name: catalog
+          default: ${var.catalog}
+        - name: gold_schema
+          default: ${resources.schemas.gold.name}
+        - name: silver_schema
+          default: ${resources.schemas.silver.name}
+      tasks:
+        - task_key: uc_functions
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/deploy/apply_sql_objects.py
+            parameters: ["--kind", "functions", "--catalog", "{{job.parameters.catalog}}",
+                         "--gold-schema", "{{job.parameters.gold_schema}}", "--silver-schema", "{{job.parameters.silver_schema}}"]
+        - task_key: refresh
+          depends_on:
+            - task_key: uc_functions   # gold calls the bank-check functions
+          run_job_task:
+            job_id: ${resources.jobs.refresh.id}
+        - task_key: metric_views
+          depends_on:
+            - task_key: refresh        # metric views need the gold tables
+          environment_key: default
+          spark_python_task:
+            python_file: ../src/deploy/apply_sql_objects.py
+            parameters: ["--kind", "metric_views", "--catalog", "{{job.parameters.catalog}}",
+                         "--gold-schema", "{{job.parameters.gold_schema}}", "--silver-schema", "{{job.parameters.silver_schema}}"]

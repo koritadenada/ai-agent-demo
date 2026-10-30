@@ -2,7 +2,7 @@
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from utilities.settings import BRONZE, CATALOG, DOCUMENTS_PATH
+from utilities.settings import AI_TABLE_PROPERTIES, BRONZE, CATALOG, DOCUMENTS_PATH
 
 # <entity>/<entity_id>/<file_item_id>.pdf, for example proforma/50217/1348002.pdf (the key in file_item.s3_key)
 KEY_PATTERN = r"/([a-z_]+)/(\d+)/(\d+)\.pdf$"
@@ -11,6 +11,7 @@ KEY_PATTERN = r"/([a-z_]+)/(\d+)/(\d+)\.pdf$"
 @dp.table(
     name=f"{CATALOG}.{BRONZE}.documents_raw",
     comment="PDF documents as received, one row per file, with the owning entity and file_item_id parsed from the key",
+    table_properties=AI_TABLE_PROPERTIES,
 )
 @dp.expect_or_drop("key_matches_layout", "file_item_id IS NOT NULL")
 def documents_raw():

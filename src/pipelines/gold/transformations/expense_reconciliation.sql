@@ -25,7 +25,6 @@ evidence AS (
          SORT_ARRAY(COLLECT_SET(li.page_number)) AS evidence_pages, MIN(li.confidence) AS evidence_confidence,
          FIRST(li.file_item_id) AS file_item_id
   FROM ${catalog}.${silver_schema}.doc_line_items li
-  WHERE li.line_source = 'supporting_invoice'
   GROUP BY ALL
 ),
 linked AS (  -- the platform's own link between a final line and its supporting file

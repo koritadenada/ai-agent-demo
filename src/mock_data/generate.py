@@ -376,12 +376,18 @@ def cdc_batch(db: Db, commit_ts: datetime) -> dict:
     out["bank_account"] = [("U", bump(acc, iban=iban(acc["iban"][:2], random.Random(7))))]
     open_pda = next(r for r in db.rows["proforma"] if r["state"] == "SUBMITTED")
     out["proforma_expense"] = [("D", next(r for r in db.rows["proforma_expense"] if r["proforma_id"] == open_pda["id"]))]
+    # A change committed while the full load was running: its commit time is earlier than the full-load copy time.
+    # The table has no version column, so only "full load first" ordering applies it correctly.
+    rec = next(r for r in db.rows["appointment_agent_recipient"] if r["id"] == APPOINTMENT_CANCELLED + 1000)
+    out["appointment_agent_recipient"] = [("U", dict(rec, agent_type="CHARTERER_AGENT",
+                                                     _commit_ts=FULL_LOAD_TS - timedelta(minutes=2)))]
     return out
 
 
 def write_table(dms_path, source_schema, table, rows, ops, commit_ts, file_name):
-    stamp = commit_ts.strftime("%Y-%m-%d %H:%M:%S.%f")
-    records = [{"Op": op, "_dms_commit_ts": stamp, **{k: v for k, v in r.items() if not k.startswith("_")}}
+    def stamp(r):  # a row can carry its own source commit time (_commit_ts), as DMS writes it
+        return r.get("_commit_ts", commit_ts).strftime("%Y-%m-%d %H:%M:%S.%f")
+    records = [{"Op": op, "_dms_commit_ts": stamp(r), **{k: v for k, v in r.items() if not k.startswith("_")}}
                for op, r in zip(ops, rows)]
     folder = os.path.join(dms_path, source_schema, table)
     os.makedirs(folder, exist_ok=True)

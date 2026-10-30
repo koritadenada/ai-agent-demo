@@ -7,11 +7,15 @@ resources:
       serverless: true
       continuous: false
       channel: CURRENT
+      tags:
+        project: ${bundle.name}
+        layer: platform
       root_path: ../src/pipelines/platform
       libraries:
         - glob:
             include: ../src/pipelines/platform/transformations/**
       configuration:
+        allow_reset: ${var.allow_reset}
         catalog: ${var.catalog}
         bronze_schema: ${resources.schemas.bronze.name}
         silver_schema: ${resources.schemas.silver.name}

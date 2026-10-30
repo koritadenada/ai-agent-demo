@@ -2,7 +2,7 @@
 from pyspark import pipelines as dp
 from pyspark.sql import functions as F
 
-from utilities.settings import BRONZE, CATALOG, SILVER, json_literal
+from utilities.settings import AI_TABLE_PROPERTIES, BRONZE, CATALOG, SILVER, json_literal
 
 DOC_TYPES = {
     "pda_quote": "Proforma disbursement account: the agent's quote before the port call",
@@ -19,6 +19,7 @@ ERRORS = "ARRAY<STRUCT<error_message: STRING, page_id: INT>>"
     name=f"{CATALOG}.{SILVER}.documents",
     comment="One row per document: parsed structure (ai_parse_document), page count, parse errors, classified type",
     cluster_by=["proforma_id"],
+    table_properties=AI_TABLE_PROPERTIES,
 )
 def documents():
     parsed = (

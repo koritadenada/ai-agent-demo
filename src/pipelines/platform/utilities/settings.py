@@ -20,6 +20,12 @@ SOURCE_SCHEMA = spark.conf.get("dms_source_schema")
 # Source columns renamed to neutral names in silver, as JSON: {"table": {"source_column": "silver_column"}}
 COLUMN_RENAMES = json.loads(spark.conf.get("column_renames", "{}") or "{}")
 
+# Cost guards. Row tracking lets the gold materialized views refresh incrementally instead of recomputing.
+# Bronze cannot be reset in production: the DMS files it was built from may be gone.
+ALLOW_RESET = spark.conf.get("allow_reset", "false")
+BRONZE_PROPERTIES = {"pipelines.reset.allowed": ALLOW_RESET}
+SILVER_PROPERTIES = {"delta.enableRowTracking": "true"}
+
 
 def bronze_name(table: str) -> str:
     if BRONZE_MODE == "existing":
