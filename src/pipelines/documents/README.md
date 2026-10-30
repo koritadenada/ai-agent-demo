@@ -42,10 +42,10 @@ mlflow.genai.set_prompt_alias(name=name, alias="production", version=v.version)
 
 ## The AI services, requirement by requirement
 
-The services of the current platform and where each requirement is implemented. Status: **met**, **by design**
+The seven AI services of the current platform (from the AI Services Map) and where each requirement is implemented. Status: **met**, **by design**
 (met differently, on purpose), **gap** (not covered yet).
 
-### Page extractor: page-accurate text from any PDF
+### AI Extractor: page-accurate text from any PDF
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -57,7 +57,7 @@ The services of the current platform and where each requirement is implemented. 
 | Stable output shape `[{page_number, extracted_text}]` | `documents.pages`, same fields | met |
 | Rasterize, resize, retry, per-page concurrency | Done by `ai_parse_document`; no code to maintain | by design |
 
-### Expense page mapper: map every page to the expense it evidences
+### DA Helper: map every page to the expense it evidences
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -70,16 +70,16 @@ The services of the current platform and where each requirement is implemented. 
 | Second model as judge | Not a model: the amount on the page is checked against the final line in gold (deterministic) | by design |
 | Evaluation harness for the mapping | `Agreement with analysts` in `expense_reconciliation_metrics`, against the analysts' verifications | met |
 
-### Event summarizer: the timeline of the port call
+### DA Event Summarizer: the timeline of the port call
 
 | Requirement | Implemented in | Status |
 |---|---|---|
-| A coherent chronological account of the port call | [`port_call_events.py`](transformations/port_call_events.py): one row per event, in order, from the statement of facts | by design: structured events that Genie and the agents query; a narrative is written on demand by the chat assistant, not stored |
+| A coherent chronological account of the port call | [`port_call_events.py`](transformations/port_call_events.py): one row per event, in order, from the statement of facts | by design: structured events that Genie and the agents query; a narrative is written on demand by HAL-9000, not stored |
 | Prompt and model change without a deploy | Prompt registry (`sof_events`) | met |
 | Retry on transient failures | `failOnError => false`: a failed call is stored with its error and never fails the run | gap: failed rows are not retried automatically yet |
 | Request and response tracing | `prompt_version` per row | gap: AI Gateway inference tables for full request logs |
 
-### Port bill analysis: reconcile the quote against the final bill
+### SOF Port Bill Analysis: reconcile the quote against the final bill
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -91,7 +91,7 @@ The services of the current platform and where each requirement is implemented. 
 | Output `{analysisStatus, amountChecks[...]}` | [`../gold/transformations/port_bill_analysis.sql`](../gold/transformations/port_bill_analysis.sql) | met |
 | A/B test model and effort without a redeploy | The rulebook is SQL, not a model call: same input, same verdict; thresholds are bundle variables | by design |
 
-### PDA/FDA validator: check bank details, amounts and dates before money moves
+### PDA/FDA Validator: check bank details, amounts and dates before money moves
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -102,7 +102,7 @@ The services of the current platform and where each requirement is implemented. 
 | New template vocabulary is data, not a prompt rewrite | Field labels (IBAN, Account no., BIC...) are in the `bank_details` prompt in the registry | met |
 | Per-field verdicts with confidence and explanation | `field_checks` | met |
 
-### Negotiator: flag overpriced quotes against history
+### AI Negotiator: flag overpriced quotes against history
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -110,9 +110,9 @@ The services of the current platform and where each requirement is implemented. 
 | Deterministic rule cascade, no model in the math | [`../gold/transformations/expense_benchmarks.sql`](../gold/transformations/expense_benchmarks.sql): exact (port, vessel type, size), then nearby ports (region, same type and size), then the port with any vessel; each level needs `min_benchmark_sample` past lines | met |
 | Regional and local port minimum | `region_min_median_eur`, `local_port_min_eur` | met |
 | Reconcile expense names across agency templates | The platform's `category_id` on every quoted and final line; no model needed | by design |
-| Draft a citation-backed negotiation email | `reasoning` gives the facts to cite | gap: the email is the quote advisor agent (next phase) |
+| Draft a citation-backed negotiation email | `reasoning` gives the facts to cite | gap: drafting the email is the agent part of the AI Negotiator (next phase) |
 
-### Chat assistant: questions in plain language
+### HAL-9000: questions in plain language
 
 | Requirement | Implemented in | Status |
 |---|---|---|
