@@ -6,7 +6,6 @@ from pyspark.sql import SparkSession
 spark = SparkSession.getActiveSession()
 
 CATALOG = spark.conf.get("catalog")
-BRONZE = spark.conf.get("bronze_schema")
 SILVER = spark.conf.get("silver_schema")
 DOCUMENTS_PATH = spark.conf.get("documents_path")
 LLM_ENDPOINT = spark.conf.get("llm_endpoint")

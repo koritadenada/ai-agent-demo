@@ -501,7 +501,7 @@
       <div class="ico">{{I_S3}}</div><div><div class="name">Documents bucket</div><div class="desc"><code>proforma/<b style="color:var(--lava)">proforma_id</b>/<br><b style="color:var(--lava)">file_item_id</b>.pdf</code></div></div></div>
     <div class="node db rev" data-t="1500" style="left:344px;top:300px;width:210px;height:130px">
       <span class="badge">Auto Loader</span>
-      <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">Bronze</div><div class="desc">Binary file plus proforma_id and file_item_id from the key</div></div></div>
+      <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">No bronze copy</div><div class="desc">Reads new PDFs from the bucket; keys from the path</div></div></div>
     <div class="nocall rev" data-t="8900" style="left:344px;top:452px;width:210px;white-space:normal;line-height:1.3"><svg viewBox="0 0 24 24" fill="none" style="flex:0 0 16px"><circle cx="12" cy="12" r="10" stroke="#00A06B" stroke-width="2"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#00A06B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Errors kept per page: one bad page never fails the file</div>
     <div class="ep rev golink" data-t="2700" data-go="5" style="left:590px;top:192px;width:380px;height:402px">
       <div class="bar">{{I_SERVERLESS_W}}Document pipeline<span class="tag">Open the graph &#8599;</span></div>
@@ -526,7 +526,7 @@
   <!-- ============ PART 2b: DOCUMENT PIPELINE GRAPH ============ -->
   <section class="scene" data-scene="5" data-dur="12000">
     <div class="stitle rev" data-t="0"><div class="k">Part 2 &middot; inside the document pipeline</div><div class="h">What runs in parallel, what needs Postgres</div></div>
-    <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; documents pipeline, every box is a table</span></div>
+    <div class="zone dbx rev" data-t="0" style="left:24px;top:176px;width:1232px;height:432px"><span class="zl">Databricks &middot; documents pipeline and its dependencies</span></div>
     <div class="lane rev" data-t="5000" style="left:590px;top:186px;width:208px;height:416px"><span class="ll">parallel, by document type</span></div>
     <div class="lane rev" data-t="7200" style="left:818px;top:186px;width:212px;height:280px"><span class="ll">parallel</span></div>
     <svg class="wires" viewBox="0 0 1280 720">
@@ -545,7 +545,7 @@
       <circle class="pulse" r="5" data-t="5600"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#r3"/></animateMotion></circle><circle class="pulse" r="5" data-t="5600"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#r4"/></animateMotion></circle><circle class="pulse" r="5" data-t="5600"><animateMotion dur="1.0s" repeatCount="indefinite" begin="indefinite"><mpath href="#r5"/></animateMotion></circle><circle class="pulse" r="5" data-t="7800"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#r8"/></animateMotion></circle><circle class="pulse" r="5" data-t="7800"><animateMotion dur="0.9s" repeatCount="indefinite" begin="indefinite"><mpath href="#r9"/></animateMotion></circle>
     </svg>
     <div class="node sm db rev" data-t="300" style="left:28px;top:354px;width:156px;height:96px">
-      <div class="ico">{{I_AUTOLOADER}}</div><div><div class="name">documents_raw</div><div class="desc">Bronze, new PDFs only</div></div></div>
+      <div class="ico">{{I_S3}}</div><div><div class="name">documents bucket</div><div class="desc">Raw layer, read by Auto Loader</div></div></div>
     <div class="node sm db rev" data-t="900" style="left:210px;top:342px;width:170px;height:120px">
       <span class="badge">per file</span>
       <div class="ico">{{I_DOC}}</div><div><div class="name">documents</div><div class="desc">ai_parse_document, then ai_classify on page 1</div></div></div>
@@ -560,7 +560,7 @@
       <div class="ico">{{I_MODEL}}</div><div><div class="name">page_expense_map</div><div class="desc">Final packs: ai_query, page to expense</div></div></div>
     <div class="node sm db rev" data-t="5800" style="left:598px;top:352px;width:188px;height:100px">
       <span class="badge">no LLM</span>
-      <div class="ico">{{I_DOC}}</div><div><div class="name">pda_quote pages</div><div class="desc">Stay in document_pages: amounts already in Postgres</div></div></div>
+      <div class="ico">{{I_DOC}}</div><div><div class="name">pda_quote pages</div><div class="desc">Amounts already in Postgres</div></div></div>
     <div class="node sm db rev" data-t="6000" style="left:598px;top:500px;width:188px;height:92px">
       <span class="badge">per page</span>
       <div class="ico">{{I_MODEL}}</div><div><div class="name">port_call_events</div><div class="desc">SOF: ai_query, timeline</div></div></div>
@@ -812,13 +812,13 @@ const CAPS = {
       [7700, 'Files link through <b>file_item</b>; analysts verify every line'],
       [9100, 'Lookups such as vessel, port and bank account are <b>assumed</b> until their columns are confirmed']],
   4: [[0, 'Documents land in a <b>second S3 bucket</b>, under the proforma they belong to'],
-      [1200, 'Auto Loader reads each new PDF once as a <b>binary file</b>; the key gives proforma_id and file_item_id'],
+      [1200, 'Auto Loader reads each new PDF once, <b>straight from the bucket</b>: no copy of the bytes in Delta'],
       [2600, 'Step 1: <b>ai_parse_document</b> returns the text of every page, with page numbers'],
       [4200, 'Steps 2 and 3: classify the document, then <b>map every page to an expense</b>'],
       [5800, 'Step 4: <b>ai_extract</b> pulls line items, totals and bank details, with confidence'],
       [7000, 'Step 5: the statement of facts becomes an <b>ordered event timeline</b>'],
       [8200, 'Every result lands once in <b>Delta</b>. Click the pipeline to see its <b>step graph</b>']],
-  5: [[0, 'Inside the document pipeline: <b>every box is a table</b>, every arrow a dependency'],
+  5: [[0, 'Inside the document pipeline: <b>every arrow is a dependency</b>'],
       [2000, 'Parse and classify <b>once per file</b>, then split into pages with no LLM call'],
       [3400, 'The expense list comes from <b>Postgres through Part 1</b>: categories are data, not prompt text'],
       [4800, 'Branches by document type <b>run in parallel</b>; proformas need no LLM, their amounts are already in Postgres'],

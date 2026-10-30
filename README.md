@@ -26,7 +26,8 @@ resources/                     everything the bundle deploys
   mock_data.job.yml            writes mock DMS files and PDFs into the landing volumes
 src/
   pipelines/platform/          bronze.py + silver.py, driven by utilities/tables.py (all 69 tables, one line each)
-  pipelines/documents/         one file per table: parse, pages, page map, line items, bank details, events
+  pipelines/documents/         one file per table: parse, pages, page map, line items, bank details, events;
+                               README maps each agent capability to its file
   pipelines/gold/              port_call_costs, expense_reconciliation, expense_benchmarks, payment_validation,
                                rfq_comparison, da_workflow, document_quality
   uc_functions/                deterministic bank checks (IBAN / domestic tail, SWIFT 8 vs 11) and masking
@@ -42,7 +43,7 @@ docs/                          architecture page, costs (docs/costs.md)
 | Layer | Platform data | Documents |
 |---|---|---|
 | Landing | DMS writes `da_schema/<table>/LOAD*.parquet` and CDC files | `proforma/<proforma_id>/<file_item_id>.pdf` |
-| Bronze | Auto Loader, one change-log streaming table per source table (Op, _dms_commit_ts ... _source_file) | Auto Loader `binaryFile`, proforma_id and file_item_id parsed from the key |
+| Bronze | Auto Loader, one change-log streaming table per source table (Op, _dms_commit_ts ... _source_file) | None: the bucket is the raw layer, Auto Loader reads the PDFs straight into silver |
 | Silver | AUTO CDC ordered full load first, then version, then commit time; deletes on `Op = 'D'`, SCD 2 where history matters | `ai_parse_document` once per file, `ai_classify` the type, pages, `ai_query` page to expense, `ai_extract` amounts and bank details, `ai_query` event timeline |
 | Gold | joined on the expense line: final line to its quote (`proforma_expense_id`), to its invoice page, to the analyst verification; plus bank checks, benchmarks, quotes and workflow | |
 | Semantic | metric views per KPI group, ready for Genie agents | |
