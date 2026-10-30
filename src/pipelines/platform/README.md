@@ -49,3 +49,24 @@ Here it runs from the `portcall-refresh` job (`resources/refresh.job.yml`). The 
 coordinates the three pipelines in order: platform data first (the documents need its expense vocabulary), then
 documents, then gold, which needs both. Each pipeline keeps a small graph about one thing, and the job is the
 one place that shows the order and the status of every run.
+
+## Adapting it to your environment
+
+- **Existing bronze**: if a bronze with the same envelope (`Op`, `_dms_commit_ts` ... `_rescued_data`, `_source_file`,
+  `_ingested_at`) already exists, set `bronze_mode: existing` and `bronze_source: <catalog>.<schema>`; silver reads it
+  and the files are not ingested again.
+- **Neutral names**: columns named after a vendor or company are renamed in silver with `column_renames`, for example
+  `'{"expense_evaluation": {"<source platform-fee column>": "is_platform_fee"}}'`.
+- **New tables**: one line in `utilities/tables.py` (keys, SCD type, history columns).
+- **Lookups to confirm**: the DA tables reference tables outside the DA families. Until their columns are confirmed,
+  the mock data and the gold SQL assume:
+
+| Table | Assumed columns | Used for |
+|---|---|---|
+| `vessel` | id, imo, name, vessel_type, gross_tonnage, dwt, flag | Vessel type and size band of benchmarks |
+| `port` | id, unlocode, name, country, region, default_currency | Port and region dimensions |
+| `buyer` | id, name, company_type, country | Buyer dimension |
+| `supplier` | id, name, company_type, country, port_id | Agent name |
+| `expense_category` | id, name, section, description (with the aliases agencies use, such as CTM) | Expense vocabulary for the document pipeline |
+| `bank_account` | id, supplier_id, bank_name, iban, account_number, swift, currency | Bank detail checks |
+| `file_item` | id, s3_key, file_name, content_type, size_bytes, creation_date | Link from documents to DAs |
