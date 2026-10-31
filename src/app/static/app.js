@@ -353,9 +353,11 @@ async function portCallList() {
     <div class="pagehead"><div>${svc('DA Event Summarizer', 'clock')}<h2>Port calls</h2>
       <p>Port calls with a statement of facts: the timeline read from the document, and a written account on demand.</p></div></div>
     <div class="grid g3">${rows.map(r => `
-      <div class="card item" style="border-top:0;display:block" onclick="location.hash='#/port-calls/${r.port_call_id}'">
+      <a class="pcard" href="#/port-calls/${r.port_call_id}">
         <div class="row-gap"><div class="ico">${I.ship}</div><div><div class="t">${esc(r.vessel_name)}</div><div class="s">${esc(r.port_name)} · ${month(r.call_month)}</div></div></div>
-        <div class="s" style="margin-top:10px">${esc(r.agent_name)} · port call ${r.port_call_id}</div></div>`).join('')}</div>`;
+        <div class="s pa">${esc(r.agent_name)}</div>
+        <div class="foot"><span class="muted small">Port call ${r.port_call_id}</span>${r.hold_payment ? '<span class="pill hold">Payment on hold</span>' : r.lines_flagged ? `<span class="pill review">${r.lines_flagged} lines to check</span>` : '<span class="pill ok">All lines match</span>'}</div>
+      </a>`).join('')}</div>`;
 }
 
 async function portCall(id) {
