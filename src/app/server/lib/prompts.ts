@@ -1,33 +1,35 @@
-// Agent prompts come from the MLflow Prompt Registry (app schema, alias `production`), read as the app's service
-// principal and refreshed every few minutes, so a new version behind the alias changes an agent without a deploy.
-// config/prompts.json holds the seeds (registered by the setup job) and is the fallback.
+// Each code agent's system prompt comes from the MLflow Prompt Registry, in the agent's own schema (the one its
+// experiment points at, alias `production`), read as the app's service principal and refreshed every few minutes,
+// so a new version behind the alias changes the agent without a deploy. config/prompts.json holds the seeds
+// (registered by the setup job) and is the fallback.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { createWorkspaceClient } from '@databricks/appkit';
-import { APP, PROMPT_ALIAS } from './config';
+import { AGENT_IDS, agentExperiments, type AgentId } from './agents';
+import { PROMPT_ALIAS } from './config';
 
-type PromptSeed = { template: string; model: string | null };
-const SEEDS = JSON.parse(readFileSync(join(process.cwd(), 'config', 'prompts.json'), 'utf8')) as Record<string, PromptSeed>;
+type PromptSeed = { prompt: string; template: string; model: string | null };
+const SEEDS = JSON.parse(readFileSync(join(process.cwd(), 'config', 'prompts.json'), 'utf8')) as Record<AgentId, PromptSeed>;
 
-const loaded: Record<string, { template: string; version: string }> = {};
+const loaded: Partial<Record<AgentId, { name: string; template: string; version: string }>> = {};
 
-async function load(name: string): Promise<void> {
+async function load(agent: AgentId): Promise<void> {
   try {
-    const client = createWorkspaceClient();
-    const response = await client.request({
+    const name = `${(await agentExperiments())[agent].promptSchema}.${SEEDS[agent].prompt}`;
+    const response = await createWorkspaceClient().request({
       method: 'GET',
-      path: `/api/2.0/mlflow/unity-catalog/prompts/${APP}.${name}/versions/by-alias/${PROMPT_ALIAS}`,
+      path: `/api/2.0/mlflow/unity-catalog/prompts/${name}/versions/by-alias/${PROMPT_ALIAS}`,
     });
     const v = (await response.json()) as { template: string; version: string };
     const template = v.template.startsWith('"') ? (JSON.parse(v.template) as string) : v.template;
-    loaded[name] = { template, version: `${name}@${PROMPT_ALIAS} v${v.version}` };
+    loaded[agent] = { name, template, version: String(v.version) };
   } catch (err) {
-    if (!loaded[name]) console.warn(`[prompts] ${name} from the repo seed: ${(err as Error).message.split('. Config:')[0]}`);
+    if (!loaded[agent]) console.warn(`[prompts] ${agent} from the repo seed: ${(err as Error).message.split('. Config:')[0]}`);
   }
 }
 
 export async function refreshPrompts(): Promise<void> {
-  await Promise.all(Object.keys(SEEDS).filter((n) => !n.startsWith('_')).map(load));
+  await Promise.all(AGENT_IDS.map(load));
 }
 
 export function startPromptRefresh(): void {
@@ -36,13 +38,21 @@ export function startPromptRefresh(): void {
 }
 
 /** An agent's system prompt (its baseSystemPrompt): the registry version behind the alias, read at every turn. */
-export function fromRegistry(name: string): () => string {
-  if (!SEEDS[name]) throw new Error(`no seed for prompt ${name} in config/prompts.json`);
-  return () => loaded[name]?.template ?? SEEDS[name].template;
+export function fromRegistry(agent: AgentId): () => string {
+  if (!SEEDS[agent]) throw new Error(`no seed for ${agent} in config/prompts.json`);
+  return () => loaded[agent]?.template ?? SEEDS[agent].template;
 }
 
+/** The prompt version an agent runs on, linked to each of its traces; undefined while on the repo seed. */
+export function promptRef(agent: AgentId): { name: string; version: string } | undefined {
+  const p = loaded[agent];
+  return p && { name: p.name, version: p.version };
+}
+
+/** Prompt name -> the version in use, for /api/config. */
 export function promptVersions(): Record<string, string> {
-  return Object.fromEntries(
-    Object.keys(SEEDS).filter((n) => !n.startsWith('_')).map((n) => [n, loaded[n]?.version ?? `${n}@repo-seed`]),
-  );
+  return Object.fromEntries(AGENT_IDS.map((agent) => {
+    const p = loaded[agent];
+    return [SEEDS[agent].prompt, p ? `${p.name}@${PROMPT_ALIAS} v${p.version}` : `${SEEDS[agent].prompt}@repo-seed`];
+  }));
 }

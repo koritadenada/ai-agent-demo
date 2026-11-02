@@ -6,6 +6,7 @@ import { GOLD } from '../../lib/config';
 import { askGenie, genieOf } from '../../lib/genie';
 import { rows } from '../../lib/sql';
 import { fromRegistry } from '../../lib/prompts';
+import { agentModel } from '../../lib/tracing';
 import { analyticsOf } from '../../lib/tools';
 
 // tool name, genie space alias (server.ts), what that agent owns
@@ -17,9 +18,10 @@ const GENIE: [string, string, string][] = [
 
 export default createAgent({
   default: true,
-  // the whole system prompt is `port_assistant` in the MLflow Prompt Registry (app schema, alias production), so it
-  // changes without a deploy; config/prompts.json only seeds it
-  baseSystemPrompt: fromRegistry('port_assistant'),
+  // its own MLflow experiment (resources/port_assistant.experiment.yml): the whole system prompt is
+  // `port_assistant` in the agent's schema (alias production, changes without a deploy) and every turn is traced there
+  model: agentModel('port-assistant'),
+  baseSystemPrompt: fromRegistry('port-assistant'),
   instructions: '',
   tools(plugins) {
     const analytics = analyticsOf(plugins);

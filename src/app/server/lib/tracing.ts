@@ -1,31 +1,66 @@
-// Agent traces (MLflow experiment portcall-agent-traces, Delta tables in the app schema). The agents plugin opens an
-// AGENT span per turn and a TOOL span per tool call; this adds the rest:
-//   - each turn is its own trace, named after the agent, with the question as input and the answer as output
-//     (otherwise the HTTP request is the root and the trace is exported before the agent span ends)
-//   - each model call is a CHAT_MODEL span with the messages, the answer, the tool calls and the token usage
-//   - the trace carries the conversation (session) and the user, for the Sessions view
+// Agent traces, one MLflow experiment per agent (resources/<agent>.experiment.yml): every turn of an agent is a
+// trace in that agent's experiment, stored as Delta tables in the agent's schema. A turn is the root of its trace,
+// named after the agent, with the question as input, the answer as output, the conversation (session), the user and
+// the prompt version it ran on. Inside it: a span per model call (messages, answer, tool calls, token usage), per tool
+// call and per SQL query. The agents plugin traces to a single experiment only, so the app does this itself.
 import { createWorkspaceClient, getCurrentUserId, getExecutionContext } from '@databricks/appkit';
-import { DatabricksAdapter, type AgentAdapter } from '@databricks/appkit/beta';
-import { context, ROOT_CONTEXT } from '@opentelemetry/api';
+import { DatabricksAdapter, type AgentAdapter, type AgentRunContext } from '@databricks/appkit/beta';
+import { context, ROOT_CONTEXT, SpanStatusCode, trace, type Context } from '@opentelemetry/api';
+import type { ReadableSpan, Span, SpanProcessor } from '@opentelemetry/sdk-trace-base';
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node';
 import * as mlflow from '@mlflow/core';
-import type { Application, NextFunction, Request, Response } from 'express';
+import { DatabricksUCTableSpanExporter, DatabricksUCTableSpanProcessor } from '@mlflow/core/dist/exporters/uc_table.js';
+import { agentExperiments, mlflowClient, type AgentId } from './agents';
+import { promptRef } from './prompts';
 
 type Client = ReturnType<typeof createWorkspaceClient>;
 type Body = { messages?: unknown[]; tools?: { function?: { name?: string } }[] } & Record<string, unknown>;
 type ToolCall = { id?: string; type: 'function'; function: { name: string; arguments: string } };
 
 /**
- * Runs agent chat requests outside the HTTP request span, so the agent span is the root of its trace. Plugin routes
- * are mounted before server extensions, so the middleware is moved to the front of the stack.
+ * Sends each trace to the experiment of the agent at its root; every other trace (HTTP requests, queries outside an
+ * agent turn) is dropped.
  */
-export function agentTurnsAsTraces(app: Application): void {
-  app.use('/api/agents/chat', (_req: Request, _res: Response, next: NextFunction) => context.with(ROOT_CONTEXT, next));
-  const router: unknown = Reflect.get(app, '_router');  // Express 4
-  const stack: unknown = router && Reflect.get(router as object, 'stack');
-  if (!Array.isArray(stack)) return;
-  // right after Express's own init layers, before every plugin route
-  const init = stack.findIndex((layer: unknown) => Reflect.get(layer as object, 'name') === 'expressInit');
-  stack.splice(init + 1, 0, stack.pop());
+class AgentTraceRouter implements SpanProcessor {
+  private agents = new Map<string, SpanProcessor>();
+  private traces = new Map<string, SpanProcessor>();   // OTel trace id -> its agent's processor
+
+  add(agent: string, processor: SpanProcessor): void {
+    this.agents.set(agent, processor);
+  }
+  onStart(span: Span, parent: Context): void {
+    const id = span.spanContext().traceId;
+    if (!span.parentSpanContext?.spanId) {
+      const agent = this.agents.get(span.name);
+      if (!agent) return;
+      this.traces.set(id, agent);
+    }
+    this.traces.get(id)?.onStart(span, parent);
+  }
+  onEnd(span: ReadableSpan): void {
+    const id = span.spanContext().traceId;
+    this.traces.get(id)?.onEnd(span);
+    if (!span.parentSpanContext?.spanId) this.traces.delete(id);
+  }
+  async forceFlush(): Promise<void> {
+    await Promise.all([...this.agents.values()].map((p) => p.forceFlush()));
+  }
+  async shutdown(): Promise<void> {
+    await Promise.all([...this.agents.values()].map((p) => p.shutdown()));
+  }
+}
+
+/** Installs the tracer provider (call before the app starts), then connects each agent to its experiment. */
+export function startAgentTracing(): void {
+  const router = new AgentTraceRouter();
+  new NodeTracerProvider({ spanProcessors: [router] }).register();
+  void agentExperiments().then((experiments) => {
+    const client = mlflowClient();
+    for (const [agent, e] of Object.entries(experiments)) {
+      if (e.traces) router.add(agent, new DatabricksUCTableSpanProcessor(new DatabricksUCTableSpanExporter(client), e.traces));
+      else console.warn(`[tracing] experiment ${e.experimentId} of ${agent} has no Unity Catalog trace location; not traced`);
+    }
+  }).catch((err: unknown) => console.warn(`[tracing] agent tracing off: ${(err as Error).message}`));
 }
 
 /** Collects what the model streamed back (OpenAI chat-completions chunks) for the span outputs. */
@@ -88,7 +123,7 @@ function collector() {
   };
 }
 
-/** Starts a CHAT_MODEL span under the active agent span; undefined when tracing is off. */
+/** Starts a CHAT_MODEL span under the active agent span; undefined outside an agent turn. */
 function startModelSpan(endpoint: string, body: Body) {
   try {
     const parent = mlflow.getCurrentActiveSpan();
@@ -105,56 +140,102 @@ function startModelSpan(endpoint: string, body: Body) {
   }
 }
 
-/**
- * The agents' model: the serving endpoint, called with the caller's client (the signed-in user in an
- * on-behalf-of-user run, as the plugin's default adapter does), with every call traced.
- */
-export function tracedModel(endpoint = process.env.DATABRICKS_SERVING_ENDPOINT_NAME ?? ''): AgentAdapter {
-  const adapter = new DatabricksAdapter({
-    async streamBody(request, signal) {
-      const body = { ...(request as Body), stream: true };
-      const span = startModelSpan(endpoint, body);
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- typed in AppKit, unresolved by the linter
-        const client: Client = getExecutionContext().client;
-        const response = await client.request({
-          method: 'POST',
-          path: `/serving-endpoints/${encodeURIComponent(endpoint)}/invocations`,
-          headers: new Headers({ 'Content-Type': 'application/json', Accept: 'text/event-stream' }),
-          body: JSON.stringify(body),
-          signal,
-        });
-        if (!response.body) throw new Error('Response body is null: streaming not supported');
-        if (!span) return response.body;
-        const seen = collector();
-        const finish = (status: mlflow.SpanStatusCode) => {
-          const { outputs, usage } = seen.result();
-          if (usage) span.setAttribute('mlflow.chat.tokenUsage', usage);
-          span.end({ outputs, status });
-        };
-        return response.body.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
-          transform(chunk, controller) {
-            seen.push(chunk);
-            controller.enqueue(chunk);
-          },
-          flush: () => finish(mlflow.SpanStatusCode.OK),
-          cancel: () => finish(mlflow.SpanStatusCode.ERROR),
-        }));
-      } catch (err) {
-        span?.end({ outputs: { error: (err as Error).message }, status: mlflow.SpanStatusCode.ERROR });
-        throw err;
-      }
-    },
-  });
-  // the conversation and the user on the trace, set once per turn from inside the agent span
-  const run = adapter.run.bind(adapter);
-  adapter.run = (input, ctx) => {
+/** The serving endpoint as a streamBody, called with the caller's client (the signed-in user), each call traced. */
+function servingStream(endpoint: string) {
+  return async (request: unknown, signal?: AbortSignal): Promise<ReadableStream<Uint8Array>> => {
+    const body = { ...(request as Body), stream: true };
+    const span = startModelSpan(endpoint, body);
     try {
-      mlflow.updateCurrentTrace({ sessionId: input.threadId, user: getCurrentUserId() });
-    } catch {
-      // tracing off
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- typed in AppKit, unresolved by the linter
+      const client: Client = getExecutionContext().client;
+      const response = await client.request({
+        method: 'POST',
+        path: `/serving-endpoints/${encodeURIComponent(endpoint)}/invocations`,
+        headers: new Headers({ 'Content-Type': 'application/json', Accept: 'text/event-stream' }),
+        body: JSON.stringify(body),
+        signal,
+      });
+      if (!response.body) throw new Error('Response body is null: streaming not supported');
+      if (!span) return response.body;
+      const seen = collector();
+      const finish = (status: mlflow.SpanStatusCode) => {
+        const { outputs, usage } = seen.result();
+        if (usage) span.setAttribute('mlflow.chat.tokenUsage', usage);
+        span.end({ outputs, status });
+      };
+      return response.body.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
+        transform(chunk, controller) {
+          seen.push(chunk);
+          controller.enqueue(chunk);
+        },
+        flush: () => finish(mlflow.SpanStatusCode.OK),
+        cancel: () => finish(mlflow.SpanStatusCode.ERROR),
+      }));
+    } catch (err) {
+      span?.end({ outputs: { error: (err as Error).message }, status: mlflow.SpanStatusCode.ERROR });
+      throw err;
     }
-    return run(input, ctx);
+  };
+}
+
+/** Runs fn in the agent turn's trace context; tracing problems never break the agent. */
+function inTurn(active: Context, fn: () => void): void {
+  try {
+    context.with(active, fn);
+  } catch {
+    // tracing off
+  }
+}
+
+/**
+ * An agent's model: the serving endpoint (as the signed-in user in an on-behalf-of-user run, like the plugin's
+ * default adapter), with every turn traced to the agent's experiment.
+ */
+export function agentModel(agent: AgentId, endpoint = process.env.DATABRICKS_SERVING_ENDPOINT_NAME ?? ''): AgentAdapter {
+  const adapter = new DatabricksAdapter({ streamBody: servingStream(endpoint) });
+  const run = adapter.run.bind(adapter);
+  adapter.run = async function* turn(input, ctx: AgentRunContext) {
+    // the turn is the root of its own trace, not a child of the HTTP request
+    const span = trace.getTracer('portcall-agents').startSpan(agent, {}, ROOT_CONTEXT);
+    const active = trace.setSpan(ROOT_CONTEXT, span);
+    span.setAttribute('mlflow.spanType', JSON.stringify(mlflow.SpanType.AGENT));
+    const messages = input.messages.filter((m) => m.role !== 'system').map((m) => ({ role: m.role, content: m.content }));
+    const question = [...messages].reverse().find((m) => m.role === 'user')?.content ?? '';
+    const prompt = promptRef(agent);
+    inTurn(active, () => {
+      mlflow.getCurrentActiveSpan()?.setInputs({ messages });
+      mlflow.updateCurrentTrace({
+        requestPreview: question,
+        sessionId: input.threadId,
+        user: getCurrentUserId(),
+        ...(prompt ? { tags: { 'mlflow.linkedPrompts': JSON.stringify([prompt]) } } : {}),
+      });
+    });
+    const executeTool: AgentRunContext['executeTool'] = (name, args) => Promise.resolve(context.with(active, () => mlflow.withSpan(async (tool) => {
+      const result = await ctx.executeTool(name, args);
+      tool.setOutputs(result);
+      return result;
+    }, { name, spanType: mlflow.SpanType.TOOL, inputs: args })));
+    const events = run(input, { ...ctx, executeTool });
+    let answer = '';
+    try {
+      for (;;) {
+        const next = await context.with(active, () => events.next());
+        if (next.done) break;
+        if (next.value.type === 'message_delta') answer += next.value.content;
+        yield next.value;
+      }
+      span.setStatus({ code: SpanStatusCode.OK });
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: (err as Error).message });
+      throw err;
+    } finally {
+      inTurn(active, () => {
+        mlflow.getCurrentActiveSpan()?.setOutputs({ role: 'assistant', content: answer });
+        mlflow.updateCurrentTrace({ responsePreview: answer });
+      });
+      span.end();
+    }
   };
   return adapter;
 }

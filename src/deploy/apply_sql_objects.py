@@ -3,9 +3,9 @@
 Each file is idempotent (CREATE OR REPLACE), so the job can run on every refresh.
   --kind functions     src/uc_functions/*.sql
   --kind metric_views  src/metric_views/*.yaml, wrapped in CREATE OR REPLACE VIEW ... WITH METRICS
-  --kind prompts       registers the default prompts of the document pipeline and of the app agents in the MLflow
-                       Prompt Registry, only when a prompt has no version behind the alias yet (later versions are
-                       never overwritten)
+  --kind prompts       registers the default prompts in the MLflow Prompt Registry: the document pipeline's in silver,
+                       each code agent's in its own schema; only when a prompt has no version behind the alias yet
+                       (later versions are never overwritten)
 """
 import argparse
 import inspect
@@ -30,14 +30,16 @@ def seed_prompts(args):
 
     import mlflow
 
-    # name -> (schema, default): pipeline prompts in silver, app agent prompts in the app schema
+    # name -> (schema, default): pipeline prompts in silver, each agent's prompt in the agent's schema
     path = SRC / "pipelines" / "documents" / "utilities" / "prompts.py"
     spec = importlib.util.spec_from_file_location("pipeline_prompts", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     defaults = {name: (args.silver_schema, p) for name, p in module.DEFAULTS.items()}
-    app_prompts = json.loads((SRC / "app" / "config" / "prompts.json").read_text())
-    defaults.update({name: (args.app_schema, p) for name, p in app_prompts.items() if not name.startswith("_")})
+    agent_schemas = dict(pair.split("=") for pair in args.agent_schemas.split(",")) if args.agent_schemas else {}
+    agent_prompts = json.loads((SRC / "app" / "config" / "prompts.json").read_text())
+    defaults.update({p["prompt"]: (agent_schemas[agent], p) for agent, p in agent_prompts.items()
+                     if not agent.startswith("_")})
     mlflow.set_registry_uri("databricks-uc")
     for name, (schema, p) in defaults.items():
         full = f"{args.catalog}.{schema}.{name}"
@@ -61,7 +63,7 @@ def main():
     ap.add_argument("--catalog", required=True)
     ap.add_argument("--gold-schema", required=True)
     ap.add_argument("--silver-schema", required=True)
-    ap.add_argument("--app-schema")
+    ap.add_argument("--agent-schemas", help="agent=schema,... (the code agents' schemas)")
     args = ap.parse_args()
     spark = SparkSession.builder.getOrCreate()
 

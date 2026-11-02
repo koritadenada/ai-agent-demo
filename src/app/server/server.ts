@@ -1,21 +1,21 @@
 // Port call agents app (AppKit). Plugins:
 //   agents     Port Assistant, Quote Negotiator, Timeline Summarizer (server/agents), as the signed-in user,
-//              traced to MLflow, conversations kept in Lakebase
+//              each traced to its own MLflow experiment, conversations kept in Lakebase
 //   analytics  the screens' queries (config/queries/*.obo.sql, as the user) and the confirmed writes below
 //   files      the PDFs of the documents volume, read as the user
 //   genie      the three Genie agents, used by the Port Assistant
 //   lakebase   the chat history
 import { analytics, createApp, files, genie, lakebase, server, sql } from '@databricks/appkit';
 import { agents } from '@databricks/appkit/beta';
-import { propagation } from '@opentelemetry/api';
 import type { Request } from 'express';
 import { z } from 'zod';
 import { APP, GOLD, SILVER, SPACES } from './lib/config';
 import { promptVersions, startPromptRefresh } from './lib/prompts';
-import { agentTurnsAsTraces, tracedModel } from './lib/tracing';
+import { startAgentTracing } from './lib/tracing';
 import { LakebaseThreadStore } from './lib/threads';
 
 const threads = new LakebaseThreadStore();
+startAgentTracing();
 
 const Decision = z.object({ decision: z.enum(['accept', 'dispute', 'hold']), note: z.string().max(2000).default('') });
 const Draft = z.object({
@@ -31,8 +31,8 @@ createApp({
   // no query cache: a decision or a saved draft shows on the next read, and gold changes with every refresh
   cache: { enabled: false },
   plugins: [
-    // each agent's prompt is in the registry (baseSystemPrompt in server/agents/<id>/agent.ts); every model call is traced
-    agents({ auth: 'on-behalf-of-user', threadStore: threads, defaultModel: tracedModel() }),
+    // each agent has its own experiment with its prompt and its traces (model and baseSystemPrompt in its agent.ts)
+    agents({ auth: 'on-behalf-of-user', threadStore: threads }),
     analytics(),
     files({ volumes: { files: { auth: 'on-behalf-of-user' } } }),  // the documents volume
     genie({ spaces: SPACES }),
@@ -40,14 +40,10 @@ createApp({
     server(),
   ],
   async onPluginsReady(appkit) {
-    // MLflow starts a trace only at a span without a parent. The Apps proxy sends a traceparent header, and
-    // continuing it would give every agent turn a remote parent and no trace, so incoming trace context is ignored.
-    propagation.disable();
     await threads.attach((text, params) => appkit.lakebase.query(text, params));
     startPromptRefresh();
 
     appkit.server.extend((app) => {
-      agentTurnsAsTraces(app);
       app.get('/api/config', (req, res) => {
         res.json({ gold: GOLD, silver: SILVER, app: APP, user: userOf(req), prompts: promptVersions() });
       });

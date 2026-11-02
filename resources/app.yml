@@ -1,6 +1,6 @@
 # The agents app (AppKit). It runs as the signed-in user (user_api_scopes): queries, agent turns, Genie and documents
 # are governed by Unity Catalog with the user's own permissions. Its service principal reads the prompt registry,
-# writes the agent traces and keeps the chat history in Lakebase.
+# writes each agent's traces to its experiment and keeps the chat history in Lakebase.
 resources:
   apps:
     agents_app:
@@ -17,8 +17,13 @@ resources:
         env:
           - name: DATABRICKS_SERVING_ENDPOINT_NAME
             value_from: agents-serving-endpoint
-          - name: MLFLOW_EXPERIMENT_ID
-            value_from: agents-mlflow-experiment
+          # one experiment per agent: the app reads the agent's prompt and writes its traces there
+          - name: PORT_ASSISTANT_EXPERIMENT_ID
+            value_from: port-assistant-experiment
+          - name: QUOTE_NEGOTIATOR_EXPERIMENT_ID
+            value_from: quote-negotiator-experiment
+          - name: TIMELINE_SUMMARIZER_EXPERIMENT_ID
+            value_from: timeline-summarizer-experiment
           - name: DATABRICKS_WAREHOUSE_ID
             value_from: sql-warehouse
           - name: DATABRICKS_VOLUME_FILES   # the documents volume, as the files plugin's volume "files"
@@ -46,9 +51,17 @@ resources:
           serving_endpoint:
             name: ${var.agent_llm_endpoint}
             permission: CAN_QUERY
-        - name: agents-mlflow-experiment
+        - name: port-assistant-experiment
           experiment:
-            experiment_id: ${resources.experiments.agent_traces.id}
+            experiment_id: ${resources.experiments.port_assistant_experiment.id}
+            permission: CAN_EDIT
+        - name: quote-negotiator-experiment
+          experiment:
+            experiment_id: ${resources.experiments.quote_negotiator_experiment.id}
+            permission: CAN_EDIT
+        - name: timeline-summarizer-experiment
+          experiment:
+            experiment_id: ${resources.experiments.timeline_summarizer_experiment.id}
             permission: CAN_EDIT
         - name: sql-warehouse
           sql_warehouse:

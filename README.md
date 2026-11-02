@@ -19,7 +19,7 @@ layer that Genie agents and an agents app work on.
 | Documents to silver | AI Functions: parse, classify, map each page to its DA line, read amounts and bank details |
 | Gold | Plain SQL: each final line against its quote, its invoice page and the analyst's check |
 | Genie agents | Port costs, DA audit, DA operations, on 7 metric views |
-| Agents app | AppKit: DA review, Quote Negotiator, port call timelines, and the Port Assistant (a custom agent over the Genie agents and the documents); chat history in Lakebase, traces in Unity Catalog |
+| Agents app | AppKit: DA review, Quote Negotiator, port call timelines, and the Port Assistant (a custom agent over the Genie agents and the documents); chat history in Lakebase, one MLflow experiment per agent for its prompt and traces |
 
 Everything runs as the signed-in user and writes nothing without a confirm.
 

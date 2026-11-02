@@ -5,13 +5,15 @@ import { z } from 'zod';
 import { GOLD, SILVER } from '../../lib/config';
 import { rows } from '../../lib/sql';
 import { fromRegistry } from '../../lib/prompts';
+import { agentModel } from '../../lib/tracing';
 import { analyticsOf } from '../../lib/tools';
 
 export default createAgent({
   ephemeral: true,
-  // the whole system prompt is `port_call_story` in the MLflow Prompt Registry (app schema, alias production), so it
-  // changes without a deploy; config/prompts.json only seeds it
-  baseSystemPrompt: fromRegistry('port_call_story'),
+  // its own MLflow experiment (resources/timeline_summarizer.experiment.yml): the whole system prompt is
+  // `port_call_story` in the agent's schema (alias production, changes without a deploy) and every turn is traced there
+  model: agentModel('timeline-summarizer'),
+  baseSystemPrompt: fromRegistry('timeline-summarizer'),
   instructions: '',
   tools(plugins) {
     const analytics = analyticsOf(plugins);

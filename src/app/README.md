@@ -14,7 +14,7 @@ The screens the DA analysts use, one per AI service, on top of the gold tables a
 
 | Plugin | Used for |
 |---|---|
-| `agents` | The three agents (`server/agents/<id>/agent.ts`), chat over `/api/agents/chat`, traces to MLflow |
+| `agents` | The three agents (`server/agents/<id>/agent.ts`), chat over `/api/agents/chat` |
 | `analytics` | The screens' queries, [`config/queries/*.obo.sql`](config/queries), and the two confirmed writes |
 | `files` | The PDFs of the documents volume |
 | `genie` | The three Genie agents (`resources/agents.genie.yml`), asked by the Port Assistant |
@@ -22,7 +22,7 @@ The screens the DA analysts use, one per AI service, on top of the gold tables a
 
 **Runs as the signed-in user.** Every query, model call, Genie question and PDF read uses the user's token
 (on-behalf-of-user auth, `user_api_scopes`), so Unity Catalog decides what each person sees. The app's service
-principal only reads the app prompts, writes the traces and keeps the chat history.
+principal only reads the agents' prompts, writes their traces and keeps the chat history.
 
 **The agents:**
 
@@ -37,17 +37,22 @@ principal only reads the app prompts, writes the traces and keeps the chat histo
 ([`threads.ts`](server/lib/threads.ts), the agents plugin's thread store): a follow-up continues the thread, and each
 user sees only their own. The Quote Negotiator and the Timeline Summarizer are one-shot and keep nothing.
 
-**Traces in Unity Catalog.** Every agent turn is one trace in the `portcall-agent-traces` experiment, named after
-the agent, with the question as input and the answer as output. Inside it: a span per model call (messages, answer,
-tool calls, token usage), per tool call and per SQL query ([`tracing.ts`](server/lib/tracing.ts)). The traces are
-Delta tables in the app schema (`experiment_*_otel_spans` and the views next to it), so they can be queried with SQL.
+**One MLflow experiment per agent.** `portcall-port-assistant`, `portcall-quote-negotiator` and
+`portcall-timeline-summarizer` (`resources/<agent>.experiment.yml`) each point at the agent's own schema, which holds:
+
+- **its prompt** (Prompts tab): the whole system prompt, alias `production`, set as `baseSystemPrompt` in the
+  agent's `agent.ts` and read every 5 minutes, so a new version changes the agent without a deploy;
+  [`config/prompts.json`](config/prompts.json) only seeds the first version
+- **its traces** (Traces tab): one trace per turn, named after the agent, with the question, the answer, the
+  conversation, the user and the prompt version it ran on. Inside it: a span per model call (messages, answer, tool
+  calls, token usage), per tool call and per SQL query ([`tracing.ts`](server/lib/tracing.ts)). They are Delta tables
+  (`experiment_*_otel_spans` and the views next to it), so they can be queried with SQL.
+
+The AppKit agents plugin traces to one experiment per app, so the app routes each trace to its agent's experiment
+itself.
 
 **Nothing is written without a confirm.** Decisions go to `analyst_decisions`, saved drafts to `negotiation_drafts`
 (app schema), as the analyst; nothing is sent to the port agent.
-
-**Prompts change without a deploy.** Each agent's whole system prompt is in the prompt registry (app schema, alias
-`production`): `port_assistant`, `negotiator`, `port_call_story`, set as `baseSystemPrompt` in its `agent.ts`. The app
-reads them every 5 minutes; [`config/prompts.json`](config/prompts.json) only seeds the first version.
 
 **Run it locally** against a deployed bundle (uses your CLI profile instead of the user token):
 
@@ -62,5 +67,5 @@ After changing a query in `config/queries`, run `npm run typegen:queries` to ref
 `shared/appkit-types`. `npm run typecheck`, `npm run lint` and `npm run build` are the checks before a deploy.
 
 **Test the deployed app:** `python tests/app_e2e.py --profile <profile> --catalog <catalog>` checks every screen
-against gold, the three agents and the Port Assistant routing, the chat history, the traces, the confirmed writes
+against gold, the three agents and the Port Assistant routing, the chat history, each agent's traces, the confirmed writes
 (removed again) and input validation.

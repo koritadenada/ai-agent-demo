@@ -1,0 +1,14 @@
+# The Timeline Summarizer agent's experiment: its Prompts tab shows the agent's prompt and its Traces tab every turn. Both live
+# in the agent's own schema (the traces as Delta tables, sent through the workspace). Edit, compare and promote
+# prompt versions there, without a deploy.
+resources:
+  experiments:
+    timeline_summarizer_experiment:
+      name: ${workspace.root_path}/portcall-timeline-summarizer
+      tags:
+        - key: mlflow.promptRegistryLocation
+          value: ${var.catalog}.${resources.schemas.timeline_summarizer.name}
+      trace_location:
+        uc_trace_location:
+          catalog: ${var.catalog}
+          schema: ${resources.schemas.timeline_summarizer.name}

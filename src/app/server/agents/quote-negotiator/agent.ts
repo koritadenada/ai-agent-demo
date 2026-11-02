@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { GOLD } from '../../lib/config';
 import { rows } from '../../lib/sql';
 import { fromRegistry } from '../../lib/prompts';
+import { agentModel } from '../../lib/tracing';
 import { analyticsOf } from '../../lib/tools';
 import type { Analytics } from '../../lib/sql';
 
@@ -54,9 +55,10 @@ async function knownAmounts(analytics: Analytics, proformaId: number): Promise<S
 
 export default createAgent({
   ephemeral: true,
-  // the whole system prompt is `negotiator` in the MLflow Prompt Registry (app schema, alias production), so it
-  // changes without a deploy; config/prompts.json only seeds it
-  baseSystemPrompt: fromRegistry('negotiator'),
+  // its own MLflow experiment (resources/quote_negotiator.experiment.yml): the whole system prompt is
+  // `negotiator` in the agent's schema (alias production, changes without a deploy) and every turn is traced there
+  model: agentModel('quote-negotiator'),
+  baseSystemPrompt: fromRegistry('quote-negotiator'),
   instructions: '',
   tools(plugins) {
     const analytics = analyticsOf(plugins);

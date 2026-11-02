@@ -19,7 +19,20 @@ resources:
     app:
       catalog_name: ${var.catalog}
       name: ${var.schema_prefix}app
-      comment: What the agents app writes (analyst decisions, negotiation drafts) and where it finds each agent
+      comment: What the agents app writes after a confirm (analyst decisions, negotiation drafts)
+    # one schema per code agent: its prompt (MLflow Prompt Registry) and its traces (Delta tables)
+    port_assistant:
+      catalog_name: ${var.catalog}
+      name: ${var.schema_prefix}port_assistant
+      comment: Port Assistant agent, its prompt and its traces
+    quote_negotiator:
+      catalog_name: ${var.catalog}
+      name: ${var.schema_prefix}quote_negotiator
+      comment: Quote Negotiator agent, its prompt and its traces
+    timeline_summarizer:
+      catalog_name: ${var.catalog}
+      name: ${var.schema_prefix}timeline_summarizer
+      comment: Timeline Summarizer agent, its prompt and its traces
 
   volumes:
     dms_volume:

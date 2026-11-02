@@ -9,6 +9,7 @@ import argparse
 import json
 import subprocess
 import sys
+import time
 
 import requests
 from databricks.sdk import WorkspaceClient
@@ -70,6 +71,17 @@ def main():
         failed = next((e.get("error") for e in events if e.get("type") in ("error", "response.failed")), None)
         return text, calls, outputs, thread_id, failed
 
+    def traces():   # agent -> traces in its own experiment (Delta tables in the agent's schema)
+        exp = agent_experiments(w, a)
+        return {agent: int(sql(f"SELECT COUNT(DISTINCT trace_id) FROM {a.catalog}.{a.prefix}{agent.replace('-', '_')}"
+                               f".experiment_{w.get_workspace_id()}_{exp[agent]}_otel_spans")[0][0]) for agent in exp}
+
+    def traced(agent, at_least, wait=120):   # traces are exported shortly after a turn ends
+        deadline = time.time() + wait
+        while (n := traces()[agent]) < at_least and time.time() < deadline:
+            time.sleep(10)
+        return n
+
     me = http.get(f"{url}/api/config", timeout=60).json()
     check(me["user"] == w.current_user.me().user_name, f"runs as the signed-in user ({me['user']})")
     check(all("@production v" in v for v in me["prompts"].values()), f"agent prompts come from the registry {me['prompts']}")
@@ -108,6 +120,7 @@ def main():
     check(r.ok and saved and saved[0]["note"] == "e2e test", "a confirmed decision is saved and read back")
     sql(f"DELETE FROM {app}.analyst_decisions WHERE note = 'e2e test'")
 
+    start = traces()
     quotes = query("quotes", gold=gold, app=app)
     q = next(x for x in quotes if int(x["flagged_lines"]) > 0)
     p = int(q["proforma_id"])
@@ -135,8 +148,11 @@ def main():
     check(not failed and "(p. " in text and [c["name"] for c in calls] == ["get_port_call"], "Timeline Summarizer writes the account with page citations")
     check(thread not in [t["id"] for t in http.get(f"{url}/api/agents/threads", timeout=60).json().get("threads", [])],
           "one-shot agents leave nothing in the chat history")
+    for agent in ("quote-negotiator", "timeline-summarizer"):
+        n = traced(agent, start[agent] + 1)
+        check(n > start[agent], f"{agent} turns are traced to its own experiment ({start[agent]} -> {n})")
 
-    before = int(sql(f"SELECT COUNT(DISTINCT trace_id) FROM {app}.experiment_{w.get_workspace_id()}_{me_exp(w, a)}_otel_spans")[0][0])
+    before = traces()
     text, calls, _, thread, failed = chat("port-assistant", "Give me the timeline of port call 20400")
     check(not failed and "port_call_timeline" in [c["name"] for c in calls], "Port Assistant answers with the timeline tool")
     text2, _, _, thread2, _ = chat("port-assistant", "And how long did the vessel wait at anchorage?", thread)
@@ -146,8 +162,12 @@ def main():
           "the conversation is kept in Lakebase (questions and answers)")
     check(any(t["id"] == thread for t in http.get(f"{url}/api/agents/threads", timeout=60).json()["threads"]), "it is listed in the user's conversations")
     http.delete(f"{url}/api/agents/threads/{thread}", timeout=60)
-    after = int(sql(f"SELECT COUNT(DISTINCT trace_id) FROM {app}.experiment_{w.get_workspace_id()}_{me_exp(w, a)}_otel_spans")[0][0])
-    check(after > before, f"agent turns are traced to Unity Catalog ({before} -> {after} traces)")
+    n = traced("port-assistant", before["port-assistant"] + 2)
+    check(n >= before["port-assistant"] + 2, f"each Port Assistant turn is a trace in its own experiment ({before['port-assistant']} -> {n})")
+    exp = agent_experiments(w, a)["port-assistant"]
+    roots = sql(f"""SELECT name, COUNT(*) FROM {a.catalog}.{a.prefix}port_assistant.experiment_{w.get_workspace_id()}_{exp}_otel_spans
+                   WHERE coalesce(parent_span_id, '') = '' AND time > current_timestamp() - INTERVAL 15 MINUTES GROUP BY name""")
+    check(bool(roots) and all(r[0] == "port-assistant" for r in roots), f"its traces start at the agent turn ({roots})")
 
     if not a.skip_routing:
         for question, tool in [("Which ports have the highest cost per call?", "ask_port_costs"),
@@ -165,10 +185,10 @@ def main():
     sys.exit(1 if FAILS else 0)
 
 
-def me_exp(w: WorkspaceClient, a) -> str:
-    """The agent trace experiment of the app (its MLflow experiment resource)."""
+def agent_experiments(w: WorkspaceClient, a) -> dict:
+    """Agent id -> its MLflow experiment (the app's <agent>-experiment resources)."""
     res = w.apps.get(a.app).resources or []
-    return next(r.experiment.experiment_id for r in res if r.experiment)
+    return {r.name.removesuffix("-experiment"): r.experiment.experiment_id for r in res if r.experiment}
 
 
 if __name__ == "__main__":
