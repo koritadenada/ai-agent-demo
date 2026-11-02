@@ -1,5 +1,11 @@
 resources:
   experiments:
     agent_traces:
-      # Traces of the Port Assistant: every question, the tools it called and what they returned.
+      # Traces of the agents (Port Assistant, Quote Negotiator): every turn, the tools called and what they returned.
+      # Stored as Delta tables in the app schema, so the app sends spans through the workspace instead of uploading
+      # them to cloud storage.
       name: ${workspace.root_path}/portcall-agent-traces
+      trace_location:
+        uc_trace_location:
+          catalog: ${var.catalog}
+          schema: ${resources.schemas.app.name}

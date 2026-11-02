@@ -28,6 +28,9 @@ variables:
   column_renames:
     description: 'JSON map of source columns to neutral silver names, {"table": {"source_column": "silver_column"}}'
     default: "{}"
+  lakebase_project:
+    description: Lakebase project of the agents app (chat history); unique in the workspace
+    default: portcall-agents
   agent_llm_endpoint:
     description: Model behind the app agents (Port Assistant, Quote Negotiator, Timeline Summarizer), unless a prompt version sets its own
     default: databricks-claude-sonnet-5-5

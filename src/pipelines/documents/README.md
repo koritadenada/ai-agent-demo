@@ -116,13 +116,13 @@ Seven AI services for the DA workflow and where each requirement is implemented.
 | Deterministic rule cascade, no model in the math | [`../gold/transformations/expense_benchmarks.sql`](../gold/transformations/expense_benchmarks.sql): exact (port, vessel type, size), then nearby ports (region, same type and size), then the port with any vessel; each level needs `min_benchmark_sample` past lines | met |
 | Regional and local port minimum | `region_min_median_eur`, `local_port_min_eur` | met |
 | Reconcile expense names across agency templates | The platform's `category_id` on every quoted and final line; no model needed | by design |
-| Draft a citation-backed negotiation email | Agent in the app ([`negotiator.py`](../../app/backend/negotiator.py)): reads the quote, the price history and competing quotes through tools, drafts the email; every amount is checked against the data before the analyst saves it | met |
+| Draft a citation-backed negotiation email | Agent in the app ([`quote-negotiator`](../../app/server/agents/quote-negotiator/agent.ts)): reads the quote, the price history and competing quotes through tools, drafts the email; every amount is checked against the data before the analyst saves it | met |
 
 ### Port Assistant: questions in plain language
 
 | Requirement | Implemented in | Status |
 |---|---|---|
-| Answer with the user's own permissions | Custom agent in the app ([`assistant.py`](../../app/backend/assistant.py)) over three Genie agents ([`agents.genie.yml`](../../../resources/agents.genie.yml)), document search and the port call timeline; it runs with the user's token | met |
+| Answer with the user's own permissions | Custom agent in the app ([`port-assistant`](../../app/server/agents/port-assistant/agent.ts)) over three Genie agents ([`agents.genie.yml`](../../../resources/agents.genie.yml)), document search and the port call timeline; it runs with the user's token | met |
 | Never write without explicit confirmation | Port Assistant only reads; decisions and drafts are saved in the app after a confirm | met |
 
 Shared settings, the prompt loader and the expense vocabulary are in [`utilities/settings.py`](utilities/settings.py).

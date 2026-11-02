@@ -18,7 +18,7 @@ layer that Genie agents and an agents app work on.
 | Documents to silver | AI Functions: parse, classify, map each page to its DA line, read amounts and bank details |
 | Gold | Plain SQL: each final line against its quote, its invoice page and the analyst's check |
 | Genie agents | Port costs, DA audit, DA operations, on 7 metric views |
-| Agents app | DA review, Quote Negotiator, port call timelines, and the Port Assistant: a custom agent over the Genie agents and the documents |
+| Agents app | AppKit: DA review, Quote Negotiator, port call timelines, and the Port Assistant (a custom agent over the Genie agents and the documents); chat history in Lakebase, traces in Unity Catalog |
 
 Everything runs as the signed-in user and writes nothing without a confirm.
 
@@ -40,9 +40,9 @@ environment".
 ## Repo
 
 ```
-databricks.yml, resources/   the bundle: pipelines, jobs, Genie agents, app, experiments
+databricks.yml, resources/   the bundle: pipelines, jobs, Genie agents, app, Lakebase, experiments
 src/pipelines/               platform, documents, gold
-src/app/                     the agents app and its agents
+src/app/                     the agents app (AppKit) and its agents
 src/agents/                  agent tools (UC functions) and the app tables
 src/deploy/                  what bundles cannot deploy: UC functions, metric views, prompts
 src/mock_data/               the demo data generator

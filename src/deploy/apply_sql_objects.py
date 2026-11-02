@@ -9,6 +9,7 @@ Each file is idempotent (CREATE OR REPLACE), so the job can run on every refresh
 """
 import argparse
 import inspect
+import json
 import pathlib
 
 import yaml
@@ -29,13 +30,14 @@ def seed_prompts(args):
 
     import mlflow
 
-    defaults = {}  # name -> (schema, default): pipeline prompts in silver, app agent prompts in the app schema
-    for path, schema in ((SRC / "pipelines" / "documents" / "utilities" / "prompts.py", args.silver_schema),
-                         (SRC / "app" / "prompts.py", args.app_schema)):
-        spec = importlib.util.spec_from_file_location(path.parent.name + "_prompts", path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        defaults.update({name: (schema, p) for name, p in module.DEFAULTS.items()})
+    # name -> (schema, default): pipeline prompts in silver, app agent prompts in the app schema
+    path = SRC / "pipelines" / "documents" / "utilities" / "prompts.py"
+    spec = importlib.util.spec_from_file_location("pipeline_prompts", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    defaults = {name: (args.silver_schema, p) for name, p in module.DEFAULTS.items()}
+    app_prompts = json.loads((SRC / "app" / "config" / "prompts.json").read_text())
+    defaults.update({name: (args.app_schema, p) for name, p in app_prompts.items() if not name.startswith("_")})
     mlflow.set_registry_uri("databricks-uc")
     for name, (schema, p) in defaults.items():
         full = f"{args.catalog}.{schema}.{name}"

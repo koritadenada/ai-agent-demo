@@ -731,12 +731,13 @@
     <div class="node rev" data-t="300" style="left:24px;top:352px;width:162px;height:96px">
       <div class="ico">{{I_INSIGHTS}}</div><div><div class="name">Analyst</div><div class="desc">Signs in with their own account</div></div></div>
     <div class="zc rev" data-t="1200" style="left:228px;top:196px;width:298px;height:404px;border-top-color:var(--lava)">
-      <div class="zh">{{I_DASH}}Agents app</div><div class="zs">Databricks Apps; one screen per AI service</div>
+      <div class="zh">{{I_DASH}}Agents app</div><div class="zs">Databricks Apps on AppKit; one screen per AI service</div>
       <div class="kv"><span>DA review</span><b>Bill Reconciler</b></div>
       <div class="kv"><span></span><b>Payment Validator</b></div>
       <div class="kv mk" data-t="2900"><span>Open quotes</span><b>Quote Negotiator</b></div>
       <div class="kv"><span>Port calls</span><b>Timeline Summarizer</b></div>
       <div class="kv mk2" data-t="6900"><span>Ask</span><b>Port Assistant</b></div>
+      <div class="kv"><span>Chat history</span><b>Lakebase</b></div>
       <div class="formula" style="margin-top:12px">Unity Catalog decides what each person sees: queries, model calls, Genie and PDFs run with their own permissions</div>
     </div>
     <div class="ep tight rev" data-t="3300" style="left:576px;top:196px;width:330px;height:300px">
@@ -748,14 +749,14 @@
     </div>
     <div class="node hero rev" data-t="7300" style="left:576px;top:512px;width:330px;height:88px">
       <span class="badge ok">running</span>
-      <div class="ico">{{I_AGENT}}</div><div><div class="name">Port Assistant</div><div class="desc">Custom agent: calls the Genie agents and tools it needs</div></div></div>
+      <div class="ico">{{I_AGENT}}</div><div><div class="name">Port Assistant</div><div class="desc">Custom agent: calls the Genie agents and tools it needs; chats kept in Lakebase</div></div></div>
     <div class="zc rev" data-t="5700" style="left:948px;top:196px;width:292px;height:150px;border-top-color:var(--navy)">
       <div class="zh">{{I_DELTA}}Saved after a confirm</div>
       <div class="kv"><span>analyst_decisions</span><b>accept, dispute, hold</b></div>
       <div class="kv"><span>negotiation_drafts</span><b>edited emails</b></div>
     </div>
     <div class="node db rev" data-t="6000" style="left:948px;top:368px;width:292px;height:100px">
-      <div class="ico">{{I_UC}}</div><div><div class="name">Prompt registry</div><div class="desc">negotiator, port_assistant, port_call_story: change them without a deploy</div></div></div>
+      <div class="ico">{{I_UC}}</div><div><div class="name">Prompts and traces</div><div class="desc">Prompts change in the registry without a deploy; every agent turn is traced to Delta tables in UC</div></div></div>
     <div class="node db rev" data-t="8100" style="left:948px;top:500px;width:292px;height:100px">
       <div class="ico">{{I_GENIE}}</div><div><div class="name">3 Genie agents + 2 tools</div><div class="desc">Port costs, DA audit, DA operations; document search; port call timeline</div></div></div>
   </section>
@@ -896,8 +897,8 @@ const CAPS = {
       [1000, 'One app, <b>one screen per AI service</b>, running as the signed-in user'],
       [3100, 'The <b>Quote Negotiator</b> is a tool-calling agent: it reads the quote, the history and past quotes'],
       [4800, 'It drafts the email; <b>every amount is checked</b> against what the tools returned'],
-      [5600, 'Nothing is saved until the analyst <b>confirms</b>; prompts change in the registry, not in code'],
-      [7100, 'The <b>Port Assistant</b> answers the rest: a custom agent that calls the Genie agents, document search or the timeline']],
+      [5600, 'Nothing is saved until the analyst <b>confirms</b>; prompts change in the registry, every turn is <b>traced to Unity Catalog</b>'],
+      [7100, 'The <b>Port Assistant</b> answers the rest: it calls the Genie agents, document search or the timeline; <b>chats are kept in Lakebase</b>']],
   9: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
       [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],

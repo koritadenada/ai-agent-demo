@@ -1,0 +1,8 @@
+# Lakebase (Postgres) for the agents app: the Port Assistant's conversations, per user. One project; its default
+# branch and database are created with it.
+resources:
+  postgres_projects:
+    chat_store:
+      project_id: ${var.lakebase_project}
+      display_name: Port call agents chat history
+      pg_version: 17

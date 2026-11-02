@@ -1,11 +1,11 @@
-# The agents app. It runs as the signed-in user (user_api_scopes): queries, model calls, Genie and documents are
-# governed by Unity Catalog with the user's own permissions. Its service principal only reads the prompt registry
-# and writes the Port Assistant traces.
+# The agents app (AppKit). It runs as the signed-in user (user_api_scopes): queries, agent turns, Genie and documents
+# are governed by Unity Catalog with the user's own permissions. Its service principal reads the prompt registry,
+# writes the agent traces and keeps the chat history in Lakebase.
 resources:
   apps:
     agents_app:
       name: portcall-agents
-      description: DA review, Quote Negotiator, port call timelines and Port Assistant
+      description: DA review, Quote Negotiator, port call timelines and the Port Assistant
       source_code_path: ../src/app
       user_api_scopes:
         - sql
@@ -13,39 +13,52 @@ resources:
         - genie
         - files
       config:
-        command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+        command: ["npm", "run", "start"]
         env:
-          - name: CATALOG
-            value: ${var.catalog}
-          - name: GOLD_SCHEMA
-            value: ${resources.schemas.gold.name}
-          - name: SILVER_SCHEMA
-            value: ${resources.schemas.silver.name}
-          - name: APP_SCHEMA
-            value: ${resources.schemas.app.name}
-          - name: PROMPT_ALIAS
-            value: ${var.prompt_alias}
-          - name: AGENT_LLM_ENDPOINT
-            value: ${var.agent_llm_endpoint}
+          - name: DATABRICKS_SERVING_ENDPOINT_NAME
+            value_from: agents-serving-endpoint
+          - name: MLFLOW_EXPERIMENT_ID
+            value_from: agents-mlflow-experiment
           - name: DATABRICKS_WAREHOUSE_ID
-            value_from: warehouse
+            value_from: sql-warehouse
+          - name: DATABRICKS_VOLUME_FILES   # the documents volume, as the files plugin's volume "files"
+            value_from: documents
+          - name: DATABRICKS_GENIE_SPACE_ID   # the genie plugin's default space; the three agents are configured in code
+            value_from: port-costs-agent
           - name: PORT_COSTS_SPACE_ID
             value_from: port-costs-agent
           - name: DA_AUDIT_SPACE_ID
             value_from: da-audit-agent
           - name: DA_OPERATIONS_SPACE_ID
             value_from: da-operations-agent
-          - name: MLFLOW_EXPERIMENT_ID
-            value_from: agent-traces
+          - name: LAKEBASE_ENDPOINT
+            value_from: postgres
+          - name: GOLD_SCHEMA
+            value: ${var.catalog}.${resources.schemas.gold.name}
+          - name: SILVER_SCHEMA
+            value: ${var.catalog}.${resources.schemas.silver.name}
+          - name: APP_SCHEMA
+            value: ${var.catalog}.${resources.schemas.app.name}
+          - name: PROMPT_ALIAS
+            value: ${var.prompt_alias}
       resources:
-        - name: warehouse
-          sql_warehouse:
-            id: ${var.warehouse_id}
-            permission: CAN_USE
-        - name: agent-llm
+        - name: agents-serving-endpoint
           serving_endpoint:
             name: ${var.agent_llm_endpoint}
             permission: CAN_QUERY
+        - name: agents-mlflow-experiment
+          experiment:
+            experiment_id: ${resources.experiments.agent_traces.id}
+            permission: CAN_EDIT
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        - name: documents
+          uc_securable:
+            securable_full_name: ${var.catalog}.${resources.schemas.landing.name}.${resources.volumes.documents_volume.name}
+            securable_type: VOLUME
+            permission: READ_VOLUME
         - name: port-costs-agent
           genie_space:
             name: ${resources.genie_spaces.port_costs.title}
@@ -61,7 +74,8 @@ resources:
             name: ${resources.genie_spaces.da_operations.title}
             space_id: ${resources.genie_spaces.da_operations.id}
             permission: CAN_RUN
-        - name: agent-traces
-          experiment:
-            experiment_id: ${resources.experiments.agent_traces.id}
-            permission: CAN_EDIT
+        - name: postgres
+          postgres:
+            branch: projects/${resources.postgres_projects.chat_store.project_id}/branches/production
+            database: projects/${resources.postgres_projects.chat_store.project_id}/branches/production/databases/databricks-postgres
+            permission: CAN_CONNECT_AND_CREATE

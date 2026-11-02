@@ -983,12 +983,13 @@
 <path d="M275.998 448L447.998 448L447.998 240L275.998 240L275.998 448Z" fill="#FF5F46"/>
 <path d="M235.998 63.9998L63.9981 63.9998L63.9981 304L235.998 304L235.998 63.9998Z" fill="#FF5F46"/>
 <path d="M64.0664 448L236.066 448L236.066 338L64.0664 338L64.0664 448Z" fill="#FABFBA"/>
-</svg>Agents app</div><div class="zs">Databricks Apps; one screen per AI service</div>
+</svg>Agents app</div><div class="zs">Databricks Apps on AppKit; one screen per AI service</div>
       <div class="kv"><span>DA review</span><b>Bill Reconciler</b></div>
       <div class="kv"><span></span><b>Payment Validator</b></div>
       <div class="kv mk" data-t="2900"><span>Open quotes</span><b>Quote Negotiator</b></div>
       <div class="kv"><span>Port calls</span><b>Timeline Summarizer</b></div>
       <div class="kv mk2" data-t="6900"><span>Ask</span><b>Port Assistant</b></div>
+      <div class="kv"><span>Chat history</span><b>Lakebase</b></div>
       <div class="formula" style="margin-top:12px">Unity Catalog decides what each person sees: queries, model calls, Genie and PDFs run with their own permissions</div>
     </div>
     <div class="ep tight rev" data-t="3300" style="left:576px;top:196px;width:330px;height:300px">
@@ -1000,7 +1001,7 @@
     </div>
     <div class="node hero rev" data-t="7300" style="left:576px;top:512px;width:330px;height:88px">
       <span class="badge ok">running</span>
-      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg></div><div><div class="name">Port Assistant</div><div class="desc">Custom agent: calls the Genie agents and tools it needs</div></div></div>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg></div><div><div class="name">Port Assistant</div><div class="desc">Custom agent: calls the Genie agents and tools it needs; chats kept in Lakebase</div></div></div>
     <div class="zc rev" data-t="5700" style="left:948px;top:196px;width:292px;height:150px;border-top-color:var(--navy)">
       <div class="zh"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
@@ -1027,7 +1028,7 @@
 <path d="M158.038 342.579L117.109 413.316L187.905 454.211L228.833 383.474L158.038 342.579Z" fill="#FABFBA"/>
 <path d="M131.857 215.105H50V296.895H131.857V215.105Z" fill="#FABFBA"/>
 <path d="M187.905 58.1582L117.109 99.0529L158.038 169.79L228.833 128.895L187.905 58.1582Z" fill="#FABFBA"/>
-</svg></div><div><div class="name">Prompt registry</div><div class="desc">negotiator, port_assistant, port_call_story: change them without a deploy</div></div></div>
+</svg></div><div><div class="name">Prompts and traces</div><div class="desc">Prompts change in the registry without a deploy; every agent turn is traced to Delta tables in UC</div></div></div>
     <div class="node db rev" data-t="8100" style="left:948px;top:500px;width:292px;height:100px">
       <div class="ico"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
@@ -1192,8 +1193,8 @@ const CAPS = {
       [1000, 'One app, <b>one screen per AI service</b>, running as the signed-in user'],
       [3100, 'The <b>Quote Negotiator</b> is a tool-calling agent: it reads the quote, the history and past quotes'],
       [4800, 'It drafts the email; <b>every amount is checked</b> against what the tools returned'],
-      [5600, 'Nothing is saved until the analyst <b>confirms</b>; prompts change in the registry, not in code'],
-      [7100, 'The <b>Port Assistant</b> answers the rest: a custom agent that calls the Genie agents, document search or the timeline']],
+      [5600, 'Nothing is saved until the analyst <b>confirms</b>; prompts change in the registry, every turn is <b>traced to Unity Catalog</b>'],
+      [7100, 'The <b>Port Assistant</b> answers the rest: it calls the Genie agents, document search or the timeline; <b>chats are kept in Lakebase</b>']],
   9: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
       [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],
