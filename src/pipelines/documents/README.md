@@ -4,14 +4,7 @@ Reads every PDF in the documents bucket once and turns it into facts with page c
 which DA expense line each page evidences, the amounts, bank details, date and rate of exchange printed on it, and
 the timeline of the port call.
 
-```
-documents bucket -> documents -> document_pages -> page_expense_map -> gold checks
-(raw layer, S3)     parse, type  one row per page  page to DA line,
-                                                   amount on the page
-                                                                   -> expense_page_evidence (pages per line)
-                                                                   -> doc_bank_details      (summary page)
-                    documents -> port_call_events (statement of facts timeline, one call per document)
-```
+[![Document pipeline](../../../docs/documents.gif)](https://koritadenada.github.io/ai-agent-demo/architecture.html)
 
 **One model call per invoice page.** The page map reads the amount in the same call, so invoice pages do not go to
 `ai_extract` a second time (about 40% less AI spend). `ai_extract` stays for bank details, where its per-field
@@ -45,84 +38,5 @@ mlflow.genai.set_prompt_alias(name=name, alias="production", version=v.version)
 - New documents only: pages already processed keep their result.
 - Every row records the version that produced it (`prompt_version`); compare versions with `Agreement with analysts`.
 - Keep the placeholders (`{{expense_lines}}`, `{{categories}}`, `{{page_text}}`, `{{document_text}}`).
-
-## The AI services, requirement by requirement
-
-Seven AI services for the DA workflow and where each requirement is implemented. Status: **met**, **by design**
-(met differently, on purpose), **gap** (not covered yet).
-
-### Page Reader: page-accurate text from any PDF
-
-| Requirement | Implemented in | Status |
-|---|---|---|
-| Page-accurate text from scanned or digital PDFs | [`documents.py`](transformations/documents.py): `ai_parse_document` | met |
-| Page numbers for downstream citations | [`documents.py`](transformations/documents.py) `pages`, [`document_pages.py`](transformations/document_pages.py) | met |
-| Works for every document family | Every PDF under the bucket is parsed; [`documents.py`](transformations/documents.py) `ai_classify` sets the type | met |
-| One bad page never fails the document | Parse errors are kept per page (`page_error`); the other pages flow on | met |
-| No API timeout on large PDFs | Runs as a pipeline when the file lands, not as a synchronous call; up to 500 pages per document | met |
-| Stable output shape `[{page_number, extracted_text}]` | `documents.pages`, same fields | met |
-| Rasterize, resize, retry, per-page concurrency | Done by `ai_parse_document`; no code to maintain | by design |
-
-### Invoice Matcher: map every page to the expense it evidences
-
-| Requirement | Implemented in | Status |
-|---|---|---|
-| Map each page to the specific expense line of that DA | [`page_expense_map.py`](transformations/page_expense_map.py): the DA's own final lines are in the prompt; the returned id is checked against them. If the id is not one of them, gold falls back to the only line of the page's category (`line_match`) | met |
-| Port expenses and husbandry, different taxonomies | The section of each line and the category vocabulary are in the prompt | met |
-| Confidence and a justification per assignment | `confidence`, `explanation` | met |
-| Output per expense `{pages, confidence, explanation}` | [`expense_page_evidence.py`](transformations/expense_page_evidence.py) | met |
-| The taxonomy is data, not a hand-maintained file | Read from `expense_category` (Postgres), aliases included | met |
-| Port and husbandry in parallel to bound latency | One call per page covers both; pages are processed in parallel batches | by design |
-| Second model as judge | Not a model: the amount on the page is checked against the final line in gold (deterministic) | by design |
-| Evaluation harness for the mapping | `Agreement with analysts` in `expense_reconciliation_metrics`, against the analysts' verifications | met |
-
-### Timeline Summarizer: the timeline of the port call
-
-| Requirement | Implemented in | Status |
-|---|---|---|
-| A coherent chronological account of the port call | [`port_call_events.py`](transformations/port_call_events.py): one row per event, in order, one call per statement of facts, each event with its page; the account itself is written on demand in the agents app ([`story.py`](../../app/backend/story.py)), not stored | met |
-| Prompt and model change without a deploy | Prompt registry (`sof_events`) | met |
-| Retry on transient failures | `failOnError => false`: a failed call is stored with its error and never fails the run | gap: failed rows are not retried automatically yet |
-| Request and response tracing | `prompt_version` per row | gap: AI Gateway inference tables for full request logs |
-
-### Bill Reconciler: reconcile the quote against the final bill
-
-| Requirement | Implemented in | Status |
-|---|---|---|
-| Reconcile every quoted line against the final bill | [`../gold/transformations/expense_reconciliation.sql`](../gold/transformations/expense_reconciliation.sql): final line to its quoted line (`proforma_expense_id`) and to its invoice pages | met |
-| Flag currency mismatches explicitly | Verdict `CURRENCY_MISMATCH`, always | met |
-| Cite a document and page for every finding | `evidence_pages`, `file_item_id`, `explanation` | met |
-| Rate of exchange: document, then platform, else stop, never invent | `roe_source` (`document` from [`doc_bank_details.py`](transformations/doc_bank_details.py), else `platform`), else `analysis_status = NO_ROE` | met |
-| Cent tolerance, combined In/Out lines | 0.01 tolerance; all pages mapped to one line are summed | met |
-| Output `{analysisStatus, amountChecks[...]}` | [`../gold/transformations/port_bill_analysis.sql`](../gold/transformations/port_bill_analysis.sql) | met |
-| A/B test model and effort without a redeploy | The rulebook is SQL, not a model call: same input, same verdict; thresholds are bundle variables | by design |
-
-### Payment Validator: check bank details, amounts and dates before money moves
-
-| Requirement | Implemented in | Status |
-|---|---|---|
-| Bank account, amount and date against the system of record | [`doc_bank_details.py`](transformations/doc_bank_details.py) reads them; [`../gold/transformations/payment_validation.sql`](../gold/transformations/payment_validation.sql) checks them | met |
-| IBAN, domestic account and SWIFT formats | [`../../uc_functions/`](../../uc_functions/): anchored IBAN tail, SWIFT 8 vs 11 | met |
-| A false MATCH is worse than a false NO_MATCH, in code | Confidence floor 0.8 in the UC functions: low confidence is always NO_MATCH | met |
-| Formal fields never rely on the model alone | The model reads, deterministic rules decide | met |
-| New template vocabulary is data, not a prompt rewrite | Field labels (IBAN, Account no., BIC...) are in the `bank_details` prompt in the registry | met |
-| Per-field verdicts with confidence and explanation | `field_checks` | met |
-
-### Quote Negotiator: flag overpriced quotes against history
-
-| Requirement | Implemented in | Status |
-|---|---|---|
-| Compare every quoted expense with history for the port | [`../gold/transformations/quote_benchmark_flags.sql`](../gold/transformations/quote_benchmark_flags.sql) | met |
-| Deterministic rule cascade, no model in the math | [`../gold/transformations/expense_benchmarks.sql`](../gold/transformations/expense_benchmarks.sql): exact (port, vessel type, size), then nearby ports (region, same type and size), then the port with any vessel; each level needs `min_benchmark_sample` past lines | met |
-| Regional and local port minimum | `region_min_median_eur`, `local_port_min_eur` | met |
-| Reconcile expense names across agency templates | The platform's `category_id` on every quoted and final line; no model needed | by design |
-| Draft a citation-backed negotiation email | Agent in the app ([`quote-negotiator`](../../app/server/agents/quote-negotiator/agent.ts)): reads the quote, the price history and competing quotes through tools, drafts the email; every amount is checked against the data before the analyst saves it | met |
-
-### Port Assistant: questions in plain language
-
-| Requirement | Implemented in | Status |
-|---|---|---|
-| Answer with the user's own permissions | Custom agent in the app ([`port-assistant`](../../app/server/agents/port-assistant/agent.ts)) over three Genie agents ([`agents.genie.yml`](../../../resources/agents.genie.yml)), document search and the port call timeline; it runs with the user's token | met |
-| Never write without explicit confirmation | Port Assistant only reads; decisions and drafts are saved in the app after a confirm | met |
 
 Shared settings, the prompt loader and the expense vocabulary are in [`utilities/settings.py`](utilities/settings.py).

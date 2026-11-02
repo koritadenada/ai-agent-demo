@@ -2,10 +2,7 @@
 
 Turns the files AWS DMS writes to S3 into one current, queryable table per source table.
 
-```
-DMS files (S3) -> bronze streaming table -> <table>_changes view -> silver streaming table
-                  change log, as received   prepares each change    current state (or history)
-```
+[![Platform pipeline](../../../docs/platform.gif)](https://koritadenada.github.io/ai-agent-demo/architecture.html)
 
 ## Why the view
 

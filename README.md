@@ -7,7 +7,8 @@ layer that Genie agents and an agents app work on.
 [![Architecture](docs/architecture.gif)](https://koritadenada.github.io/ai-agent-demo/architecture.html)
 
 [Open the animated architecture](https://koritadenada.github.io/ai-agent-demo/architecture.html) · details:
-[platform pipeline](src/pipelines/platform/README.md) · [document pipeline](src/pipelines/documents/README.md) ·
+[pipelines](src/pipelines/README.md) ([platform](src/pipelines/platform/README.md),
+[documents](src/pipelines/documents/README.md), [gold](src/pipelines/gold/README.md)) · [agents](src/agents/README.md) ·
 [agents app](src/app/README.md)
 
 ## What runs

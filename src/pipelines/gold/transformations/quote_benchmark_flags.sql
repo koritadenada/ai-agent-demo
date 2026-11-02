@@ -2,7 +2,7 @@
 -- (exact port, vessel type and size; then nearby ports in the region, same vessel type and size; then the port with
 -- any vessel), the regional minimum and the
 -- local port minimum. Flagged when the quote is above the benchmark median by more than ${quote_flag_pct} percent.
--- This is the input of the quote advisor agent; the negotiation email itself is the agent's job, not the pipeline's.
+-- This is the input of the Quote Negotiator agent; the negotiation email itself is the agent's job, not the pipeline's.
 CREATE OR REFRESH MATERIALIZED VIEW quote_benchmark_flags
 COMMENT 'Per quoted PDA line: benchmark median (exact, port or region level), regional and local port minimum, flag and reasoning'
 AS
