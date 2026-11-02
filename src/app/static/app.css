@@ -1,4 +1,4 @@
-/* Port-call agents. Palette and shapes follow the customer's product: navy text and table headers, indigo actions,
+/* Port-call agents. Navy text and table headers, indigo actions,
    sky accents, green / orange / red amounts, large rounded cards on a light sky background with dotted waves. */
 :root {
   --navy: #000D4C; --navy-2: #4D5682; --indigo: #3C45E6; --indigo-h: #1C25D4; --sky: #2AA8F2; --sky-soft: #C9E8FB;

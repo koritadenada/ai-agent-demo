@@ -48,7 +48,7 @@ mlflow.genai.set_prompt_alias(name=name, alias="production", version=v.version)
 
 ## The AI services, requirement by requirement
 
-The seven AI services of the current platform (from the AI Services Map) and where each requirement is implemented. Status: **met**, **by design**
+Seven AI services for the DA workflow and where each requirement is implemented. Status: **met**, **by design**
 (met differently, on purpose), **gap** (not covered yet).
 
 ### AI Extractor: page-accurate text from any PDF
