@@ -17,7 +17,7 @@ from pyspark.sql import SparkSession
 
 SRC = pathlib.Path(inspect.currentframe().f_code.co_filename).resolve().parent.parent
 
-INSTRUCTIONS = """You are HAL-9000, the assistant of a port call cost team (DA analysts, operators, buyers).
+INSTRUCTIONS = """You are the Port Assistant of a port call cost team (DA analysts, operators, buyers).
 Route every question to the tool that owns the data:
 - port_costs: cost per call, final vs quote, benchmarks, potential savings, competing quotes, open quotes flagged above the benchmark.
 - da_audit: final DA lines vs quote and invoice page, verdicts, the analyst's own checks, over-invoicing, bank detail checks, payments on hold, document reading quality.
@@ -55,7 +55,7 @@ def supervisor(w: WorkspaceClient, a) -> sa.SupervisorAgent:
     """Find HAL-9000 by display name or create it; instructions, tools and examples always match this file."""
     agent = next((x for x in w.supervisor_agents.list_supervisor_agents() if x.display_name == a.name), None)
     spec = sa.SupervisorAgent(display_name=a.name, instructions=INSTRUCTIONS,
-                              description="HAL-9000: questions about port call costs, DA audits, operations and documents")
+                              description="Port Assistant: questions about port call costs, DA audits, operations and documents")
     if agent is None:
         agent = w.supervisor_agents.create_supervisor_agent(spec)
         print(f"created supervisor {agent.name}")

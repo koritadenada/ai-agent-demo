@@ -29,8 +29,8 @@ variables:
     description: 'JSON map of source columns to neutral silver names, {"table": {"source_column": "silver_column"}}'
     default: "{}"
   supervisor_name:
-    description: Display name of the HAL-9000 supervisor agent (unique in the workspace)
-    default: HAL-9000 port calls
+    description: Display name of the supervisor agent (unique in the workspace)
+    default: Port Assistant
   agent_llm_endpoint:
     description: Model behind the app agents (AI Negotiator, DA Event Summarizer), unless a prompt version sets its own
     default: databricks-claude-sonnet-5-5
