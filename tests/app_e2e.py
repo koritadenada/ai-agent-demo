@@ -1,6 +1,6 @@
 """End-to-end test of the deployed agents app, as a signed-in user (CLI OAuth token).
 
-Checks every screen's API against SQL on gold, the two app agents, HAL-9000 routing, the confirmed writes (removed
+Checks every screen's API against SQL on gold, the two app agents, Port Assistant routing, the confirmed writes (removed
 again afterwards) and input validation. Usage:
   python tests/app_e2e.py --profile <profile> --app <app name> --catalog <catalog> [--prefix portcall_] [--skip-hal]
 """
@@ -81,14 +81,14 @@ def main():
     q = get(f"quotes/{flagged['proforma_id']}").json()
     check(sum(l["flagged"] for l in q["lines"]) == flagged["flagged_lines"], f"quote {flagged['proforma_id']}: flagged lines match")
     dr = post(f"quotes/{flagged['proforma_id']}/draft", {"instructions": ""})
-    check(dr.ok, f"AI Negotiator drafts an email ({dr.status_code})")
+    check(dr.ok, f"Quote Negotiator drafts an email ({dr.status_code})")
     if dr.ok:
         d = dr.json()
-        check(d["steps"][0]["tool"] == "get_quote", "AI Negotiator reads the quote first")
-        check(d["unverified_amounts"] == [], f"AI Negotiator: every amount found in the data ({d['unverified_amounts']})")
+        check(d["steps"][0]["tool"] == "get_quote", "Quote Negotiator reads the quote first")
+        check(d["unverified_amounts"] == [], f"Quote Negotiator: every amount found in the data ({d['unverified_amounts']})")
         names = {l["expense_name"] for l in q["lines"] if l["flagged"]}
-        check({l["expense_name"] for l in d["lines"]} <= names, "AI Negotiator negotiates only flagged lines")
-        check("—" not in d["body"] + d["subject"] and "–" not in d["body"] + d["subject"], "AI Negotiator: no dashes as punctuation")
+        check({l["expense_name"] for l in d["lines"]} <= names, "Quote Negotiator negotiates only flagged lines")
+        check("—" not in d["body"] + d["subject"] and "–" not in d["body"] + d["subject"], "Quote Negotiator: no dashes as punctuation")
         r = post(f"quotes/{flagged['proforma_id']}/drafts", {**d, "subject": "e2e test"})
         check(r.ok and get(f"quotes/{flagged['proforma_id']}").json()["drafts"][0]["subject"] == "e2e test", "a confirmed draft is saved and shown")
         sql(f"DELETE FROM {app}.negotiation_drafts WHERE subject = 'e2e test'")
@@ -100,7 +100,7 @@ def main():
     pc = get(f"port-calls/{fdas[0]['port_call_id']}").json()
     check(len(pc["events"]) > 0 and all(e["event_time"] for e in pc["events"]), f"port call {fdas[0]['port_call_id']}: timeline with times")
     st = post(f"port-calls/{fdas[0]['port_call_id']}/story", {}).json()
-    check(bool(st.get("story")) and "(p. " in st["story"], "DA Event Summarizer writes an account with page citations")
+    check(bool(st.get("story")) and "(p. " in st["story"], "Timeline Summarizer writes an account with page citations")
     check(all(v.endswith(("v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9")) for v in get("prompts").json().values()),
           f"app prompts come from the registry {get('prompts').json()}")
 
@@ -110,9 +110,9 @@ def main():
                                 ("How long does FDA approval take by port?", "DA operations"),
                                 ("What does the pilotage invoice of port call 20217 say?", "Document search"),
                                 ("Give me the timeline of port call 20400", "Port call timeline")]:
-            r = post("hal", {"messages": [{"role": "user", "content": question}]})
+            r = post("assistant", {"messages": [{"role": "user", "content": question}]})
             got = r.json().get("agents", []) if r.ok else r.text[:200]
-            check(r.ok and agent in got and bool(r.json()["answer"]), f"HAL-9000 routes '{question}' to {agent} ({got})")
+            check(r.ok and agent in got and bool(r.json()["answer"]), f"Port Assistant routes '{question}' to {agent} ({got})")
 
     print(f"\n{len(FAILS)} failed" if FAILS else "\nall passed")
     sys.exit(1 if FAILS else 0)

@@ -1,11 +1,11 @@
 """Port-call agents app: the screens the analysts use, on top of the gold tables and the agents.
 
   Overview             what needs attention today
-  DA review            SOF Port Bill Analysis + PDA/FDA Validator per final DA, with the invoice pages; accept,
+  DA review            Bill Reconciler + Payment Validator per final DA, with the invoice pages; accept,
                        dispute or hold (saved only after the analyst confirms)
-  AI Negotiator        open PDA quotes above the benchmark; drafts the email with the evidence
-  Port call            DA Event Summarizer: the statement of facts timeline and a written account on demand
-  HAL-9000             questions in plain language, answered by the supervisor agent and its Genie agents
+  Quote Negotiator        open PDA quotes above the benchmark; drafts the email with the evidence
+  Port call            Timeline Summarizer: the statement of facts timeline and a written account on demand
+  Port Assistant       questions in plain language, answered by a custom agent over the Genie agents and documents
 
 Every call runs as the signed-in user (see backend/workspace.py)."""
 import json
@@ -16,7 +16,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from backend import hal, llm, negotiator, story
+from backend import assistant, llm, negotiator, story
 from backend.workspace import APP, GOLD, SILVER, Session, session
 
 logging.basicConfig(level=logging.INFO)
@@ -222,21 +222,14 @@ class Ask(BaseModel):
     messages: list[dict]
 
 
-@app.post("/api/hal")
-def ask_hal(a: Ask, s: Session = Depends(session)):
-    return hal.ask(s, a.messages[-12:])
-
-
-@app.get("/api/agents")
-def agents(s: Session = Depends(session)):
-    host = s.w.config.host.rstrip("/")
-    rows = s.sql(f"SELECT agent, endpoint_name, resource_id FROM {APP}.agent_registry")
-    return [{**r, "url": f"{host}/genie/rooms/{r['resource_id']}" if r["agent"] != "hal_9000" else None} for r in rows]
+@app.post("/api/assistant")
+def ask_assistant(a: Ask, s: Session = Depends(session)):
+    return assistant.ask(s, a.messages[-12:])
 
 
 @app.get("/api/prompts")
 def prompts():
-    return {n: llm.prompt(n).version for n in ("negotiator", "port_call_story")}
+    return {n: llm.prompt(n).version for n in ("negotiator", "port_call_story", "port_assistant")}
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

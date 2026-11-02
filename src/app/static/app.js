@@ -456,7 +456,7 @@ async function hal() {
     if (!q.trim()) return;
     chat.push({ role: 'user', content: q }); const bot = { role: 'assistant', pending: true, content: '' }; chat.push(bot); draw();
     try {
-      const r = await api('/api/hal', { method: 'POST', body: { messages: chat.filter(m => !m.pending && m.content).map(({ role, content }) => ({ role, content })) } });
+      const r = await api('/api/assistant', { method: 'POST', body: { messages: chat.filter(m => !m.pending && m.content).map(({ role, content }) => ({ role, content })) } });
       Object.assign(bot, { pending: false, content: r.answer || 'No answer.', agents: r.agents });
     } catch (e) { Object.assign(bot, { pending: false, content: `Sorry, that failed: ${e.message}` }); }
     draw();

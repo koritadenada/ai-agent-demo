@@ -237,6 +237,11 @@
   .wire.dep.on { opacity:1; }
   /* a part that is longer than one screen: it scrolls between the header and the caption */
   .scroller { position:absolute; left:0; right:0; top:80px; bottom:100px; overflow-y:auto; overflow-x:hidden; }
+  .viewswitch { position:absolute; right:40px; top:104px; z-index:5; display:flex; gap:2px; padding:3px; background:#fff;
+    border:1px solid var(--line); border-radius:999px; box-shadow:0 2px 8px rgba(27,49,57,.06); }
+  .viewswitch button { border:0; background:none; font:inherit; font-size:12.5px; font-weight:600; color:var(--muted);
+    padding:6px 14px; border-radius:999px; cursor:pointer; }
+  .viewswitch button.on { background:var(--navy); color:#fff; }
   .scrollpage { position:absolute; left:0; top:-80px; width:1280px; }
   .scrollpage svg.wires { height:auto; }
   .scrollhint { position:absolute; display:flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px; background:#fff;
@@ -426,7 +431,7 @@
       <div class="run"><div class="lbl">What runs</div>
         <div><span>Metric views</span><b>7</b></div>
         <div><span>Genie agents</span><b>3</b></div>
-        <div><span>Supervisor agent</span><b>Port Assistant</b></div>
+        <div><span>Custom agent</span><b>Port Assistant</b></div>
         <div><span>Agents app</span><b>4 screens</b></div></div>
     </div>
   </section>
@@ -467,7 +472,7 @@
 <path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
 <path d="M459.812 206.815C428.864 256.533 382.402 324.948 361.655 342.503C340.909 360.058 310.141 391.703 238.824 391.703C188.862 391.703 145.885 359.614 126.81 313.595C126.811 313.648 126.811 313.703 126.812 313.756C124.109 307.041 117.538 302.298 109.855 302.297C99.7606 302.297 91.5767 310.481 91.5767 320.576C91.5769 322.945 92.0279 325.113 92.8485 327.047C97.2392 337.39 108.92 337.83 108.92 370.096C108.92 374.793 108.92 366.343 108.92 370.096C78.5784 370.096 53.9815 345.498 53.9809 315.157C53.9809 284.815 78.5781 260.218 108.92 260.218H116.288V260.208H203.559C210.079 260.208 216.337 262.969 220.41 268.059C227.547 276.978 233.017 285.281 237.048 292.133C240.783 298.481 251.969 298.543 255.667 292.173C259.566 285.456 264.744 277.343 271.309 268.619C275.386 263.201 281.863 260.208 288.644 260.208H321.094C368.515 260.208 394.508 237.472 407.78 221.085C414.648 212.606 424.403 206.815 435.315 206.815H459.812Z" fill="#FABFBA"/>
 <path d="M246.744 286.125C246.743 224.929 197.938 175.293 137.646 175.064C197.938 174.835 246.744 125.196 246.744 64C246.744 64 246.744 64 246.744 64C246.744 125.338 295.778 175.063 356.263 175.063C295.778 175.063 246.744 224.787 246.744 286.125Z" fill="#FF5F46"/>
-</svg>Port Assistant</div><div class="sd">Questions in plain language</div><div class="sh">supervisor + 3 Genie agents</div></div>
+</svg>Port Assistant</div><div class="sd">Questions in plain language</div><div class="sh">custom agent + 3 Genie agents</div></div>
     <div class="decide rev" data-t="11000" style="left:656px;top:484px;width:584px;height:96px">
       <div class="dl"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M127.11 120.78L118.32 111.99V41.24L92.15 15.16H88.96V39.11C88.96 43.47 92.51 47.02 96.87 47.02H109.21V44.02H96.88C94.17 44.02 91.97 41.82 91.97 39.11V19.21L115.33 42.49V113.24L125 122.91C125.98 123.89 126.53 125.21 126.53 126.61C126.53 128.01 125.99 129.33 125.01 130.31C122.96 132.35 119.64 132.35 117.6 130.31L108.37 121.08L102 114.71L111.53 105.18L102.78 96.43L97.95 101.26L92.38 95.69C96.27 91.31 98.4 85.74 98.4 79.84C98.4 66.69 87.7 56 74.55 56C61.4 56 50.68 66.71 50.68 79.86C50.68 93.01 61.38 103.71 74.53 103.71C78.33 103.71 81.96 102.84 85.31 101.13L83.95 98.46C81.02 99.95 77.86 100.71 74.53 100.71C63.03 100.71 53.68 91.36 53.68 79.86C53.68 68.37 63.03 59.02 74.53 59.02C86.03 59.02 95.38 68.37 95.38 79.86C95.38 85.45 93.19 90.71 89.21 94.67L88.14 95.73L95.81 103.39L92.17 107.03L91.11 108.1L97.73 114.72L91.8 120.65H38.39C35.68 120.65 33.48 118.45 33.48 115.74V23.07C33.48 20.36 35.68 18.16 38.39 18.16H83.19V15.16H38.39C34.03 15.16 30.48 18.71 30.48 23.07V115.73C30.48 120.09 34.03 123.64 38.39 123.64H93.05L99.86 116.83L106.23 123.2L115.46 132.43C117.06 134.03 119.17 134.83 121.28 134.83C123.39 134.83 125.5 134.03 127.11 132.43C128.66 130.88 129.52 128.81 129.52 126.6C129.52 124.4 128.67 122.33 127.11 120.78ZM95.36 108.09L102.77 100.68L107.27 105.18L99.86 112.59L95.36 108.09Z" fill="#FF5F46"/>
@@ -767,6 +772,7 @@
 
   <!-- ============ PART 3: GOLD, AND ONE ROW WORKED THROUGH BELOW (scroll) ============ -->
   <section class="scene" data-scene="6" data-dur="21500">
+    <div class="viewswitch"><button data-to="0">Architecture</button><button data-to="620">Worked example</button></div>
     <div class="scroller" data-scroll-at="9600" data-scroll-to="620"><div class="scrollpage" style="height:1360px">
 
     <div class="stitle rev" data-t="0"><div class="k">Part 3</div><div class="h">Gold: both sources meet on the expense line</div></div>
@@ -951,7 +957,7 @@
 </svg></div><div><div class="name">DA operations</div></div></div>
     <div class="node hero rev" data-t="6900" style="left:1046px;top:330px;width:196px;height:156px">
       <span class="badge ok">running</span>
-      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg></div><div><div class="name">Port Assistant</div><div class="desc">Supervisor agent: routes each question to the right Genie agent, adds document search</div></div></div>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg></div><div><div class="name">Port Assistant</div><div class="desc">Custom agent in the app: asks the right Genie agent, adds document search</div></div></div>
   </section>
 
   <!-- ============ PART 4b: THE AGENTS APP ============ -->
@@ -994,7 +1000,7 @@
     </div>
     <div class="node hero rev" data-t="7300" style="left:576px;top:512px;width:330px;height:88px">
       <span class="badge ok">running</span>
-      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg></div><div><div class="name">Port Assistant</div><div class="desc">Supervisor agent: picks the Genie agent or tool for each question</div></div></div>
+      <div class="ico"><svg viewBox="0 0 512 512" fill="none"><path d="M96 80H416C434 80 448 94 448 112V336C448 354 434 368 416 368H224L136 440V368H96C78 368 64 354 64 336V112C64 94 78 80 96 80Z" fill="#FABFBA"/><path d="M256 128L282 198L352 224L282 250L256 320L230 250L160 224L230 198Z" fill="#FF5F46"/></svg></div><div><div class="name">Port Assistant</div><div class="desc">Custom agent: calls the Genie agents and tools it needs</div></div></div>
     <div class="zc rev" data-t="5700" style="left:948px;top:196px;width:292px;height:150px;border-top-color:var(--navy)">
       <div class="zh"><svg viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M126.77 25.11H23.23C21.2868 25.1126 19.4239 25.8857 18.0499 27.2598C16.6758 28.6339 15.9027 30.4968 15.9 32.44V47H122.45V44H18.9V32.44C18.9 31.2916 19.3562 30.1902 20.1683 29.3782C20.9803 28.5662 22.0816 28.11 23.23 28.11H126.77C127.918 28.11 129.02 28.5662 129.832 29.3782C130.644 30.1902 131.1 31.2916 131.1 32.44V117.56C131.1 118.708 130.644 119.81 129.832 120.622C129.02 121.434 127.918 121.89 126.77 121.89H23.23C22.0816 121.89 20.9803 121.434 20.1683 120.622C19.3562 119.81 18.9 118.708 18.9 117.56V58.26H15.9V117.56C15.9027 119.503 16.6758 121.366 18.0499 122.74C19.4239 124.114 21.2868 124.887 23.23 124.89H126.77C128.713 124.887 130.576 124.114 131.95 122.74C133.324 121.366 134.097 119.503 134.1 117.56V32.44C134.097 30.4968 133.324 28.6339 131.95 27.2598C130.576 25.8857 128.713 25.1126 126.77 25.11Z" fill="#FF5F46"/>
@@ -1021,7 +1027,7 @@
 <path d="M158.038 342.579L117.109 413.316L187.905 454.211L228.833 383.474L158.038 342.579Z" fill="#FABFBA"/>
 <path d="M131.857 215.105H50V296.895H131.857V215.105Z" fill="#FABFBA"/>
 <path d="M187.905 58.1582L117.109 99.0529L158.038 169.79L228.833 128.895L187.905 58.1582Z" fill="#FABFBA"/>
-</svg></div><div><div class="name">Prompt registry</div><div class="desc">negotiator, port_call_story: change them without a deploy</div></div></div>
+</svg></div><div><div class="name">Prompt registry</div><div class="desc">negotiator, port_assistant, port_call_story: change them without a deploy</div></div></div>
     <div class="node db rev" data-t="8100" style="left:948px;top:500px;width:292px;height:100px">
       <div class="ico"><svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M209.385 409.061C192.063 409.061 178.02 426.494 178.02 448H323.502C323.502 426.494 309.46 409.061 292.138 409.061H209.385Z" fill="#FF5F46"/>
@@ -1181,13 +1187,13 @@ const CAPS = {
   7: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
       [1000, 'Each metric view holds <b>measures</b> (what you count) and <b>dimensions</b> (what you slice by)'],
       [4200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
-      [6400, '<b>Port Assistant</b>, a supervisor agent, routes every question to the right one']],
+      [6400, '<b>Port Assistant</b>, a custom agent in the app, asks the right one for every question']],
   8: [[0, 'Some services need <b>more than a Genie agent</b>: they read documents, draft and decide'],
       [1000, 'One app, <b>one screen per AI service</b>, running as the signed-in user'],
       [3100, 'The <b>Quote Negotiator</b> is a tool-calling agent: it reads the quote, the history and past quotes'],
       [4800, 'It drafts the email; <b>every amount is checked</b> against what the tools returned'],
       [5600, 'Nothing is saved until the analyst <b>confirms</b>; prompts change in the registry, not in code'],
-      [7100, '<b>Port Assistant</b> answers the rest: it routes to the Genie agents, document search or the timeline']],
+      [7100, 'The <b>Port Assistant</b> answers the rest: a custom agent that calls the Genie agents, document search or the timeline']],
   9: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
       [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],
@@ -1220,9 +1226,10 @@ function reset(sc){
   sc.querySelectorAll('[data-off]').forEach(e => e.classList.remove('off'));
 }
 // a part can hand over to a second view in the same tab: [data-off] hides its group from that time on
+let jumped = false;  // a tab or card click opens a part on its first view; stepping and auto-play still scroll
 function phases(sc, t){
   sc.querySelectorAll('[data-off]').forEach(e => e.classList.toggle('off', t >= +e.dataset.off));
-  sc.querySelectorAll('.scroller').forEach(e => scrollPart(e, t >= +e.dataset.scrollAt && t !== Infinity ? +e.dataset.scrollTo : 0));
+  sc.querySelectorAll('.scroller').forEach(e => scrollPart(e, !jumped && t >= +e.dataset.scrollAt && t !== Infinity ? +e.dataset.scrollTo : 0));
 }
 // smooth where the browser animates it, and land on the target in any case
 function scrollPart(e, top){ e.scrollTo({ top, behavior: 'smooth' }); setTimeout(() => { if (Math.abs(e.scrollTop - top) > 2) e.scrollTop = top; }, 900); }
@@ -1316,15 +1323,27 @@ document.querySelectorAll('a.uclink').forEach(a => a.addEventListener('click', e
 document.querySelectorAll('[data-go]').forEach(c => c.addEventListener('click', e => {
   e.stopPropagation();
   const i = +c.dataset.go;
+  jumped = true;
   if (MODE === 'present') { enter(i); present(i, bounds(i).length - 1, false); } else { paused = true; show(i, true); }
+  jumped = false;
 }));
 // tabs: click to open a part immediately, fully shown
 document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', e => {
   e.stopPropagation();
   const i = +p.dataset.p;
+  jumped = true;
   if (MODE === 'present') { enter(i); present(i, bounds(i).length - 1, false); }
   else { paused = true; show(i, true); }
+  jumped = false;
 }));
+// the view switch of a scrollable part (Gold: architecture or worked example)
+document.querySelectorAll('.viewswitch').forEach(v => {
+  const sc = v.parentElement.querySelector('.scroller');
+  const mark = () => v.querySelectorAll('button').forEach(b => b.classList.toggle('on',
+    Math.abs(sc.scrollTop - +b.dataset.to) < sc.clientHeight / 2));
+  v.querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); scrollPart(sc, +b.dataset.to); }));
+  sc.addEventListener('scroll', mark); mark();
+});
 // hover: what each object is (table, view, volume, column) and the column behind the value shown
 const ST = 'Streaming table', MV = 'Materialized view', VOL = 'Volume', COL = 'Column', MEAS = 'Measure';
 const S = 'portcall_silver.', G = 'portcall_gold.';

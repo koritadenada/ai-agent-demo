@@ -51,7 +51,7 @@ mlflow.genai.set_prompt_alias(name=name, alias="production", version=v.version)
 Seven AI services for the DA workflow and where each requirement is implemented. Status: **met**, **by design**
 (met differently, on purpose), **gap** (not covered yet).
 
-### AI Extractor: page-accurate text from any PDF
+### Page Reader: page-accurate text from any PDF
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -63,7 +63,7 @@ Seven AI services for the DA workflow and where each requirement is implemented.
 | Stable output shape `[{page_number, extracted_text}]` | `documents.pages`, same fields | met |
 | Rasterize, resize, retry, per-page concurrency | Done by `ai_parse_document`; no code to maintain | by design |
 
-### DA Helper: map every page to the expense it evidences
+### Invoice Matcher: map every page to the expense it evidences
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -76,7 +76,7 @@ Seven AI services for the DA workflow and where each requirement is implemented.
 | Second model as judge | Not a model: the amount on the page is checked against the final line in gold (deterministic) | by design |
 | Evaluation harness for the mapping | `Agreement with analysts` in `expense_reconciliation_metrics`, against the analysts' verifications | met |
 
-### DA Event Summarizer: the timeline of the port call
+### Timeline Summarizer: the timeline of the port call
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -85,7 +85,7 @@ Seven AI services for the DA workflow and where each requirement is implemented.
 | Retry on transient failures | `failOnError => false`: a failed call is stored with its error and never fails the run | gap: failed rows are not retried automatically yet |
 | Request and response tracing | `prompt_version` per row | gap: AI Gateway inference tables for full request logs |
 
-### SOF Port Bill Analysis: reconcile the quote against the final bill
+### Bill Reconciler: reconcile the quote against the final bill
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -97,7 +97,7 @@ Seven AI services for the DA workflow and where each requirement is implemented.
 | Output `{analysisStatus, amountChecks[...]}` | [`../gold/transformations/port_bill_analysis.sql`](../gold/transformations/port_bill_analysis.sql) | met |
 | A/B test model and effort without a redeploy | The rulebook is SQL, not a model call: same input, same verdict; thresholds are bundle variables | by design |
 
-### PDA/FDA Validator: check bank details, amounts and dates before money moves
+### Payment Validator: check bank details, amounts and dates before money moves
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -108,7 +108,7 @@ Seven AI services for the DA workflow and where each requirement is implemented.
 | New template vocabulary is data, not a prompt rewrite | Field labels (IBAN, Account no., BIC...) are in the `bank_details` prompt in the registry | met |
 | Per-field verdicts with confidence and explanation | `field_checks` | met |
 
-### AI Negotiator: flag overpriced quotes against history
+### Quote Negotiator: flag overpriced quotes against history
 
 | Requirement | Implemented in | Status |
 |---|---|---|
@@ -118,12 +118,11 @@ Seven AI services for the DA workflow and where each requirement is implemented.
 | Reconcile expense names across agency templates | The platform's `category_id` on every quoted and final line; no model needed | by design |
 | Draft a citation-backed negotiation email | Agent in the app ([`negotiator.py`](../../app/backend/negotiator.py)): reads the quote, the price history and competing quotes through tools, drafts the email; every amount is checked against the data before the analyst saves it | met |
 
-### HAL-9000: questions in plain language
+### Port Assistant: questions in plain language
 
 | Requirement | Implemented in | Status |
 |---|---|---|
-| Answer with the user's own permissions | Supervisor agent ([`apply_agents.py`](../../deploy/apply_agents.py)) over three Genie agents ([`agents.genie.yml`](../../../resources/agents.genie.yml)), document search and the port call timeline; the app calls it with the user's token | met |
-| Never write without explicit confirmation | HAL-9000 only reads; decisions and drafts are saved in the app after a confirm | met |
+| Answer with the user's own permissions | Custom agent in the app ([`assistant.py`](../../app/backend/assistant.py)) over three Genie agents ([`agents.genie.yml`](../../../resources/agents.genie.yml)), document search and the port call timeline; it runs with the user's token | met |
+| Never write without explicit confirmation | Port Assistant only reads; decisions and drafts are saved in the app after a confirm | met |
 
 Shared settings, the prompt loader and the expense vocabulary are in [`utilities/settings.py`](utilities/settings.py).
-Costs: [`docs/costs.md`](../../../docs/costs.md).

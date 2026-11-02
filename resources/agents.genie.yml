@@ -1,4 +1,4 @@
-# The three Genie agents HAL-9000 routes to. Each one reads metric views (governed measures) and, for row-level
+# The three Genie agents the Port Assistant routes to. Each one reads metric views (governed measures) and, for row-level
 # questions ("which lines", "which payments"), the gold table behind them. IDs only need to be unique and sorted.
 resources:
   genie_spaces:

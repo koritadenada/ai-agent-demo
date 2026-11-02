@@ -24,12 +24,5 @@ CREATE TABLE IF NOT EXISTS {catalog}.{app_schema}.negotiation_drafts (
   model STRING,
   created_by STRING NOT NULL,
   created_at TIMESTAMP NOT NULL
-) COMMENT 'Negotiation emails drafted by the AI Negotiator and saved by an analyst'
+) COMMENT 'Negotiation emails drafted by the Quote Negotiator and saved by an analyst'
 TBLPROPERTIES ('delta.enableRowTracking' = 'true');
-
-CREATE TABLE IF NOT EXISTS {catalog}.{app_schema}.agent_registry (
-  agent STRING NOT NULL,
-  endpoint_name STRING,
-  resource_id STRING,
-  updated_at TIMESTAMP
-) COMMENT 'Where the app finds each agent (supervisor endpoint, Genie space ids); written by the setup job';

@@ -237,6 +237,11 @@
   .wire.dep.on { opacity:1; }
   /* a part that is longer than one screen: it scrolls between the header and the caption */
   .scroller { position:absolute; left:0; right:0; top:80px; bottom:100px; overflow-y:auto; overflow-x:hidden; }
+  .viewswitch { position:absolute; right:40px; top:104px; z-index:5; display:flex; gap:2px; padding:3px; background:#fff;
+    border:1px solid var(--line); border-radius:999px; box-shadow:0 2px 8px rgba(27,49,57,.06); }
+  .viewswitch button { border:0; background:none; font:inherit; font-size:12.5px; font-weight:600; color:var(--muted);
+    padding:6px 14px; border-radius:999px; cursor:pointer; }
+  .viewswitch button.on { background:var(--navy); color:#fff; }
   .scrollpage { position:absolute; left:0; top:-80px; width:1280px; }
   .scrollpage svg.wires { height:auto; }
   .scrollhint { position:absolute; display:flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px; background:#fff;
@@ -362,7 +367,7 @@
       <div class="run"><div class="lbl">What runs</div>
         <div><span>Metric views</span><b>7</b></div>
         <div><span>Genie agents</span><b>3</b></div>
-        <div><span>Supervisor agent</span><b>Port Assistant</b></div>
+        <div><span>Custom agent</span><b>Port Assistant</b></div>
         <div><span>Agents app</span><b>4 screens</b></div></div>
     </div>
   </section>
@@ -392,7 +397,7 @@
     <div class="svc rev" data-t="7800" style="left:656px;top:364px;height:96px"><span class="badge ok">running</span>
       <div class="sn">{{I_CHECK}}Payment Validator</div><div class="sd">Bank, amount and date before payment</div><div class="sh">payment_validation</div></div>
     <div class="svc rev" data-t="9700" style="left:964px;top:244px;height:96px"><span class="badge ok">running</span>
-      <div class="sn">{{I_GENIE}}Port Assistant</div><div class="sd">Questions in plain language</div><div class="sh">supervisor + 3 Genie agents</div></div>
+      <div class="sn">{{I_GENIE}}Port Assistant</div><div class="sd">Questions in plain language</div><div class="sh">custom agent + 3 Genie agents</div></div>
     <div class="decide rev" data-t="11000" style="left:656px;top:484px;width:584px;height:96px">
       <div class="dl">{{I_INSIGHTS}}The analyst decides</div>
       <i class="dk ok">accept</i><i class="dk rv">dispute</i><i class="dk hd">hold</i>
@@ -579,6 +584,7 @@
 
   <!-- ============ PART 3: GOLD, AND ONE ROW WORKED THROUGH BELOW (scroll) ============ -->
   <section class="scene" data-scene="6" data-dur="21500">
+    <div class="viewswitch"><button data-to="0">Architecture</button><button data-to="620">Worked example</button></div>
     <div class="scroller" data-scroll-at="9600" data-scroll-to="620"><div class="scrollpage" style="height:1360px">
 
     <div class="stitle rev" data-t="0"><div class="k">Part 3</div><div class="h">Gold: both sources meet on the expense line</div></div>
@@ -707,7 +713,7 @@
       <div class="ico">{{I_GENIE}}</div><div><div class="name">DA operations</div></div></div>
     <div class="node hero rev" data-t="6900" style="left:1046px;top:330px;width:196px;height:156px">
       <span class="badge ok">running</span>
-      <div class="ico">{{I_AGENT}}</div><div><div class="name">Port Assistant</div><div class="desc">Supervisor agent: routes each question to the right Genie agent, adds document search</div></div></div>
+      <div class="ico">{{I_AGENT}}</div><div><div class="name">Port Assistant</div><div class="desc">Custom agent in the app: asks the right Genie agent, adds document search</div></div></div>
   </section>
 
   <!-- ============ PART 4b: THE AGENTS APP ============ -->
@@ -742,14 +748,14 @@
     </div>
     <div class="node hero rev" data-t="7300" style="left:576px;top:512px;width:330px;height:88px">
       <span class="badge ok">running</span>
-      <div class="ico">{{I_AGENT}}</div><div><div class="name">Port Assistant</div><div class="desc">Supervisor agent: picks the Genie agent or tool for each question</div></div></div>
+      <div class="ico">{{I_AGENT}}</div><div><div class="name">Port Assistant</div><div class="desc">Custom agent: calls the Genie agents and tools it needs</div></div></div>
     <div class="zc rev" data-t="5700" style="left:948px;top:196px;width:292px;height:150px;border-top-color:var(--navy)">
       <div class="zh">{{I_DELTA}}Saved after a confirm</div>
       <div class="kv"><span>analyst_decisions</span><b>accept, dispute, hold</b></div>
       <div class="kv"><span>negotiation_drafts</span><b>edited emails</b></div>
     </div>
     <div class="node db rev" data-t="6000" style="left:948px;top:368px;width:292px;height:100px">
-      <div class="ico">{{I_UC}}</div><div><div class="name">Prompt registry</div><div class="desc">negotiator, port_call_story: change them without a deploy</div></div></div>
+      <div class="ico">{{I_UC}}</div><div><div class="name">Prompt registry</div><div class="desc">negotiator, port_assistant, port_call_story: change them without a deploy</div></div></div>
     <div class="node db rev" data-t="8100" style="left:948px;top:500px;width:292px;height:100px">
       <div class="ico">{{I_GENIE}}</div><div><div class="name">3 Genie agents + 2 tools</div><div class="desc">Port costs, DA audit, DA operations; document search; port call timeline</div></div></div>
   </section>
@@ -885,13 +891,13 @@ const CAPS = {
   7: [[0, 'Genie answers best on <b>governed definitions</b>, not raw tables'],
       [1000, 'Each metric view holds <b>measures</b> (what you count) and <b>dimensions</b> (what you slice by)'],
       [4200, 'Each Genie agent gets the <b>metric views for its domain</b>'],
-      [6400, '<b>Port Assistant</b>, a supervisor agent, routes every question to the right one']],
+      [6400, '<b>Port Assistant</b>, a custom agent in the app, asks the right one for every question']],
   8: [[0, 'Some services need <b>more than a Genie agent</b>: they read documents, draft and decide'],
       [1000, 'One app, <b>one screen per AI service</b>, running as the signed-in user'],
       [3100, 'The <b>Quote Negotiator</b> is a tool-calling agent: it reads the quote, the history and past quotes'],
       [4800, 'It drafts the email; <b>every amount is checked</b> against what the tools returned'],
       [5600, 'Nothing is saved until the analyst <b>confirms</b>; prompts change in the registry, not in code'],
-      [7100, '<b>Port Assistant</b> answers the rest: it routes to the Genie agents, document search or the timeline']],
+      [7100, 'The <b>Port Assistant</b> answers the rest: a custom agent that calls the Genie agents, document search or the timeline']],
   9: [[0, 'Zoom in: <b>one Pilotage line</b> on one port call (mock data)'],
       [400, 'The platform says: quoted <b>2,500.00 EUR</b>, final <b>2,730.00 EUR</b>'],
       [2000, 'The invoice says <b>2,730.00 EUR on page 4</b>'],
@@ -924,9 +930,10 @@ function reset(sc){
   sc.querySelectorAll('[data-off]').forEach(e => e.classList.remove('off'));
 }
 // a part can hand over to a second view in the same tab: [data-off] hides its group from that time on
+let jumped = false;  // a tab or card click opens a part on its first view; stepping and auto-play still scroll
 function phases(sc, t){
   sc.querySelectorAll('[data-off]').forEach(e => e.classList.toggle('off', t >= +e.dataset.off));
-  sc.querySelectorAll('.scroller').forEach(e => scrollPart(e, t >= +e.dataset.scrollAt && t !== Infinity ? +e.dataset.scrollTo : 0));
+  sc.querySelectorAll('.scroller').forEach(e => scrollPart(e, !jumped && t >= +e.dataset.scrollAt && t !== Infinity ? +e.dataset.scrollTo : 0));
 }
 // smooth where the browser animates it, and land on the target in any case
 function scrollPart(e, top){ e.scrollTo({ top, behavior: 'smooth' }); setTimeout(() => { if (Math.abs(e.scrollTop - top) > 2) e.scrollTop = top; }, 900); }
@@ -1020,15 +1027,27 @@ document.querySelectorAll('a.uclink').forEach(a => a.addEventListener('click', e
 document.querySelectorAll('[data-go]').forEach(c => c.addEventListener('click', e => {
   e.stopPropagation();
   const i = +c.dataset.go;
+  jumped = true;
   if (MODE === 'present') { enter(i); present(i, bounds(i).length - 1, false); } else { paused = true; show(i, true); }
+  jumped = false;
 }));
 // tabs: click to open a part immediately, fully shown
 document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', e => {
   e.stopPropagation();
   const i = +p.dataset.p;
+  jumped = true;
   if (MODE === 'present') { enter(i); present(i, bounds(i).length - 1, false); }
   else { paused = true; show(i, true); }
+  jumped = false;
 }));
+// the view switch of a scrollable part (Gold: architecture or worked example)
+document.querySelectorAll('.viewswitch').forEach(v => {
+  const sc = v.parentElement.querySelector('.scroller');
+  const mark = () => v.querySelectorAll('button').forEach(b => b.classList.toggle('on',
+    Math.abs(sc.scrollTop - +b.dataset.to) < sc.clientHeight / 2));
+  v.querySelectorAll('button').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); scrollPart(sc, +b.dataset.to); }));
+  sc.addEventListener('scroll', mark); mark();
+});
 // hover: what each object is (table, view, volume, column) and the column behind the value shown
 const ST = 'Streaming table', MV = 'Materialized view', VOL = 'Volume', COL = 'Column', MEAS = 'Measure';
 const S = 'portcall_silver.', G = 'portcall_gold.';

@@ -28,11 +28,8 @@ variables:
   column_renames:
     description: 'JSON map of source columns to neutral silver names, {"table": {"source_column": "silver_column"}}'
     default: "{}"
-  supervisor_name:
-    description: Display name of the supervisor agent (unique in the workspace)
-    default: Port Assistant
   agent_llm_endpoint:
-    description: Model behind the app agents (AI Negotiator, DA Event Summarizer), unless a prompt version sets its own
+    description: Model behind the app agents (Port Assistant, Quote Negotiator, Timeline Summarizer), unless a prompt version sets its own
     default: databricks-claude-sonnet-5-5
   llm_endpoint:
     description: Default model for ai_query when a prompt version does not name one
@@ -125,3 +122,8 @@ targets:
         documents_volume:
           volume_type: EXTERNAL
           storage_location: ${resources.external_locations.documents_bucket.url}
+
+# after every deploy: print a link to every resource
+experimental:
+  scripts:
+    postdeploy: "python3 scripts/print_links.py --target ${bundle.target} --profile '${workspace.profile}' --var catalog=${var.catalog}"

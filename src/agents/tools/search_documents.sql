@@ -1,4 +1,4 @@
--- HAL-9000 tool: keyword search over the text of every PDF page (PDA quotes, final DA packs, statements of facts).
+-- Port Assistant tool: keyword search over the text of every PDF page (PDA quotes, final DA packs, statements of facts).
 -- Ranked by how many of the words appear on the page, then how often, optionally for one port call; account numbers are masked in
 -- the snippet, like in gold.
 CREATE OR REPLACE FUNCTION {catalog}.{gold_schema}.search_documents(

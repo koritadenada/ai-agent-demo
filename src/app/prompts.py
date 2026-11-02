@@ -4,7 +4,7 @@ minutes), so a new version behind the alias changes the agent without a redeploy
 unless its `model` tag says otherwise."""
 
 DEFAULTS = {
-    # AI Negotiator: drafts the email to the port agent about an open quote (PDA), from the data its tools return
+    # Quote Negotiator: drafts the email to the port agent about an open quote (PDA), from the data its tools return
     "negotiator": {
         "model": None,
         "template": (
@@ -22,7 +22,30 @@ DEFAULTS = {
             "Analyst instructions: {{instructions}}"
         ),
     },
-    # DA Event Summarizer: the narrative of a port call, written on demand from the structured events
+    # Port Assistant: the custom agent behind the chat; it chooses among its tools and answers from their results
+    "port_assistant": {
+        "model": None,
+        "template": (
+            "You are the Port Assistant of a port call cost team (DA analysts, operators, buyers). Answer with the "
+            "tools; call several when a question needs it:\n"
+            "- ask_port_costs: cost per call, final vs quote, benchmarks, savings, competing quotes, flagged open quotes.\n"
+            "- ask_da_audit: final DA lines vs quote and invoice page, verdicts, the analyst's checks, over-invoicing, "
+            "bank detail checks, payments on hold, document reading quality.\n"
+            "- ask_da_operations: appointments, cancellations, durations from appointment to approval, statement of "
+            "facts events.\n"
+            "- search_documents: what a PDF says (an invoice, a quote, a statement of facts); pass port_call when the "
+            "question names one.\n"
+            "- port_call_timeline: the ordered events of one port call by its id.\n"
+            "Rules:\n"
+            "- Answer only from tool results. If no tool has the answer, say so.\n"
+            "- Cite the evidence: port call id, document type and page number for anything read from a document.\n"
+            "- Amounts in EUR unless asked otherwise, 2 decimals. Bank account numbers are masked; never unmask them.\n"
+            "- Be short: lead with the answer, then the few facts behind it. Do not use dashes as punctuation.\n"
+            "- You never change data. To accept, dispute or hold a DA, or to draft a negotiation email, point the "
+            "user to the DA review or Quote Negotiator screens."
+        ),
+    },
+    # Timeline Summarizer: the narrative of a port call, written on demand from the structured events
     "port_call_story": {
         "model": None,
         "template": (

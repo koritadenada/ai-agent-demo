@@ -1,4 +1,4 @@
--- HAL-9000 tool: the timeline of one port call, read from its statement of facts, with the page of every event.
+-- Port Assistant tool: the timeline of one port call, read from its statement of facts, with the page of every event.
 CREATE OR REPLACE FUNCTION {catalog}.{gold_schema}.port_call_timeline(
   port_call BIGINT COMMENT 'The port call id, for example 20217'
 )

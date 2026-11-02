@@ -2,7 +2,7 @@ resources:
   jobs:
     setup:
       name: portcall-setup
-      description: Run after each deploy. Applies the UC functions, seeds missing prompts, refreshes the data once, applies the metric views, then the HAL-9000 supervisor agent and its tools.
+      description: Run after each deploy. Applies the UC functions, seeds missing prompts, refreshes the data once, applies the metric views, then the Port Assistant's tools and the app tables.
       performance_target: STANDARD
       max_concurrent_runs: 1
       tags:
@@ -15,7 +15,6 @@ resources:
             dependencies:
               - pyyaml
               - mlflow>=3.1
-              - databricks-sdk>=0.158   # supervisor agents API
       parameters:
         - name: catalog
           default: ${var.catalog}
@@ -61,8 +60,4 @@ resources:
             python_file: ../src/deploy/apply_agents.py
             parameters: ["--catalog", "{{job.parameters.catalog}}", "--gold-schema", "{{job.parameters.gold_schema}}",
                          "--silver-schema", "{{job.parameters.silver_schema}}", "--app-schema", "{{job.parameters.app_schema}}",
-                         "--name", "${var.supervisor_name}",
-                         "--app-service-principal", "${resources.apps.agents_app.service_principal_client_id}",
-                         "--port-costs-space", "${resources.genie_spaces.port_costs.id}",
-                         "--da-audit-space", "${resources.genie_spaces.da_audit.id}",
-                         "--da-operations-space", "${resources.genie_spaces.da_operations.id}"]
+                         "--app-service-principal", "${resources.apps.agents_app.service_principal_client_id}"]

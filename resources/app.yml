@@ -1,10 +1,11 @@
 # The agents app. It runs as the signed-in user (user_api_scopes): queries, model calls, Genie and documents are
-# governed by Unity Catalog with the user's own permissions. Its service principal only reads the prompt registry.
+# governed by Unity Catalog with the user's own permissions. Its service principal only reads the prompt registry
+# and writes the Port Assistant traces.
 resources:
   apps:
     agents_app:
       name: portcall-agents
-      description: DA review, AI Negotiator, port call timelines and HAL-9000
+      description: DA review, Quote Negotiator, port call timelines and Port Assistant
       source_code_path: ../src/app
       user_api_scopes:
         - sql
@@ -28,6 +29,14 @@ resources:
             value: ${var.agent_llm_endpoint}
           - name: DATABRICKS_WAREHOUSE_ID
             value_from: warehouse
+          - name: PORT_COSTS_SPACE_ID
+            value_from: port-costs-agent
+          - name: DA_AUDIT_SPACE_ID
+            value_from: da-audit-agent
+          - name: DA_OPERATIONS_SPACE_ID
+            value_from: da-operations-agent
+          - name: MLFLOW_EXPERIMENT_ID
+            value_from: agent-traces
       resources:
         - name: warehouse
           sql_warehouse:
@@ -52,3 +61,7 @@ resources:
             name: ${resources.genie_spaces.da_operations.title}
             space_id: ${resources.genie_spaces.da_operations.id}
             permission: CAN_RUN
+        - name: agent-traces
+          experiment:
+            experiment_id: ${resources.experiments.agent_traces.id}
+            permission: CAN_EDIT

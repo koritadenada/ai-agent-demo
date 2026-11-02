@@ -1,4 +1,4 @@
-"""AI Negotiator: drafts a citation-backed negotiation email for an open PDA quote.
+"""Quote Negotiator: drafts a citation-backed negotiation email for an open PDA quote.
 
 A tool-calling loop: the model reads the quote, the price history and competing quotes through tools (plain SQL on
 gold, as the signed-in user), then calls submit_draft. The benchmark math is SQL, never the model, and every amount

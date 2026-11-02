@@ -1,4 +1,4 @@
-"""DA Event Summarizer: the port call timeline (structured events from the statement of facts, stored by the
+"""Timeline Summarizer: the port call timeline (structured events from the statement of facts, stored by the
 document pipeline) and a written account generated on demand, never stored, with the page of each event."""
 from . import llm
 from .workspace import GOLD, SILVER, Session
