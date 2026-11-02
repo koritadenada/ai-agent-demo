@@ -111,7 +111,7 @@ td.num, .mono { font-variant-numeric: tabular-nums; }
 .item { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-top: 1px solid var(--grey-2); cursor: pointer; }
 .item:first-child { border-top: 0; }
 .item:hover .t { color: var(--indigo); }
-.item .t { font-weight: 600; } .item .s { color: var(--muted); font-size: 12.5px; }
+.t { font-weight: 600; } .s { color: var(--muted); font-size: 12.5px; }
 .item .r { margin-left: auto; text-align: right; }
 .ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: rgba(60,69,230,.08); color: var(--indigo); flex: none; }
 .ico svg { width: 20px; height: 20px; }
@@ -140,6 +140,7 @@ td.num, .mono { font-variant-numeric: tabular-nums; }
 .ev .time { font-variant-numeric: tabular-nums; color: var(--navy-2); width: 150px; flex: none; font-size: 13px; }
 .ev .what { font-weight: 600; }
 .gap { margin: 2px 0 2px -4px; font-size: 12px; color: var(--orange); font-weight: 600; }
+.gap.ops { color: var(--muted); font-weight: 500; }
 
 /* negotiator */
 .steps { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
@@ -198,10 +199,10 @@ textarea { resize: vertical; min-height: 120px; line-height: 1.5; }
 .row-gap { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .story { font-size: 15px; line-height: 1.65; }
 
-/* port call cards */
-.pcard { display: flex; flex-direction: column; gap: 12px; background: #fff; border-radius: var(--r-lg); padding: 18px 20px;
-  border: 1px solid rgba(0,13,76,.06); box-shadow: var(--shadow); color: var(--navy); transition: border-color .15s, transform .15s; }
-.pcard:hover { border-color: var(--indigo); transform: translateY(-1px); }
-.pcard .t { font-weight: 600; font-size: 15px; } .pcard .s { color: var(--muted); font-size: 12.5px; }
-.pcard .pa { margin-top: -2px; }
-.pcard .foot { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--grey-2); padding-top: 12px; }
+/* port call cards: a .card that is a link */
+.pcard { display: flex; flex-direction: column; gap: 10px; color: var(--navy); transition: border-color .15s, transform .15s; }
+.pcard:hover, .pcard:focus-visible { border-color: var(--indigo); transform: translateY(-1px); outline: none; }
+.pcard:focus-visible { box-shadow: 0 0 0 3px rgba(60,69,230,.25), var(--shadow); }
+.pcard .t { font-size: 15px; }
+.pcard .foot { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--grey-2); padding-top: 12px; margin-top: auto; }

@@ -93,6 +93,10 @@ def main():
         check(r.ok and get(f"quotes/{flagged['proforma_id']}").json()["drafts"][0]["subject"] == "e2e test", "a confirmed draft is saved and shown")
         sql(f"DELETE FROM {app}.negotiation_drafts WHERE subject = 'e2e test'")
 
+    calls = get("port-calls").json()
+    sofs = int(sql(f"SELECT COUNT(DISTINCT proforma_id) FROM {a.catalog}.{a.prefix}silver.documents WHERE doc_type = 'statement_of_facts'")[0][0])
+    check(len(calls) == sofs, f"Port calls lists every call with a statement of facts ({len(calls)})")
+    check(not any((c["wait_from"] or "").lower().startswith("commenced") for c in calls), "the longest wait never counts operations")
     pc = get(f"port-calls/{fdas[0]['port_call_id']}").json()
     check(len(pc["events"]) > 0 and all(e["event_time"] for e in pc["events"]), f"port call {fdas[0]['port_call_id']}: timeline with times")
     st = post(f"port-calls/{fdas[0]['port_call_id']}/story", {}).json()

@@ -88,6 +88,18 @@ const DOC = { final_da_pack: 'Final DA pack', pda_quote: 'PDA quote', statement_
 const SECTION = { PORT_EXPENSES: 'Port expenses', HUSBANDRY: 'Husbandry' };
 const svc = (name, icon) => `<span class="svc">${I[icon]}${esc(name)}</span>`;
 const decisionPill = d => d ? `<span class="pill ${DECISION[d][0]}">${DECISION[d][1]}</span>` : '<span class="pill info">To review</span>';
+const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
+// What the checks found on a final DA, the same on every screen. A count that is not there yet means not checked.
+function linesPill(f, ofTotal = false) {
+  if (f.lines_flagged == null) return '<span class="pill muted">Not checked yet</span>';
+  if (!f.lines_flagged) return `<span class="pill ok">${ofTotal ? `All ${f.lines_checked}` : 'All'} lines match</span>`;
+  return `<span class="pill review">${ofTotal ? `${f.lines_flagged} of ${f.lines_checked} lines` : plural(f.lines_flagged, 'line')} to check</span>`;
+}
+function paymentPill(f) {
+  if (f.hold_payment == null) return '<span class="pill muted">Not checked yet</span>';
+  return f.hold_payment ? '<span class="pill hold">Payment on hold</span>' : '<span class="pill ok">Bank details match</span>';
+}
+const checkPill = f => f.hold_payment ? paymentPill(f) : linesPill(f);
 
 // ---------- shell ----------
 const NAV = [['#/', 'Overview'], ['#/review', 'DA review'], ['#/negotiator', 'AI Negotiator'], ['#/port-calls', 'Port calls'], ['#/hal', 'HAL-9000']];
@@ -144,7 +156,7 @@ async function overview() {
           <div class="item" onclick="location.hash='#/review/${f.evaluation_id}'">
             <div class="ico ${f.hold_payment ? 'red' : ''}">${f.hold_payment ? I.bank : I.review}</div>
             <div><div class="t">${esc(f.vessel_name)} at ${esc(f.port_name)}</div><div class="s">${esc(f.agent_name)} · port call ${f.port_call_id}</div></div>
-            <div class="r"><div>${f.hold_payment ? '<span class="pill hold">Payment on hold</span>' : f.lines_flagged ? `<span class="pill review">${f.lines_flagged} lines to check</span>` : '<span class="pill ok">All lines match</span>'}</div>
+            <div class="r"><div>${checkPill(f)}</div>
               <div class="s" style="margin-top:4px">${decisionPill(f.decision)}</div></div>
           </div>`).join('')}</div>
         <div style="margin-top:12px"><a href="#/review" class="btn ghost sm">All final DAs</a></div>
@@ -190,8 +202,8 @@ async function reviewList() {
           <td>${esc(r.agent_name)}<div class="exp">${esc(r.buyer_name)}</div></td>
           <td class="nowrap">${month(r.call_month)}</td>
           <td class="num nowrap">${money(r.final_amount, r.currency)}</td>
-          <td>${r.lines_flagged ? `<span class="pill review">${r.lines_flagged} of ${r.lines_checked} to check</span>` : `<span class="pill ok">${r.lines_checked} match</span>`}</td>
-          <td>${r.hold_payment ? '<span class="pill hold">On hold</span>' : '<span class="pill ok">Details match</span>'}</td>
+          <td>${linesPill(r, true)}</td>
+          <td>${paymentPill(r)}</td>
           <td>${decisionPill(r.decision)}</td></tr>`).join('') || '<tr><td colspan="7" class="muted">Nothing here.</td></tr>'}
       </table></div>`;
     view.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { reviewFilter = b.dataset.f; draw(); });
@@ -232,7 +244,7 @@ async function reviewDetail(id) {
       <div class="grid">
         ${p?.hold_payment ? bankCard : ''}
         <div class="card flush"><div class="head row-gap" style="justify-content:space-between"><div><h3>${I.review}Quote against final bill</h3>
-          <div class="sub" style="margin:0">${f.lines_flagged ? `${f.lines_flagged} of ${f.lines_checked} lines need a look` : `All ${f.lines_checked} lines match`}. Click a page to see the invoice.</div></div>${svc('SOF Port Bill Analysis', 'review')}</div>
+          <div class="sub" style="margin:0">${f.lines_flagged == null ? 'The lines have not been checked yet' : f.lines_flagged ? `${f.lines_flagged} of ${f.lines_checked} ${f.lines_flagged === 1 ? 'line needs' : 'lines need'} a look` : `All ${f.lines_checked} lines match`}. Click a page to see the invoice.</div></div>${svc('SOF Port Bill Analysis', 'review')}</div>
           <div class="tbl" style="border-radius:0;border-left:0;border-right:0;border-bottom:0"><table>
             <tr><th>Expense</th><th class="num">Quoted (${esc(f.currency)})</th><th class="num">Final (${esc(f.currency)})</th><th>Invoice page</th><th>Check</th></tr>
             ${rowsHtml}
@@ -261,7 +273,7 @@ async function reviewDetail(id) {
   view.querySelectorAll('[data-d]').forEach(b => b.onclick = async () => {
     const k = b.dataset.d;
     const text = { accept: `Accept the final DA of ${esc(f.vessel_name)} at ${esc(f.port_name)} for payment?`,
-      dispute: `Dispute this final DA with ${esc(f.agent_name)}? ${f.lines_flagged} lines were flagged.`,
+      dispute: `Dispute this final DA with ${esc(f.agent_name)}? ${plural(f.lines_flagged || 0, 'line')} ${f.lines_flagged === 1 ? 'was' : 'were'} flagged.`,
       hold: 'Hold the payment of this final DA until the bank details are confirmed?' }[k];
     const ok = await confirmBox({ title: { accept: 'Accept final DA', dispute: 'Dispute final DA', hold: 'Hold payment' }[k], text,
       ok: { accept: 'Accept', dispute: 'Dispute', hold: 'Hold payment' }[k], cls: { accept: 'green', dispute: 'orange', hold: 'red' }[k], note: true });
@@ -348,16 +360,20 @@ function renderDraft(id, r) {
 
 // ---------- port calls (DA Event Summarizer) ----------
 async function portCallList() {
-  const rows = await api('/api/fdas');
+  const rows = await api('/api/port-calls');
+  const facts = r => [r.port_stay_hours != null && `${num(r.port_stay_hours, 1)} h in port`, r.events && plural(r.events, 'event')].filter(Boolean).join(' · ');
+  const wait = r => r.longest_wait_hours == null ? 'No timed events read'
+    : `Longest wait ${num(r.longest_wait_hours, 1)} h: ${esc(r.wait_from.toLowerCase())} to ${esc(r.wait_to.toLowerCase())}`;
   view.innerHTML = `
     <div class="pagehead"><div>${svc('DA Event Summarizer', 'clock')}<h2>Port calls</h2>
       <p>Port calls with a statement of facts: the timeline read from the document, and a written account on demand.</p></div></div>
     <div class="grid g3">${rows.map(r => `
-      <a class="pcard" href="#/port-calls/${r.port_call_id}">
+      <a class="card pcard" href="#/port-calls/${r.port_call_id}">
         <div class="row-gap"><div class="ico">${I.ship}</div><div><div class="t">${esc(r.vessel_name)}</div><div class="s">${esc(r.port_name)} · ${month(r.call_month)}</div></div></div>
-        <div class="s pa">${esc(r.agent_name)}</div>
-        <div class="foot"><span class="muted small">Port call ${r.port_call_id}</span>${r.hold_payment ? '<span class="pill hold">Payment on hold</span>' : r.lines_flagged ? `<span class="pill review">${r.lines_flagged} lines to check</span>` : '<span class="pill ok">All lines match</span>'}</div>
-      </a>`).join('')}</div>`;
+        <div class="s">${esc(r.agent_name)}<br>${wait(r)}</div>
+        <div class="foot"><span class="s">Port call ${r.port_call_id}</span>
+          ${facts(r) ? `<span class="pill muted">${facts(r)}</span>` : ''}</div>
+      </a>`).join('') || '<div class="card muted">No statement of facts read yet.</div>'}</div>`;
 }
 
 async function portCall(id) {
@@ -368,7 +384,8 @@ async function portCall(id) {
     const prev = d.events[i - 1]; let gap = '';
     if (prev && e.event_time && prev.event_time) {
       const h = (new Date(e.event_time) - new Date(prev.event_time)) / 36e5;
-      if (h >= 3) gap = `<div class="gap">${num(h, 1)} hours</div>`;
+      if (/^commenced/i.test(prev.event)) gap = `<div class="gap ops">${num(h, 1)} hours of operations</div>`;
+      else if (h >= 3) gap = `<div class="gap">waited ${num(h, 1)} hours</div>`;
     }
     return `${gap}<div class="ev"><div class="time">${e.event_time ? when(e.event_time) : esc(e.event_time_text)}</div><div class="what">${esc(e.event)}</div>
       <span class="pagechip" data-file="${e.file_item_id}" data-page="${e.page_number}">${I.page}p. ${e.page_number}</span></div>`;
