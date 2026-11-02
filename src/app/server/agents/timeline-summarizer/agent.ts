@@ -4,11 +4,15 @@ import { createAgent, tool } from '@databricks/appkit/beta';
 import { z } from 'zod';
 import { GOLD, SILVER } from '../../lib/config';
 import { rows } from '../../lib/sql';
+import { fromRegistry } from '../../lib/prompts';
 import { analyticsOf } from '../../lib/tools';
 
 export default createAgent({
   ephemeral: true,
-  instructions: 'Write the account of the port call from the tool result only.',
+  // the whole system prompt is `port_call_story` in the MLflow Prompt Registry (app schema, alias production), so it
+  // changes without a deploy; config/prompts.json only seeds it
+  baseSystemPrompt: fromRegistry('port_call_story'),
+  instructions: '',
   tools(plugins) {
     const analytics = analyticsOf(plugins);
     return {

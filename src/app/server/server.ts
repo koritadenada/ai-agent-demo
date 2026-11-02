@@ -11,7 +11,8 @@ import { propagation } from '@opentelemetry/api';
 import type { Request } from 'express';
 import { z } from 'zod';
 import { APP, GOLD, SILVER, SPACES } from './lib/config';
-import { promptFor, promptVersions, startPromptRefresh } from './lib/prompts';
+import { promptVersions, startPromptRefresh } from './lib/prompts';
+import { agentTurnsAsTraces, tracedModel } from './lib/tracing';
 import { LakebaseThreadStore } from './lib/threads';
 
 const threads = new LakebaseThreadStore();
@@ -30,7 +31,8 @@ createApp({
   // no query cache: a decision or a saved draft shows on the next read, and gold changes with every refresh
   cache: { enabled: false },
   plugins: [
-    agents({ auth: 'on-behalf-of-user', threadStore: threads, baseSystemPrompt: (ctx) => promptFor(ctx.agentName) }),
+    // each agent's prompt is in the registry (baseSystemPrompt in server/agents/<id>/agent.ts); every model call is traced
+    agents({ auth: 'on-behalf-of-user', threadStore: threads, defaultModel: tracedModel() }),
     analytics(),
     files({ volumes: { files: { auth: 'on-behalf-of-user' } } }),  // the documents volume
     genie({ spaces: SPACES }),
@@ -45,6 +47,7 @@ createApp({
     startPromptRefresh();
 
     appkit.server.extend((app) => {
+      agentTurnsAsTraces(app);
       app.get('/api/config', (req, res) => {
         res.json({ gold: GOLD, silver: SILVER, app: APP, user: userOf(req), prompts: promptVersions() });
       });

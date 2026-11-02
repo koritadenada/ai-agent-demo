@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { GOLD } from '../../lib/config';
 import { askGenie, genieOf } from '../../lib/genie';
 import { rows } from '../../lib/sql';
+import { fromRegistry } from '../../lib/prompts';
 import { analyticsOf } from '../../lib/tools';
 
 // tool name, genie space alias (server.ts), what that agent owns
@@ -16,7 +17,10 @@ const GENIE: [string, string, string][] = [
 
 export default createAgent({
   default: true,
-  instructions: 'Answer port call questions with your tools.',
+  // the whole system prompt is `port_assistant` in the MLflow Prompt Registry (app schema, alias production), so it
+  // changes without a deploy; config/prompts.json only seeds it
+  baseSystemPrompt: fromRegistry('port_assistant'),
+  instructions: '',
   tools(plugins) {
     const analytics = analyticsOf(plugins);
     const genie = genieOf(plugins);

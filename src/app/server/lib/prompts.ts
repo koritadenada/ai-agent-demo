@@ -9,13 +9,6 @@ import { APP, PROMPT_ALIAS } from './config';
 type PromptSeed = { template: string; model: string | null };
 const SEEDS = JSON.parse(readFileSync(join(process.cwd(), 'config', 'prompts.json'), 'utf8')) as Record<string, PromptSeed>;
 
-/** Agent id (folder under server/agents) -> prompt name in the registry. */
-export const AGENT_PROMPTS: Record<string, string> = {
-  'port-assistant': 'port_assistant',
-  'quote-negotiator': 'negotiator',
-  'timeline-summarizer': 'port_call_story',
-};
-
 const loaded: Record<string, { template: string; version: string }> = {};
 
 async function load(name: string): Promise<void> {
@@ -42,13 +35,14 @@ export function startPromptRefresh(): void {
   setInterval(() => void refreshPrompts(), 5 * 60_000).unref();
 }
 
-export function promptFor(agentName: string): string {
-  const name = AGENT_PROMPTS[agentName];
-  return (name && (loaded[name]?.template ?? SEEDS[name]?.template)) || '';
+/** An agent's system prompt (its baseSystemPrompt): the registry version behind the alias, read at every turn. */
+export function fromRegistry(name: string): () => string {
+  if (!SEEDS[name]) throw new Error(`no seed for prompt ${name} in config/prompts.json`);
+  return () => loaded[name]?.template ?? SEEDS[name].template;
 }
 
 export function promptVersions(): Record<string, string> {
   return Object.fromEntries(
-    Object.values(AGENT_PROMPTS).map((n) => [n, loaded[n]?.version ?? `${n}@repo-seed`]),
+    Object.keys(SEEDS).filter((n) => !n.startsWith('_')).map((n) => [n, loaded[n]?.version ?? `${n}@repo-seed`]),
   );
 }

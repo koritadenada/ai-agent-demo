@@ -37,16 +37,17 @@ principal only reads the app prompts, writes the traces and keeps the chat histo
 ([`threads.ts`](server/lib/threads.ts), the agents plugin's thread store): a follow-up continues the thread, and each
 user sees only their own. The Quote Negotiator and the Timeline Summarizer are one-shot and keep nothing.
 
-**Traces in Unity Catalog.** Every agent turn (model calls, tool calls, Genie questions) is traced to the
-`portcall-agent-traces` experiment, stored as Delta tables in the app schema (`experiment_*_otel_spans` and the
-views next to it), so traces are queried with SQL like any other table.
+**Traces in Unity Catalog.** Every agent turn is one trace in the `portcall-agent-traces` experiment, named after
+the agent, with the question as input and the answer as output. Inside it: a span per model call (messages, answer,
+tool calls, token usage), per tool call and per SQL query ([`tracing.ts`](server/lib/tracing.ts)). The traces are
+Delta tables in the app schema (`experiment_*_otel_spans` and the views next to it), so they can be queried with SQL.
 
 **Nothing is written without a confirm.** Decisions go to `analyst_decisions`, saved drafts to `negotiation_drafts`
 (app schema), as the analyst; nothing is sent to the port agent.
 
-**Prompts change without a deploy.** `port_assistant`, `negotiator` and `port_call_story` are in the prompt registry
-(app schema, alias `production`); the app reads them every 5 minutes. [`config/prompts.json`](config/prompts.json)
-only seeds the first version. The model is `agent_llm_endpoint`.
+**Prompts change without a deploy.** Each agent's whole system prompt is in the prompt registry (app schema, alias
+`production`): `port_assistant`, `negotiator`, `port_call_story`, set as `baseSystemPrompt` in its `agent.ts`. The app
+reads them every 5 minutes; [`config/prompts.json`](config/prompts.json) only seeds the first version.
 
 **Run it locally** against a deployed bundle (uses your CLI profile instead of the user token):
 

@@ -6,6 +6,7 @@ import { createAgent, tool } from '@databricks/appkit/beta';
 import { z } from 'zod';
 import { GOLD } from '../../lib/config';
 import { rows } from '../../lib/sql';
+import { fromRegistry } from '../../lib/prompts';
 import { analyticsOf } from '../../lib/tools';
 import type { Analytics } from '../../lib/sql';
 
@@ -53,7 +54,10 @@ async function knownAmounts(analytics: Analytics, proformaId: number): Promise<S
 
 export default createAgent({
   ephemeral: true,
-  instructions: 'Draft the negotiation email for the open PDA quote, then call submit_draft.',
+  // the whole system prompt is `negotiator` in the MLflow Prompt Registry (app schema, alias production), so it
+  // changes without a deploy; config/prompts.json only seeds it
+  baseSystemPrompt: fromRegistry('negotiator'),
+  instructions: '',
   tools(plugins) {
     const analytics = analyticsOf(plugins);
     return {
