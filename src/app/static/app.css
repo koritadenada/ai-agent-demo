@@ -156,7 +156,7 @@ textarea { resize: vertical; min-height: 120px; line-height: 1.5; }
 .ok-note { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: var(--r-sm); background: var(--green-soft); color: var(--green); font-size: 13px; font-weight: 500; }
 .warn svg, .ok-note svg { width: 18px; height: 18px; flex: none; }
 
-/* HAL-9000 chat */
+/* Port Assistant chat */
 .chat { display: flex; flex-direction: column; height: calc(100vh - 220px); min-height: 520px; }
 .msgs { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 4px 4px 20px; }
 .msg { max-width: 82%; padding: 14px 18px; border-radius: 20px; }

@@ -102,9 +102,9 @@ function paymentPill(f) {
 const checkPill = f => f.hold_payment ? paymentPill(f) : linesPill(f);
 
 // ---------- shell ----------
-const NAV = [['#/', 'Overview'], ['#/review', 'DA review'], ['#/negotiator', 'AI Negotiator'], ['#/port-calls', 'Port calls'], ['#/hal', 'HAL-9000']];
+const NAV = [['#/', 'Overview'], ['#/review', 'DA review'], ['#/negotiator', 'Quote Negotiator'], ['#/port-calls', 'Port calls'], ['#/assistant', 'Port Assistant']];
 $('#brand').innerHTML = `${I.mark}<div><b>PortCall</b><span>Agents</span></div>`;
-$('#askbtn').innerHTML = `${I.hal}Ask HAL-9000`;
+$('#askbtn').innerHTML = `${I.hal}Ask Port Assistant`;
 api('/api/me').then(m => { $('#who').textContent = m.user; }).catch(() => {});
 
 function setNav(hash) {
@@ -122,7 +122,7 @@ const routes = [
   [/^#\/negotiator\/(\d+)$/, quoteDetail],
   [/^#\/port-calls$/, portCallList],
   [/^#\/port-calls\/(\d+)$/, portCall],
-  [/^#\/hal$/, hal],
+  [/^#\/assistant$/, hal],
 ];
 async function route() {
   const h = location.hash || '#/'; setNav(h); window.scrollTo(0, 0);
@@ -150,7 +150,7 @@ async function overview() {
       <div class="kpi good"><div class="v">${num(k.open_quote_savings_eur, 0)}<small>EUR</small></div><div class="l">To negotiate on ${k.open_quotes_flagged} open quotes</div></div>
     </div>
     <div class="grid g2">
-      <div class="card"><div class="row-gap" style="justify-content:space-between"><h3>${I.review}Final DAs to decide</h3>${svc('SOF Port Bill Analysis', 'review')}</div>
+      <div class="card"><div class="row-gap" style="justify-content:space-between"><h3>${I.review}Final DAs to decide</h3>${svc('Bill Reconciler', 'review')}</div>
         <div class="sub">Every line checked against its quote and its invoice page; bank details checked before payment.</div>
         <div class="list">${d.fdas.map(f => `
           <div class="item" onclick="location.hash='#/review/${f.evaluation_id}'">
@@ -161,7 +161,7 @@ async function overview() {
           </div>`).join('')}</div>
         <div style="margin-top:12px"><a href="#/review" class="btn ghost sm">All final DAs</a></div>
       </div>
-      <div class="card"><div class="row-gap" style="justify-content:space-between"><h3>${I.deal}Open quotes to negotiate</h3>${svc('AI Negotiator', 'deal')}</div>
+      <div class="card"><div class="row-gap" style="justify-content:space-between"><h3>${I.deal}Open quotes to negotiate</h3>${svc('Quote Negotiator', 'deal')}</div>
         <div class="sub">PDA quotes above what this port usually costs for this vessel size, before the vessel arrives.</div>
         <div class="list">${d.quotes.filter(q => q.flagged_lines).map(q => `
           <div class="item" onclick="location.hash='#/negotiator/${q.proforma_id}'">
@@ -173,9 +173,9 @@ async function overview() {
       </div>
     </div>
     <div class="card" style="margin-top:20px">
-      <div class="row-gap" style="justify-content:space-between"><h3>${I.hal}Ask HAL-9000</h3>${svc('HAL-9000', 'hal')}</div>
+      <div class="row-gap" style="justify-content:space-between"><h3>${I.hal}Ask Port Assistant</h3>${svc('Port Assistant', 'hal')}</div>
       <div class="sub">Costs, audits, operations and documents, in plain language, with your own data permissions.</div>
-      <form class="composer" onsubmit="event.preventDefault(); sessionStorage.q = this.q.value; location.hash = '#/hal'">
+      <form class="composer" onsubmit="event.preventDefault(); sessionStorage.q = this.q.value; location.hash = '#/assistant'">
         <input name="q" placeholder="For example: which ports were most expensive per call last month?" autocomplete="off">
         <button class="btn">${I.send}Ask</button>
       </form>
@@ -191,7 +191,7 @@ async function reviewList() {
   const draw = () => {
     const shown = rows.filter(groups[reviewFilter]);
     view.innerHTML = `
-      <div class="pagehead"><div>${svc('SOF Port Bill Analysis', 'review')} ${svc('PDA/FDA Validator', 'bank')}
+      <div class="pagehead"><div>${svc('Bill Reconciler', 'review')} ${svc('Payment Validator', 'bank')}
         <h2>Final DA review</h2><p>Each final DA, line by line against the quote and the supplier invoice pages, and the bank details against the platform.</p></div>
         <div class="tabs">${[['todo', 'To review'], ['hold', 'Payment on hold'], ['decided', 'Decided'], ['all', 'All']].map(([k, t]) =>
           `<button class="${reviewFilter === k ? 'on' : ''}" data-f="${k}">${t}<b>${rows.filter(groups[k]).length}</b></button>`).join('')}</div></div>
@@ -230,7 +230,7 @@ async function reviewDetail(id) {
         <td><span class="pill ${cls}">${esc(VERDICT[l.verdict] || l.verdict)}</span>${l.variance_vs_quote_pct != null && Math.abs(l.variance_vs_quote_pct) >= .05 ? `<div class="exp">${l.variance_vs_quote_pct > 0 ? '+' : ''}${num(l.variance_vs_quote_pct, 1)}% vs quote</div>` : ''}</td></tr>`;
     }).join('')}
     <tr class="subtotal"><td>Subtotal</td><td class="num">${num(sum(ls, 'quoted_amount'))}</td><td class="num">${num(sum(ls, 'final_amount'))}</td><td colspan="2"></td></tr>`).join('');
-  const bankCard = p ? `<div class="card"><div class="row-gap" style="justify-content:space-between"><h3>${I.bank}Bank details before payment</h3>${svc('PDA/FDA Validator', 'bank')}</div>
+  const bankCard = p ? `<div class="card"><div class="row-gap" style="justify-content:space-between"><h3>${I.bank}Bank details before payment</h3>${svc('Payment Validator', 'bank')}</div>
           <div class="sub">What the DA pack says against what the platform has on file. Low-confidence readings never count as a match.</div>
           ${(p.field_checks || []).map(c => `<div class="check"><span class="pill ${c.status === 'MATCH' ? 'ok' : 'dispute'}">${c.status === 'MATCH' ? 'Match' : 'Differs'}</span>
             <div><div class="n">${esc(c.name)}</div><div class="e">${esc(c.explanation)}${c.confidence != null ? ` · read with ${num(c.confidence * 100, 0)}% confidence` : ''}</div></div></div>`).join('')}
@@ -244,7 +244,7 @@ async function reviewDetail(id) {
       <div class="grid">
         ${p?.hold_payment ? bankCard : ''}
         <div class="card flush"><div class="head row-gap" style="justify-content:space-between"><div><h3>${I.review}Quote against final bill</h3>
-          <div class="sub" style="margin:0">${f.lines_flagged == null ? 'The lines have not been checked yet' : f.lines_flagged ? `${f.lines_flagged} of ${f.lines_checked} ${f.lines_flagged === 1 ? 'line needs' : 'lines need'} a look` : `All ${f.lines_checked} lines match`}. Click a page to see the invoice.</div></div>${svc('SOF Port Bill Analysis', 'review')}</div>
+          <div class="sub" style="margin:0">${f.lines_flagged == null ? 'The lines have not been checked yet' : f.lines_flagged ? `${f.lines_flagged} of ${f.lines_checked} ${f.lines_flagged === 1 ? 'line needs' : 'lines need'} a look` : `All ${f.lines_checked} lines match`}. Click a page to see the invoice.</div></div>${svc('Bill Reconciler', 'review')}</div>
           <div class="tbl" style="border-radius:0;border-left:0;border-right:0;border-bottom:0"><table>
             <tr><th>Expense</th><th class="num">Quoted (${esc(f.currency)})</th><th class="num">Final (${esc(f.currency)})</th><th>Invoice page</th><th>Check</th></tr>
             ${rowsHtml}
@@ -283,11 +283,11 @@ async function reviewDetail(id) {
   });
 }
 
-// ---------- AI Negotiator ----------
+// ---------- Quote Negotiator ----------
 async function quoteList() {
   const rows = await api('/api/quotes');
   view.innerHTML = `
-    <div class="pagehead"><div>${svc('AI Negotiator', 'deal')}<h2>Open quotes</h2>
+    <div class="pagehead"><div>${svc('Quote Negotiator', 'deal')}<h2>Open quotes</h2>
       <p>PDA quotes not yet approved, against what each port usually costs for the same vessel type and size.</p></div></div>
     <div class="tbl"><table>
       <tr><th>Vessel and port</th><th>Agent</th><th>Call</th><th class="num">Quoted</th><th>Above benchmark</th><th class="num">Potential saving</th><th></th></tr>
@@ -322,7 +322,7 @@ async function quoteDetail(id) {
             <td class="num">${num(d.lines.filter(l => l.flagged).reduce((a, l) => a + (l.potential_saving_eur || 0), 0))}</td></tr>
         </table></div></div>
       <div class="grid">
-        <div class="card"><div class="row-gap" style="justify-content:space-between"><h3>${I.deal}Negotiation email</h3>${svc('AI Negotiator', 'deal')}</div>
+        <div class="card"><div class="row-gap" style="justify-content:space-between"><h3>${I.deal}Negotiation email</h3>${svc('Quote Negotiator', 'deal')}</div>
           <div class="sub">The agent reads the quote, the price history at this port and past competing quotes, then drafts the email. Every amount is checked against the data.</div>
           <div class="field"><label>Your instructions (optional)</label><input type="text" id="instr" placeholder="For example: keep it short, focus on pilotage and towage"></div>
           <button class="btn" id="draftbtn">${I.spark}Draft the email</button>
@@ -358,14 +358,14 @@ function renderDraft(id, r) {
   };
 }
 
-// ---------- port calls (DA Event Summarizer) ----------
+// ---------- port calls (Timeline Summarizer) ----------
 async function portCallList() {
   const rows = await api('/api/port-calls');
   const facts = r => [r.port_stay_hours != null && `${num(r.port_stay_hours, 1)} h in port`, r.events && plural(r.events, 'event')].filter(Boolean).join(' · ');
   const wait = r => r.longest_wait_hours == null ? 'No timed events read'
     : `Longest wait ${num(r.longest_wait_hours, 1)} h: ${esc(r.wait_from.toLowerCase())} to ${esc(r.wait_to.toLowerCase())}`;
   view.innerHTML = `
-    <div class="pagehead"><div>${svc('DA Event Summarizer', 'clock')}<h2>Port calls</h2>
+    <div class="pagehead"><div>${svc('Timeline Summarizer', 'clock')}<h2>Port calls</h2>
       <p>Port calls with a statement of facts: the timeline read from the document, and a written account on demand.</p></div></div>
     <div class="grid g3">${rows.map(r => `
       <a class="card pcard" href="#/port-calls/${r.port_call_id}">
@@ -404,7 +404,7 @@ async function portCall(id) {
       <div class="fact"><div class="k">FDA to approval</div><div class="v">${pc.fda_approval_hours != null ? num(pc.fda_approval_hours, 1) + ' h' : '-'}</div></div></div></div>
     <div class="grid g-main">
       <div class="grid">
-        <div class="card"><div class="row-gap" style="justify-content:space-between"><h3>${I.clock}Timeline from the statement of facts</h3>${svc('DA Event Summarizer', 'clock')}</div>
+        <div class="card"><div class="row-gap" style="justify-content:space-between"><h3>${I.clock}Timeline from the statement of facts</h3>${svc('Timeline Summarizer', 'clock')}</div>
           <div class="sub">${d.events.length ? `${d.events.length} events read from the document; click a page to see it.` : 'No statement of facts read yet.'}</div>
           <div class="timeline">${evs}</div></div>
         <div class="card"><h3>${I.spark}Written account</h3><div class="sub">Written on demand from the events above, with the page of each one.</div>
@@ -431,14 +431,14 @@ async function portCall(id) {
   };
 }
 
-// ---------- HAL-9000 ----------
+// ---------- Port Assistant ----------
 const chat = [];
 async function hal() {
   const samples = ['Which ports have the highest cost per call?', 'Why are payments on hold?',
     'Which open quotes are above the benchmark?', 'What does the pilotage invoice of port call 20217 say?',
     'How long does FDA approval take by port?', 'Give me the timeline of port call 20400'];
   view.innerHTML = `
-    <div class="pagehead"><div>${svc('HAL-9000', 'hal')}<h2>Ask HAL-9000</h2>
+    <div class="pagehead"><div>${svc('Port Assistant', 'hal')}<h2>Ask Port Assistant</h2>
       <p>Routes each question to the right agent: port costs, DA audit, DA operations, or the documents themselves. Answers use your own data permissions.</p></div>
       <button class="btn ghost sm" id="newchat">New conversation</button></div>
     <div class="card chat"><div class="msgs" id="msgs"></div>
