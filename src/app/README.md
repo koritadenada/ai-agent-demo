@@ -16,7 +16,7 @@ The screens the DA analysts use, one per AI service, on top of the gold tables a
 |---|---|
 | `agents` | The three agents (`server/agents/<id>/agent.ts`), chat over `/api/agents/chat` |
 | `analytics` | The screens' queries, [`config/queries/*.obo.sql`](config/queries), and the two confirmed writes |
-| `files` | The PDFs of the documents volume |
+| `files` | The PDFs of the documents volume, read only and only as the signed-in user (a volume policy) |
 | `genie` | The three Genie agents (`resources/agents.genie.yml`), asked by the Port Assistant |
 | `lakebase` | The chat history (Lakebase project `portcall-agents`, `resources/lakebase.yml`) |
 

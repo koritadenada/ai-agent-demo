@@ -5,7 +5,7 @@
 //   files      the PDFs of the documents volume, read as the user
 //   genie      the three Genie agents, used by the Port Assistant
 //   lakebase   the chat history
-import { analytics, createApp, files, genie, lakebase, server, sql } from '@databricks/appkit';
+import { analytics, createApp, files, genie, lakebase, server, sql, type FilePolicy } from '@databricks/appkit';
 import { agents } from '@databricks/appkit/beta';
 import type { Request } from 'express';
 import { z } from 'zod';
@@ -13,6 +13,11 @@ import { APP, GOLD, SILVER, SPACES } from './lib/config';
 import { promptVersions, startPromptRefresh } from './lib/prompts';
 import { startAgentTracing } from './lib/tracing';
 import { LakebaseThreadStore } from './lib/threads';
+
+// No request to the documents runs as the app's service principal (a request without a user token would). Local
+// development has no user token and runs as the CLI profile, so it is allowed there.
+const usersOnly: FilePolicy = (_action, _resource, user) =>
+  user.isServicePrincipal !== true || process.env.NODE_ENV === 'development';
 
 const threads = new LakebaseThreadStore();
 startAgentTracing();
@@ -34,7 +39,8 @@ createApp({
     // each agent has its own experiment with its prompt and its traces (model and baseSystemPrompt in its agent.ts)
     agents({ auth: 'on-behalf-of-user', threadStore: threads }),
     analytics(),
-    files({ volumes: { files: { auth: 'on-behalf-of-user' } } }),  // the documents volume
+    // the documents volume: read only, and only as a signed-in user
+    files({ volumes: { files: { auth: 'on-behalf-of-user', policy: files.policy.all(usersOnly, files.policy.publicRead()) } } }),
     genie({ spaces: SPACES }),
     lakebase(),
     server(),
